@@ -20,7 +20,7 @@ public struct Event {
     public let message: String
     
     /// scope assigned to the event.
-    public let scope: Scope
+    public internal(set) var scope: Scope
     
     /// Event severity level.
     public var level: Level = .debug

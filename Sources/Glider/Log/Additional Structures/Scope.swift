@@ -19,7 +19,7 @@ public struct Scope {
     public private(set) var tags: [String: String]?
     
     /// Runtime context attributes captured.
-    public internal(set) var runtimeContext: RuntimeContext
+    public internal(set) var runtimeContext: RuntimeContext?
     
     /// Sets the fingerprint in the scope.
     /// A fingerprint is a way to uniquely identify an error, and all events have one.

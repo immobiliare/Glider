@@ -41,15 +41,54 @@ final class GliderTests: XCTestCase {
         testLogChannelsForLevel(.critical)
     }
     
-    func test_logChannelsSending() throws {
-        let log = Log {
-            $0.level = .error
+    /// The following test check if a channel can ignore correctly the
+    /// building of an event when the parent log is disabled or its level
+    /// is below the parent log level.
+    /// This avoid unnecessary cpu operations reducing the footprint of the
+    /// logging operation itself.
+    func test_logChannelsGatekeeping() throws {
+        
+        func testGatekeeper(logLevel: Level, writeLevel: Level, shouldPass: Bool)  {
+            var hasPassed = false
+            let log = Log {
+                $0.level = logLevel
+            }
+            
+            log[writeLevel]?.write {
+                if shouldPass == false {
+                    XCTFail("Event building should never happend")
+                } else {
+                    hasPassed = true
+                }
+                return .init("dummy event")
+            }
+            
+            if shouldPass && hasPassed == false {
+                XCTFail("Event building should be called")
+            }
         }
         
-        log.debug?.write {
-            var event = Event("Ciao")
-            return event
+        testGatekeeper(logLevel: .debug, writeLevel: .debug, shouldPass: true)
+        testGatekeeper(logLevel: .error, writeLevel: .debug, shouldPass: false)
+    }
+    
+    /// The following test check if the runtime context attributes are attached
+    /// correctly to a new created event.
+    func test_eventRuntimeContext() throws {
+        let log = Log {
+            $0.level = .debug
         }
+        
+        let sentEvent = log.debug?.write {
+            Event("This is a dummy event")
+        }
+        
+        XCTAssertNotNil(sentEvent, "Event should be dispatched correctly")
+        XCTAssertNotNil(sentEvent?.scope.runtimeContext, "Runtime attributes should be not empty")
+        XCTAssertEqual(sentEvent?.scope.runtimeContext?.fileName, (#file as NSString).lastPathComponent, "Incorrect runtime context attributes")
+        
+        let currentThreadId = ProcessIdentification.threadID()
+        XCTAssertEqual(sentEvent?.scope.runtimeContext?.threadID, currentThreadId, "Event should include correct thread identifier")
     }
     
 }

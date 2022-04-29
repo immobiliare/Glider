@@ -29,6 +29,11 @@ public class Log: Equatable {
     
     // MARK: - Channels
     
+    /// Subscript to access to a specific level channel.
+    public subscript(level: Level) -> Channel? {
+        channels[level.rawValue]
+    }
+    
     /// `debug` channel receive messages meant to be useful
     /// only during development.
     public var debug: Channel? { channels[Level.debug.rawValue] }
