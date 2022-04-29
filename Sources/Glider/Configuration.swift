@@ -14,13 +14,16 @@ import Foundation
 
 extension Log {
     
+    /// This struct allows you to define the configuration of a new log instance.
     public struct Configuration {
         
+        // MARK: - Log Initial Configuration
+        
         /// Subsystem of the log.
-        public var subsystem: LogIdentifiable = ""
+        public var subsystem: LogUUID = ""
         
         /// Category identiifer of the log.
-        public var category: LogIdentifiable = ""
+        public var category: LogUUID = ""
         
         // Minimum severity level for this logger.
         // Messages sent to a logger with a level lower than this will be automatically
@@ -29,7 +32,46 @@ extension Log {
         
         /// Defines if a log is active and can receive messages.
         /// By default is `true`.
-        public var enabled: Bool = true
+        public var isEnabled = true
+        
+        // MARK: - Extra Configuration
+        
+        /// Identify how the messages must be handled when sent to the logger instance.
+        /// Typically you want to set if to `false` in production and `true` in development.
+        /// The default behaviour - when not specified - uses the `DEBUG` flag to set the the value `true`.
+        ///
+        /// DISCUSSION:
+        /// In synchronous mode messages are sent directly to the queue and the log function is returned
+        /// when recorded is called on each specified transport. This mode is is helpful while debugging,
+        /// as it ensures that logs are always up-to-date when debug breakpoints are hit.
+        ///
+        /// However, synchronous mode can have a negative influence on performance and is
+        /// therefore not recommended for use in production code.
+        public var isSynchronous: Bool
+        
+        /// This is the dispatch queue which make in order the payload received from different channels.
+        /// Usually you don't need to specify it manually, a new `.background` serial queue is created automatically
+        /// when a new configuration is created.
+        public var acceptQueue: DispatchQueue = .init(label: "com.glider.acceptqueue", qos: .background, attributes: [])
+        
+        // MARK: - Initialization
+        
+        /// Initialize a new configuration.
+        public init() {
+            #if DEBUG
+            self.isSynchronous = true
+            #else
+            self.isSynchronous = false
+            #endif
+        }
+        
     }
     
 }
+
+// MARK: - Extras
+
+public protocol LogUUID: CustomStringConvertible { }
+
+extension String: LogUUID {}
+
