@@ -54,14 +54,14 @@ final class GliderTests: XCTestCase {
                 $0.level = logLevel
             }
             
-            log[writeLevel]?.write {
+            log[writeLevel]?.write(event: {
                 if shouldPass == false {
                     XCTFail("Event building should never happend")
                 } else {
                     hasPassed = true
                 }
                 return .init("dummy event")
-            }
+            })
             
             if shouldPass && hasPassed == false {
                 XCTFail("Event building should be called")
@@ -89,6 +89,26 @@ final class GliderTests: XCTestCase {
         
         let currentThreadId = ProcessIdentification.threadID()
         XCTAssertEqual(sentEvent?.scope.runtimeContext?.threadID, currentThreadId, "Event should include correct thread identifier")
+    }
+    
+    
+    /// The following test check if the message, both as a literal string or computed string
+    /// is dispatched correctly to the underlying transporters.
+    func test_writeLiteralsAndComputedMessages() throws {
+        let log = Log {
+            $0.level = .debug
+        }
+        
+        let refDate = Date(timeIntervalSince1970: 0)
+        
+        let event1 = log.debug?.write("Hello")
+        let event2 = log.debug?.write({
+            let date = ISO8601DateFormatter().string(from: refDate)
+            return "Hello, it's \(date)"
+        })
+        
+        XCTAssertEqual(event1?.message, "Hello", "Literal message is not filled correctly")
+        XCTAssertEqual(event2?.message, "Hello, it's 1970-01-01T00:00:00Z", "Computed message literal is not correct")
     }
     
 }

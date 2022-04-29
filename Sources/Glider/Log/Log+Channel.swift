@@ -47,7 +47,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(_ eventBuilder: @escaping () -> Event,
+    public func write(event eventBuilder: @escaping () -> Event,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         
         guard let log = log, log.isEnabled else {
@@ -62,4 +62,47 @@ public class Channel {
         return event
     }
     
+    /// Write a new message (both as literal or computed function which return a string)  into the current channel.
+    /// String's value is evaluated only if channel is active and the level should be included.
+    /// This is pretty useful when your message is not a literal string but must be evaluated.
+    ///
+    /// NOTE: The underlying `Event` object is created automatically for you.
+    ///
+    /// See the notes on `write()` function for `Event` instance for more infos.
+    ///
+    /// - Parameters:
+    ///   - messageBuilder: function which generate the message string to send.
+    ///                     this function which will be executed only if the message is actually sent
+    ///                     in order to avoid unnecessary overheads when the generation may result expensive.
+    ///   - function: function name of the caller (filled automastically)
+    ///   - filePath: file path of the caller (filled automatically)
+    ///   - fileLine: file line of the caller (filled automatically)
+    /// - Returns: Event
+    public func write(_ messageBuilder: @escaping () -> String,
+                      function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
+        // NOTE: this additional check is to avoid unnecessary string evaluation, it's not redudant in write() for event
+        guard let log = log, log.isEnabled  else {
+            return nil
+        }
+
+        return write(event: {
+            .init(messageBuilder())
+        }, function: function, filePath: filePath, fileLine: fileLine)
+    }
+    
+    /// Write a simple message literal into the channel.
+    ///
+    /// - Parameters:
+    ///   - message: message literal to write.
+    ///   - function: function name of the caller (filled automastically)
+    ///   - filePath: file path of the caller (filled automatically)
+    ///   - fileLine: file line of the caller (filled automatically)
+    /// - Returns: Event
+    public func write(_ message: String,
+                      function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
+        write(event: {
+            .init(message)
+        }, function: function, filePath: filePath, fileLine: fileLine)
+    }
 }
+
