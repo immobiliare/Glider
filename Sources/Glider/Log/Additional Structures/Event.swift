@@ -29,6 +29,12 @@ public struct Event {
     /// Date when the event has occurred.
     public let timestamp = Date()
     
+    /// Associated subsystem.
+    public internal(set) var subsystem: LogUUID? = nil
+    
+    /// Associated category.
+    public internal(set) var category: LogUUID? = nil
+    
     /// Arbitrary additional information that will be sent with the event.
     public var extra: Metadata?
     

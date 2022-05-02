@@ -39,7 +39,7 @@ extension Log {
         /// Used to decide whether a given event should be passed along to the receiver recorders.
         /// If at least one of the filter specified (executed in order) return `false`
         /// from `shouldWrite()` function event will be silently ignored when being processed.
-        public var filters = [EventFilter]()
+        public var filters = [TransportFilter]()
         
         /// List of underlying transport layers which can receive and eventually store events.
         public var transports = [Transport]()

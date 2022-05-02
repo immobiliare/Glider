@@ -12,6 +12,8 @@
 
 import Foundation
 
+/// The following struct is used to retrive the standard information about
+/// the context where GliderSDK is running in.
 internal struct ProcessIdentification {
     
     // this ensures we only look up process info once

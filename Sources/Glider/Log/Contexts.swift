@@ -38,3 +38,24 @@ extension Log.Contexts {
     }
     
 }
+/*
+public struct ContextsOptions: OptionSet {
+    public let rawValue: Int32
+    
+    // Opening options
+    public static let readOnly = Options(rawValue: SQLITE_OPEN_READONLY)
+
+    public static let `default`:  Options = [
+        .readWrite, .create, .fullMutex
+    ]
+    public static let all: Options = [
+        .readOnly, .readWrite, .create,
+        .noMutex, .fullMutex,
+        .sharedCache, .privateCache
+    ]
+    
+    public init(rawValue: Int32) {
+        self.rawValue = rawValue
+    }
+}
+*/

@@ -37,7 +37,7 @@ public class TransportManager {
     /// Used to decide whether a given event should be passed along to the receiver
     /// recorders. If at least one of the filter specified (executed in order) return `false`
     /// from `shouldWrite()` function payload will be silently ignored when being processed.
-    internal var filters = [EventFilter]()
+    internal var filters = [TransportFilter]()
     
     /// List of transports associated with the log.
     /// Transports are the container where events are stored.
@@ -105,7 +105,7 @@ public class TransportManager {
 
 // MARK: - EventFilter Array Extension
 
-extension Array where Element == EventFilter {
+extension Array where Element == TransportFilter {
     
     /// Return true if passed event can be recorded using filters of the array.
     ///
@@ -114,7 +114,7 @@ extension Array where Element == EventFilter {
     fileprivate func canAcceptEvent(_ event: Event) -> Bool {
         guard isEmpty == false else { return true }
         
-        if let _ = first(where: { $0.shouldWrite(event) == false }) {
+        if let _ = first(where: { $0.shouldAccept(event) == false }) {
             return false
         }
         

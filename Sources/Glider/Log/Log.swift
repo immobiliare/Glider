@@ -19,6 +19,19 @@ public class Log: Equatable {
     /// Unique identifier of the log instance.
     public let uuid = UUID()
     
+    /// Subsystem helps you to track and identify the logger. Typically this is
+    /// the bundle identifier of the package which produce the log messages.
+    ///
+    /// For example you may use "com.myapp.storage" for a logger
+    /// in your separate storage framework package.
+    public let subsystem: LogUUID
+    
+    /// You can use category to further distinguish a logger inside the same
+    /// subsystem.
+    /// For example you may use "messageStorage" or "usersStorage" to
+    /// separate two logger in the same "com.myapp.storage"'s subsystem.
+    public let category: LogUUID
+    
     /// Current level of severity of the log instance.
     /// Messages below set level are ignored automatically.
     public private(set) var level: Level = .debug
@@ -63,7 +76,7 @@ public class Log: Equatable {
     public var emergency: Channel? { channels[Level.emergency.rawValue] }
     
     /// Define a list
-    public var filters: [EventFilter] {
+    public var filters: [TransportFilter] {
         set { transporter.filters = newValue }
         get { transporter.filters }
     }
@@ -93,6 +106,8 @@ public class Log: Equatable {
         
         self.transporter = TransportManager(configuration: config)
         self.isEnabled = config.isEnabled
+        self.category = config.category
+        self.subsystem = config.subsystem
         setLevel(config.level)
     }
     

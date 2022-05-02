@@ -101,7 +101,7 @@ final class GliderTests: XCTestCase {
         let refDate = Date(timeIntervalSince1970: 0)
         
         let event1 = log.debug?.write("Hello")
-        let event2 = log.debug?.write({
+        let event2 = log.debug?.write(message: {
             let date = ISO8601DateFormatter().string(from: refDate)
             return "Hello, it's \(date)"
         })
@@ -112,6 +112,7 @@ final class GliderTests: XCTestCase {
     
     /// The following test check if event filters are working correctly to ignore
     /// or pass events to the underlying transports.
+    /// It also check if event level is correct and all messages are received in order when sync mode is active.
     func test_eventFilters() throws {
         // Create a list of events with an extra index information; each event
         // has a progressive number from 0 to 100.
@@ -133,17 +134,25 @@ final class GliderTests: XCTestCase {
         
         // We'll check if transport receive correct events filtered.
         var countReceivedEvents = 0
+        var prevReceivedValue: Int?
         let finalTransport = TestTransport { eventReceived in
             let valueAssociated = eventReceived.extra!["idx"] as! Int
             XCTAssertTrue(valueAssociated.isMultiple(of: 2), "Odd filter does not work as expected")
             XCTAssertTrue(valueAssociated < 50, "Max value filter does not work as expected")
             XCTAssertEqual("Message #\(valueAssociated)", eventReceived.message, "Message received is wrong")
             XCTAssertEqual(eventReceived.level, .info, "Expected value is not received")
+            
+            if let prevReceivedValue = prevReceivedValue {
+                XCTAssertTrue(prevReceivedValue < valueAssociated, "Events are not received in strict order")
+            }
+            
             countReceivedEvents += 1
+            prevReceivedValue = valueAssociated
         }
         
         let log = Log {
             $0.level = .info
+            $0.isSynchronous = true
             $0.filters = [
                 oddFilter,
                 maxValueFilter
@@ -160,13 +169,59 @@ final class GliderTests: XCTestCase {
         
         XCTAssertTrue(countReceivedEvents == 24, "Filter does not work as expected, total filtered values are wrong")
     }
+
+    /// The following test check if subsystem and category are sent correctly.
+    func test_subsystemAndCategory() throws {
+        
+        let log = Log {
+            $0.subsystem = LogSubsystem.coreApplication
+            $0.category = LogCategory.network
+            $0.level = .debug
+        }
+        
+        let event1 = log.debug?.write("Literal msg")
+        let event2 = log.debug?.write(event: {
+            Event("Computed msg")
+        })
+        let event3 = log.debug?.write(message: {
+            "Computed msg"
+        })
+        
+        [event1, event2, event3].forEach { event in
+            guard let event = event else {
+                XCTFail("Event should be sent correctly")
+                return
+            }
+            
+            XCTAssertEqual(event.subsystem?.description, LogSubsystem.coreApplication.rawValue)
+            XCTAssertEqual(event.category?.description, LogCategory.network.rawValue)
+        }
+    }
     
 }
 
 
 // MARK: - Helper Structures
 
-fileprivate class CallbackFilter: EventFilter {
+fileprivate enum LogSubsystem: String, LogUUID {
+    case coreApplication = "com.myapp.core"
+    case externalFramework = "com.myapp.externalframework"
+    
+    var description: String {
+        rawValue
+    }
+}
+
+fileprivate enum LogCategory: String, LogUUID {
+    case network = "com.myapp.networking"
+    case storage = "com.myapp.storage"
+    
+    var description: String {
+        rawValue
+    }
+}
+
+fileprivate class CallbackFilter: TransportFilter {
     typealias Callback = ((Event) -> Bool)
     
     private var callback: Callback
@@ -175,7 +230,7 @@ fileprivate class CallbackFilter: EventFilter {
         self.callback = callback
     }
     
-    func shouldWrite(_ event: Event) -> Bool {
+    func shouldAccept(_ event: Event) -> Bool {
         callback(event)
     }
     
