@@ -61,11 +61,17 @@ public class Log: Equatable {
     
     /// `emergency` channel receive messages when application is unusable.
     public var emergency: Channel? { channels[Level.emergency.rawValue] }
-
-    /// The low-level interface for accepting log messages.
-    public let transporter: Transporter
+    
+    /// Define a list
+    public var filters: [EventFilter] {
+        set { transporter.filters = newValue }
+        get { transporter.filters }
+    }
     
     // MARK: - Private Properties
+    
+    /// The low-level interface for accepting log messages.
+    internal let transporter: TransportManager
     
     /// This is the queue used to change the value of the log level.
     private let channelsQueue: DispatchQueue
@@ -85,7 +91,7 @@ public class Log: Equatable {
         var config = Configuration()
         builder(&config)
         
-        self.transporter = Transporter(configuration: config)
+        self.transporter = TransportManager(configuration: config)
         self.isEnabled = config.isEnabled
         setLevel(config.level)
     }

@@ -1,6 +1,5 @@
 import XCTest
 @testable import Glider
-import Sentry
 
 final class GliderTests: XCTestCase {
     
@@ -85,10 +84,10 @@ final class GliderTests: XCTestCase {
         
         XCTAssertNotNil(sentEvent, "Event should be dispatched correctly")
         XCTAssertNotNil(sentEvent?.scope.runtimeContext, "Runtime attributes should be not empty")
-        XCTAssertEqual(sentEvent?.scope.runtimeContext?.fileName, (#file as NSString).lastPathComponent, "Incorrect runtime context attributes")
+        XCTAssertEqual(sentEvent?.scope.runtimeContext.fileName, (#file as NSString).lastPathComponent, "Incorrect runtime context attributes")
         
         let currentThreadId = ProcessIdentification.threadID()
-        XCTAssertEqual(sentEvent?.scope.runtimeContext?.threadID, currentThreadId, "Event should include correct thread identifier")
+        XCTAssertEqual(sentEvent?.scope.runtimeContext.threadID, currentThreadId, "Event should include correct thread identifier")
     }
     
     
@@ -110,5 +109,92 @@ final class GliderTests: XCTestCase {
         XCTAssertEqual(event1?.message, "Hello", "Literal message is not filled correctly")
         XCTAssertEqual(event2?.message, "Hello, it's 1970-01-01T00:00:00Z", "Computed message literal is not correct")
     }
+    
+    /// The following test check if event filters are working correctly to ignore
+    /// or pass events to the underlying transports.
+    func test_eventFilters() throws {
+        // Create a list of events with an extra index information; each event
+        // has a progressive number from 0 to 100.
+        var events = (0..<100).map {
+            Event("Message #\($0!)", extra: ["idx": $0])
+        }
+
+        // We'll add two filters:
+        // - filter only odd values
+        // - filter only values below 50 excluded
+        // - moreover the first log event should not be read because has a lower level than expected
+        let oddFilter = CallbackFilter {
+            ($0.extra?["idx"] as! Int).isMultiple(of: 2)
+        }
+        
+        let maxValueFilter = CallbackFilter {
+            ($0.extra?["idx"] as! Int) < 50
+        }
+        
+        // We'll check if transport receive correct events filtered.
+        var countReceivedEvents = 0
+        let finalTransport = TestTransport { eventReceived in
+            let valueAssociated = eventReceived.extra!["idx"] as! Int
+            XCTAssertTrue(valueAssociated.isMultiple(of: 2), "Odd filter does not work as expected")
+            XCTAssertTrue(valueAssociated < 50, "Max value filter does not work as expected")
+            XCTAssertEqual("Message #\(valueAssociated)", eventReceived.message, "Message received is wrong")
+            XCTAssertEqual(eventReceived.level, .info, "Expected value is not received")
+            countReceivedEvents += 1
+        }
+        
+        let log = Log {
+            $0.level = .info
+            $0.filters = [
+                oddFilter,
+                maxValueFilter
+            ]
+            $0.transports = [
+                finalTransport
+            ]
+        }
+        
+        for i in 0..<events.count {
+            let level: Level = (i == 0 ? .debug : .info)
+            log[level]?.write(event: &events[i])
+        }
+        
+        XCTAssertTrue(countReceivedEvents == 24, "Filter does not work as expected, total filtered values are wrong")
+    }
+    
+}
+
+
+// MARK: - Helper Structures
+
+fileprivate class CallbackFilter: EventFilter {
+    typealias Callback = ((Event) -> Bool)
+    
+    private var callback: Callback
+    
+    init(_ callback: @escaping Callback) {
+        self.callback = callback
+    }
+    
+    func shouldWrite(_ event: Event) -> Bool {
+        callback(event)
+    }
+    
+}
+
+fileprivate class TestTransport: Transport {
+    typealias OnReceiveEvent = ((Event) -> Void)
+
+    private var onReceiveEvent: OnReceiveEvent?
+    
+    init(onReceiveEvent: @escaping OnReceiveEvent) {
+        self.onReceiveEvent = onReceiveEvent
+    }
+    
+    func record(event: Event) -> Bool {
+        onReceiveEvent?(event)
+        return true
+    }
+    
+    var queue: DispatchQueue? = DispatchQueue(label: "com.test.transport", qos: .background)
     
 }

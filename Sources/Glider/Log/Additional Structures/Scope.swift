@@ -1,8 +1,13 @@
 //
-//  File.swift
-//  
+//  Glider
+//  Fast, Lightweight yet powerful logging system for Swift.
 //
-//  Created by Daniele Margutti on 26/04/22.
+//  Created by Daniele Margutti
+//  Email: <hello@danielemargutti.com>
+//  Web: <http://www.danielemargutti.com>
+//
+//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
@@ -19,7 +24,7 @@ public struct Scope {
     public private(set) var tags: [String: String]?
     
     /// Runtime context attributes captured.
-    public internal(set) var runtimeContext: RuntimeContext?
+    public internal(set) var runtimeContext = RuntimeContext()
     
     /// Sets the fingerprint in the scope.
     /// A fingerprint is a way to uniquely identify an error, and all events have one.
@@ -31,7 +36,7 @@ public struct Scope {
     // MARK: - Initialization
     
     public init() {
-        
+
     }
     
 }
@@ -45,10 +50,10 @@ extension Scope {
         // MARK: - Public Properties
         
         /// Identify the function name called by the log (stack trace).
-        public let function: String?
+        public private(set) var function: String?
         
         /// Identify the file path called by the log (stack trace).
-        public let filePath: String?
+        public private(set) var filePath: String?
         
         /// Name of the file called by the log.
         public var fileName: String? {
@@ -59,23 +64,22 @@ extension Scope {
         public private(set) var fileLine: Int?
         
         /// Calling thread id.
-        public private(set) var threadID: UInt64?
+        public let threadID = ProcessIdentification.threadID()
      
-        // MARK: - Initialization
+        // MARK: - Internal Function
         
-        /// Initialize a new runtime context with the information coming from the stacktrace.
+        /// Attach calle informations to the runtime context.
         ///
         /// - Parameters:
         ///   - function: function called.
         ///   - filePath: file path origin of the call.
         ///   - fileLine: file line origin of the call.
-        internal init(function: String, filePath: String, fileLine: Int) {
+        internal mutating func attach(function: String? = nil, filePath: String? = nil, fileLine: Int? = nil) {
             self.function = function
             self.filePath = filePath
             self.fileLine = fileLine
-            self.threadID = ProcessIdentification.threadID()
         }
-        
+
     }
     
 }

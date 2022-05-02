@@ -36,9 +36,6 @@ public class Channel {
     // MARK: - Public Functions
 
     /// Write a new event to the current channel.
-    /// If parent log is disabled or channel's level is below log's level message is ignored and
-    /// returned data is `nil`. Otherwise, when event is correctly dispatched to the underlying
-    /// transport services it will return the `Event` instance sent.
     ///
     /// - Parameters:
     ///   - eventBuilder: builder function for event
@@ -56,7 +53,34 @@ public class Channel {
         
         // Generate the event and decorate it with the current scope and runtime attributes
         var event = eventBuilder()
-        event.scope.runtimeContext = .init(function: function, filePath: filePath, fileLine: fileLine)
+        event.level = self.level
+        event.scope.runtimeContext.attach(function: function, filePath: filePath, fileLine: fileLine)
+        
+        log.transporter.write(event)
+        return event
+    }
+    
+    /// Write a new event to the current channel.
+    /// If parent log is disabled or channel's level is below log's level message is ignored and
+    /// returned data is `nil`. Otherwise, when event is correctly dispatched to the underlying
+    /// transport services it will return the `Event` instance sent.
+    ///
+    /// - Parameters:
+    ///   - event: event to write
+    ///   - function: function name of the caller (filled automastically)
+    ///   - filePath: file path of the caller (filled automatically)
+    ///   - fileLine: file line of the caller (filled automatically)
+    /// - Returns: Event
+    @discardableResult
+    public func write(event: inout Event,
+                      function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
+        guard let log = log, log.isEnabled else {
+            return nil
+        }
+        
+        // Generate the event and decorate it with the current scope and runtime attributes
+        event.level = self.level
+        event.scope.runtimeContext.attach(function: function, filePath: filePath, fileLine: fileLine)
         
         log.transporter.write(event)
         return event
@@ -74,11 +98,14 @@ public class Channel {
     ///   - messageBuilder: function which generate the message string to send.
     ///                     this function which will be executed only if the message is actually sent
     ///                     in order to avoid unnecessary overheads when the generation may result expensive.
+    ///   - object: object you can send for automatic serialization.
     ///   - function: function name of the caller (filled automastically)
     ///   - filePath: file path of the caller (filled automatically)
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
+    @discardableResult
     public func write(_ messageBuilder: @escaping () -> String,
+                      object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         // NOTE: this additional check is to avoid unnecessary string evaluation, it's not redudant in write() for event
         guard let log = log, log.isEnabled  else {
@@ -86,7 +113,7 @@ public class Channel {
         }
 
         return write(event: {
-            .init(messageBuilder())
+            .init(messageBuilder(), object: object)
         }, function: function, filePath: filePath, fileLine: fileLine)
     }
     
@@ -94,15 +121,19 @@ public class Channel {
     ///
     /// - Parameters:
     ///   - message: message literal to write.
+    ///   - object: object you can send for automatic serialization.
     ///   - function: function name of the caller (filled automastically)
     ///   - filePath: file path of the caller (filled automatically)
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
+    @discardableResult
     public func write(_ message: String,
+                      object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         write(event: {
-            .init(message)
+            .init(message, object: object)
         }, function: function, filePath: filePath, fileLine: fileLine)
     }
+    
 }
 

@@ -22,12 +22,12 @@ public class GliderSDK {
     /// SDK Current Version.
     public static let version = "1.0.0"
     
-    public var scope: Scope
+    public var scope: Scope = Scope()
     
     // MARK: - Initialization
     
     private init() {
-        self.scope = Scope()
+        
     }
     
 }

@@ -36,6 +36,17 @@ extension Log {
         
         // MARK: - Extra Configuration
         
+        /// Used to decide whether a given event should be passed along to the receiver recorders.
+        /// If at least one of the filter specified (executed in order) return `false`
+        /// from `shouldWrite()` function event will be silently ignored when being processed.
+        public var filters = [EventFilter]()
+        
+        /// List of underlying transport layers which can receive and eventually store events.
+        public var transports = [Transport]()
+        
+        /// Strategy used to encode common object formats data when passed as encodable object.
+        public var serializationStrategies = SerializationStrategies()
+        
         /// Identify how the messages must be handled when sent to the logger instance.
         /// Typically you want to set if to `false` in production and `true` in development.
         /// The default behaviour - when not specified - uses the `DEBUG` flag to set the the value `true`.
