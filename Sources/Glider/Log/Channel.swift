@@ -53,7 +53,7 @@ public class Channel {
         
         // Generate the event and decorate it with the current scope and runtime attributes
         var event = eventBuilder()
-        return write(event: &event)
+        return write(event: &event, function: function, filePath: filePath, fileLine: fileLine)
     }
     
     /// Write a new event to the current channel.

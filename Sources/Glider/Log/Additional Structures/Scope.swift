@@ -23,7 +23,12 @@ public struct Scope {
     
     /// Tags are key/value string pairs.
     /// Some transports may index and make them searchable (like sentry).
-    public private(set) var tags: [String: String]?
+    /// Values can be overriden by the event's `tags` informations.
+    public var tags = Tags()
+    
+    /// Arbitrary additional information that will be sent with the event.
+    /// Values can be overriden by the event's `extra` informations.
+    public var extra = Metadata()
 
     /// Sets the fingerprint in the scope.
     /// A fingerprint is a way to uniquely identify an error, and all events have one.

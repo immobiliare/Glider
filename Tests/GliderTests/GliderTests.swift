@@ -74,6 +74,8 @@ final class GliderTests: XCTestCase {
     /// The following test check if the runtime context attributes are attached
     /// correctly to a new created event.
     func test_eventRuntimeContext() throws {
+        GliderSDK.shared.contextsCaptureOptions = .all
+        
         let log = Log {
             $0.level = .debug
         }
@@ -125,18 +127,18 @@ final class GliderTests: XCTestCase {
         // - filter only values below 50 excluded
         // - moreover the first log event should not be read because has a lower level than expected
         let oddFilter = CallbackFilter {
-            ($0.extra?["idx"] as! Int).isMultiple(of: 2)
+            ($0.scope.extra["idx"] as! Int).isMultiple(of: 2)
         }
         
         let maxValueFilter = CallbackFilter {
-            ($0.extra?["idx"] as! Int) < 50
+            ($0.scope.extra["idx"] as! Int) < 50
         }
         
         // We'll check if transport receive correct events filtered.
         var countReceivedEvents = 0
         var prevReceivedValue: Int?
         let finalTransport = TestTransport { eventReceived in
-            let valueAssociated = eventReceived.extra!["idx"] as! Int
+            let valueAssociated = eventReceived.scope.extra["idx"] as! Int
             XCTAssertTrue(valueAssociated.isMultiple(of: 2), "Odd filter does not work as expected")
             XCTAssertTrue(valueAssociated < 50, "Max value filter does not work as expected")
             XCTAssertEqual("Message #\(valueAssociated)", eventReceived.message, "Message received is wrong")
@@ -198,6 +200,7 @@ final class GliderTests: XCTestCase {
         }
     }
     
+    /// The following test check if captured context attributes are correctly managed based upon active options.
     func test_contextCapturingOptions() throws {
         let log = Log {
             $0.level = .debug
@@ -219,6 +222,53 @@ final class GliderTests: XCTestCase {
         let allContextsCapturedEvent = log.debug?.write(message: "")
         XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.os, "OS related context attributes must be present")
         XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.device, "Device related context attributes must be present")
+    }
+    
+    /// The following test check if tags and extra dictionaries are merged correctly
+    /// between the event's specific values and the scope's value.
+    func test_eventExtraAndTagsMergeWithScope() throws {
+        let log = Log {
+            $0.level = .debug
+        }
+        
+        // Setup some global tags and extra values
+        GliderSDK.shared.scope.tags = [
+            "tag1": "scope_value",
+            "tag2": "scope_value"
+        ]
+        
+        GliderSDK.shared.scope.extra = [
+            "extra1": "scope_value",
+            "extra2": "scope_value",
+            "extra4": "scope_value"
+        ]
+        
+        // Attach to event custom extra and tags values, some of them will override existing
+        // keys inside the scope's extra and tags.
+        var proposedEvent = Event("test message",
+                      extra: [
+                        "extra1": "event_value",
+                        "extra3": "event_value"
+                      ], tags: [
+                        "tag1": "event_value",
+                        "tag3": "event_value"
+                      ])
+        
+        guard let sentEvent = log.debug?.write(event: &proposedEvent) else {
+            XCTFail()
+            return
+        }
+            
+        // Check if the resulting event combines two dictionary values.
+        XCTAssertEqual(sentEvent.scope.tags.keys.count, 3)
+        XCTAssertEqual(sentEvent.scope.tags["tag1"], "event_value")
+        XCTAssertEqual(sentEvent.scope.tags["tag2"], "scope_value")
+        XCTAssertEqual(sentEvent.scope.tags["tag3"], "event_value")
+
+        XCTAssertEqual(sentEvent.scope.extra.keys.count, 4)
+        XCTAssertEqual(sentEvent.scope.extra["extra1"] as? String, "event_value")
+        XCTAssertEqual(sentEvent.scope.extra["extra2"] as? String, "scope_value")
+        XCTAssertEqual(sentEvent.scope.extra["extra4"] as? String, "scope_value")
     }
     
 }

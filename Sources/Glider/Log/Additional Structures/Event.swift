@@ -35,9 +35,6 @@ public struct Event {
     /// Associated category.
     public internal(set) var category: LogUUID? = nil
     
-    /// Arbitrary additional information that will be sent with the event.
-    public var extra: Metadata?
-    
     /// scope assigned to the event.
     public internal(set) var scope: Scope
     
@@ -57,17 +54,36 @@ public struct Event {
     ///   - message: message of the event.
     ///   - object: object to serialize when sending the event.
     ///   - extra: additional informations that will be sent with the event.
+    ///   - tags: additional indexable informations.
     ///   - scope: scope associated with the event; if not set the global scope is used.
     public init(_ message: String, object: SerializableObject? = nil,
                 extra: Metadata? = nil,
+                tags: Tags? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
                 
         self.message = message
         self.object = object
         self.scope = scope
-        self.extra = extra
+        self.scope.extra = Dictionary.merge(baseDictionary: scope.extra, additionalData: extra)
+        self.scope.tags = Dictionary.merge(baseDictionary: scope.tags, additionalData: tags)
         
+        // Capture the current context if set.
         self.scope.captureContext()
     }
 
+}
+
+extension Dictionary {
+    
+    internal static func merge(baseDictionary: [Key: Value], additionalData:  [Key: Value]?) ->  [Key: Value] {
+        guard let additionalData = additionalData else {
+            return baseDictionary
+        }
+        
+        let result = baseDictionary.merging(additionalData, uniquingKeysWith: { (_, new) in
+            new
+        })
+        return result
+    }
+    
 }

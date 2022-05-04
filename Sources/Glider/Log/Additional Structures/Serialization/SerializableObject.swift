@@ -26,6 +26,9 @@ import AppKit
 /// to one object managed by the logging platform.
 public typealias Metadata = [String: Any?]
 
+/// Tags are arbitrary data can be indexed.
+public typealias Tags = [String: String]
+
 // MARK: - SerializableObject
 
 /// An object conforms to this protocol is able to send additional data along with
