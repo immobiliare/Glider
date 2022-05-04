@@ -83,11 +83,11 @@ final class GliderTests: XCTestCase {
         }
         
         XCTAssertNotNil(sentEvent, "Event should be dispatched correctly")
-        XCTAssertNotNil(sentEvent?.scope.runtimeContext, "Runtime attributes should be not empty")
-        XCTAssertEqual(sentEvent?.scope.runtimeContext.fileName, (#file as NSString).lastPathComponent, "Incorrect runtime context attributes")
+        XCTAssertNotNil(sentEvent?.scope.context, "Runtime attributes should be not empty")
+        XCTAssertEqual(sentEvent?.scope.fileName, (#file as NSString).lastPathComponent, "Incorrect runtime context attributes")
         
         let currentThreadId = ProcessIdentification.threadID()
-        XCTAssertEqual(sentEvent?.scope.runtimeContext.threadID, currentThreadId, "Event should include correct thread identifier")
+        XCTAssertEqual(sentEvent?.scope.threadID, currentThreadId, "Event should include correct thread identifier")
     }
     
     
@@ -100,7 +100,7 @@ final class GliderTests: XCTestCase {
         
         let refDate = Date(timeIntervalSince1970: 0)
         
-        let event1 = log.debug?.write("Hello")
+        let event1 = log.debug?.write(message: "Hello")
         let event2 = log.debug?.write(message: {
             let date = ISO8601DateFormatter().string(from: refDate)
             return "Hello, it's \(date)"
@@ -179,12 +179,12 @@ final class GliderTests: XCTestCase {
             $0.level = .debug
         }
         
-        let event1 = log.debug?.write("Literal msg")
+        let event1 = log.debug?.write(message: "Literal msg")
         let event2 = log.debug?.write(event: {
-            Event("Computed msg")
+            Event("Computed msg with event")
         })
         let event3 = log.debug?.write(message: {
-            "Computed msg"
+            "Computed msg with string"
         })
         
         [event1, event2, event3].forEach { event in
@@ -196,6 +196,29 @@ final class GliderTests: XCTestCase {
             XCTAssertEqual(event.subsystem?.description, LogSubsystem.coreApplication.rawValue)
             XCTAssertEqual(event.category?.description, LogCategory.network.rawValue)
         }
+    }
+    
+    func test_contextCapturingOptions() throws {
+        let log = Log {
+            $0.level = .debug
+        }
+
+        // Test if context is not captured when turned off the option
+        GliderSDK.shared.contextsCaptureOptions = .none
+        let noContextEvent = log.debug?.write(message: "")
+        XCTAssertNil(noContextEvent?.scope.context, "Context should be not captured in this mode")
+        
+        // Test if context is captured correctly when turned on
+        GliderSDK.shared.contextsCaptureOptions = [.os]
+        let onlyOSContextEvent = log.debug?.write(message: "")
+        XCTAssertNotNil(onlyOSContextEvent?.scope.context?.os, "OS related context attributes must be present")
+        XCTAssertNil(onlyOSContextEvent?.scope.context?.device, "Device related context attributes must not be present")
+        
+        // Test if context is captured correctly when all flags are turned on
+        GliderSDK.shared.contextsCaptureOptions = .all
+        let allContextsCapturedEvent = log.debug?.write(message: "")
+        XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.os, "OS related context attributes must be present")
+        XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.device, "Device related context attributes must be present")
     }
     
 }

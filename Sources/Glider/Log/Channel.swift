@@ -78,7 +78,7 @@ public class Channel {
         event.level = self.level
         event.subsystem = log.subsystem
         event.category = log.category
-        event.scope.runtimeContext.attach(function: function, filePath: filePath, fileLine: fileLine)
+        event.scope.attach(function: function, filePath: filePath, fileLine: fileLine)
         
         log.transporter.write(event)
         return event
@@ -125,7 +125,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(_ message: String,
+    public func write(message: String,
                       object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         write(event: {

@@ -34,19 +34,6 @@ extension Log {
         /// By default is `true`.
         public var isEnabled = true
         
-        // MARK: - Extra Configuration
-        
-        /// Used to decide whether a given event should be passed along to the receiver recorders.
-        /// If at least one of the filter specified (executed in order) return `false`
-        /// from `shouldWrite()` function event will be silently ignored when being processed.
-        public var filters = [TransportFilter]()
-        
-        /// List of underlying transport layers which can receive and eventually store events.
-        public var transports = [Transport]()
-        
-        /// Strategy used to encode common object formats data when passed as encodable object.
-        public var serializationStrategies = SerializationStrategies()
-        
         /// Identify how the messages must be handled when sent to the logger instance.
         /// Typically you want to set if to `false` in production and `true` in development.
         /// The default behaviour - when not specified - uses the `DEBUG` flag to set the the value `true`.
@@ -59,6 +46,21 @@ extension Log {
         /// However, synchronous mode can have a negative influence on performance and is
         /// therefore not recommended for use in production code.
         public var isSynchronous: Bool
+        
+        // MARK: - Main Configuration
+        
+        /// Used to decide whether a given event should be passed along to the receiver recorders.
+        /// If at least one of the filter specified (executed in order) return `false`
+        /// from `shouldWrite()` function event will be silently ignored when being processed.
+        public var filters = [TransportFilter]()
+        
+        /// List of underlying transport layers which can receive and eventually store events.
+        public var transports = [Transport]()
+        
+        // MARK: - Extra Configuration
+
+        /// Strategy used to encode common object formats data when passed as encodable object.
+        public var serializationStrategies = SerializationStrategies()
         
         /// This is the dispatch queue which make in order the payload received from different channels.
         /// Usually you don't need to specify it manually, a new `.background` serial queue is created automatically

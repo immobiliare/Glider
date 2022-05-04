@@ -61,10 +61,13 @@ public struct Event {
     public init(_ message: String, object: SerializableObject? = nil,
                 extra: Metadata? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
+                
         self.message = message
         self.object = object
         self.scope = scope
         self.extra = extra
+        
+        self.scope.captureContext()
     }
 
 }

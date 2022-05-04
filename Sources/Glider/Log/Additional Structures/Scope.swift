@@ -16,16 +16,15 @@ import Foundation
 
 public struct Scope {
     
+    // MARK: - Public Properties
+
     /// Set global user -> thus will be sent with every event.
     public var user: User?
     
     /// Tags are key/value string pairs.
     /// Some transports may index and make them searchable (like sentry).
     public private(set) var tags: [String: String]?
-    
-    /// Runtime context attributes captured.
-    public internal(set) var runtimeContext = RuntimeContext()
-    
+
     /// Sets the fingerprint in the scope.
     /// A fingerprint is a way to uniquely identify an error, and all events have one.
     /// Events with the same fingerprint may be grouped together into an issue depending
@@ -33,53 +32,47 @@ public struct Scope {
     /// (For example Sentry group them in a single issue).
     public var fingerprint: String?
     
-    // MARK: - Initialization
+    /// Identify the function name called by the log (stack trace).
+    public private(set) var function: String?
     
-    public init() {
-
+    /// Identify the file path called by the log (stack trace).
+    public private(set) var filePath: String?
+    
+    /// Name of the file called by the log.
+    public var fileName: String? {
+        ((filePath ?? "") as NSString).lastPathComponent
     }
     
-}
-
-// MARK: - Scope.RuntimeContext
-
-extension Scope {
+    /// Identify the file line called by the log (stack trace).
+    public private(set) var fileLine: Int?
     
-    public struct RuntimeContext {
-        
-        // MARK: - Public Properties
-        
-        /// Identify the function name called by the log (stack trace).
-        public private(set) var function: String?
-        
-        /// Identify the file path called by the log (stack trace).
-        public private(set) var filePath: String?
-        
-        /// Name of the file called by the log.
-        public var fileName: String? {
-            ((filePath ?? "") as NSString).lastPathComponent
+    /// Calling thread id.
+    public let threadID = ProcessIdentification.threadID()
+    
+    // MARK: - Contexts
+    
+    /// Device context describes the device that caused the event.
+    /// This is most appropriate for mobile applications.
+    public internal(set) var context: Context?
+    
+    /// Attach calle informations to the runtime context.
+    ///
+    /// - Parameters:
+    ///   - function: function called.
+    ///   - filePath: file path origin of the call.
+    ///   - fileLine: file line origin of the call.
+    internal mutating func captureContext() {
+        guard GliderSDK.shared.contextsCaptureOptions != .none else {
+            return // avoid to capture the context
         }
         
-        /// Identify the file line called by the log (stack trace).
-        public private(set) var fileLine: Int?
-        
-        /// Calling thread id.
-        public let threadID = ProcessIdentification.threadID()
-     
-        // MARK: - Internal Function
-        
-        /// Attach calle informations to the runtime context.
-        ///
-        /// - Parameters:
-        ///   - function: function called.
-        ///   - filePath: file path origin of the call.
-        ///   - fileLine: file line origin of the call.
-        internal mutating func attach(function: String? = nil, filePath: String? = nil, fileLine: Int? = nil) {
-            self.function = function
-            self.filePath = filePath
-            self.fileLine = fileLine
-        }
-
+        self.context = ContextsData.shared.captureContext()
+    }
+    
+    internal mutating func attach(function fName: String? = nil, filePath fPath: String? = nil, fileLine fLine: Int? = nil) {
+        self.function = fName
+        self.filePath = fPath
+        self.fileLine = fLine
     }
     
 }
