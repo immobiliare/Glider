@@ -55,3 +55,13 @@ public protocol SerializableObject {
     func serialize(with strategies: SerializationStrategies) -> Data?
 
 }
+
+// MARK: - SerializableObject for Encodable objects
+
+public extension SerializableObject where Self: Encodable {
+    
+    func serialize(with strategies: SerializationStrategies) -> Data? {
+        try? JSONEncoder().encode(self)
+    }
+
+}

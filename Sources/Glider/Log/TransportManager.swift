@@ -28,7 +28,7 @@ public class TransportManager {
     /// therefore not recommended for use in production code.
     private let isSynchronous: Bool
     
-    /// Serialized strategies
+    /// Serialized strategies. If not set the default's `TransportManager` is used instead.
     internal private(set) var serializedStrategies: SerializationStrategies
         
     /// This is the dispatch queue which make in order the payload received from different channels.

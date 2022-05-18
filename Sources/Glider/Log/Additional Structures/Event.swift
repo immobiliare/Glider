@@ -85,7 +85,10 @@ public struct Event {
     }
     
     // MARK: - Internal Functions
-
+    
+    /// This function perform serialization of the associated event's object.
+    ///
+    /// - Parameter manager: manager.
     internal mutating func serializeObjectIfNeeded(withTransportManager manager: TransportManager) {
         guard serializedObject == nil else {
             return // value is cached

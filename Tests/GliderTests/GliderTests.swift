@@ -284,6 +284,57 @@ final class GliderTests: XCTestCase {
         
     }
     
+    func test_eventObjectSerializationWithCustomSerializeFunction() async throws {
+        
+        struct Company: SerializableObject {
+            var name: String
+            var foundedDate: Date?
+            var homepage: URL
+            var founders: [String]
+            
+            func serializeMetadata() -> Metadata? {
+                [
+                    "class": "company_class"
+                ]
+            }
+            
+            func serialize(with strategies: SerializationStrategies) -> Data? {
+                "name:\(name)\nfoundedDate:\(foundedDate?.timeIntervalSince1970 ?? 0)\nhomepage:\(homepage.absoluteString)\nfounders=\(founders.joined(separator: ","))".data(using: .utf8)!
+            }
+            
+        }
+        
+        let company = Company(name: "ExSpace", foundedDate: Date(), homepage: URL(string: "http://www.exspace.com")!, founders: ["Mark","Jane"])
+
+        let transport = TestTransport {
+            XCTAssertNotNil($0.serializedObject, "Failed to transport serialized data")
+            
+            // Validate metadata
+            XCTAssertEqual($0.serializedObject?.metadata?["class"] as? String, "company_class")
+         
+            // Validate data
+            guard let rawData = $0.serializedObject?.data else {
+                XCTFail("Failed to read the serialized object data")
+                return
+            }
+            
+            let rawString = String(data: rawData, encoding: .utf8)!
+            let expectedString = "name:\(company.name)\nfoundedDate:\(company.foundedDate?.timeIntervalSince1970 ?? 0)\nhomepage:\(company.homepage.absoluteString)\nfounders=\(company.founders.joined(separator: ","))"
+            
+            XCTAssertEqual(rawString, expectedString, "Failed to check correctness of the raw data for serialized object")
+        }
+        
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [ transport ]
+        }
+                
+        log.info?.write(event: {
+            $0.object = company
+        })
+        
+    }
+    
     func test_eventObjectSerialization() async throws {
         
         struct People: SerializableObject, Codable {
@@ -292,10 +343,6 @@ final class GliderTests: XCTestCase {
                     "class": "People",
                     "interesting_key": "any_value"
                 ]
-            }
-            
-            func serialize(with strategies: SerializationStrategies) -> Data? {
-                try? JSONEncoder().encode(self)
             }
             
             var name: String
