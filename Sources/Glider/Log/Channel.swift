@@ -11,6 +11,7 @@
 //
 
 import Foundation
+import UIKit
 
 public class Channel {
     
@@ -44,7 +45,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(event eventBuilder: @escaping () -> Event,
+    public func write(event eventBuilder: @escaping (inout Event) -> Void,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         
         guard let log = log, log.isEnabled else {
@@ -52,7 +53,8 @@ public class Channel {
         }
         
         // Generate the event and decorate it with the current scope and runtime attributes
-        var event = eventBuilder()
+        var event = Event()
+        eventBuilder(&event)
         return write(event: &event, function: function, filePath: filePath, fileLine: fileLine)
     }
     
@@ -102,7 +104,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(message messageBuilder: @escaping () -> String,
+    public func write(message stringBuilder: @escaping () -> String,
                       object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         // NOTE: this additional check is to avoid unnecessary string evaluation, it's not redudant in write() for event
@@ -111,7 +113,8 @@ public class Channel {
         }
 
         return write(event: {
-            .init(messageBuilder(), object: object)
+            $0.object = object
+            $0.message = stringBuilder()
         }, function: function, filePath: filePath, fileLine: fileLine)
     }
     
@@ -129,7 +132,8 @@ public class Channel {
                       object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         write(event: {
-            .init(message, object: object)
+            $0.message = message
+            $0.object = object
         }, function: function, filePath: filePath, fileLine: fileLine)
     }
     

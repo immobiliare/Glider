@@ -21,7 +21,7 @@ public struct Event {
     public let id: String = UUID().uuidString
     
     /// Message to record.
-    public let message: String
+    public var message: String
     
     /// Object to serialize.
     public var object: SerializableObject?
@@ -66,6 +66,14 @@ public struct Event {
         self.scope = scope
         self.scope.extra = Dictionary.merge(baseDictionary: scope.extra, additionalData: extra)
         self.scope.tags = Dictionary.merge(baseDictionary: scope.tags, additionalData: tags)
+        
+        // Capture the current context if set.
+        self.scope.captureContext()
+    }
+    
+    public init() {
+        self.message = ""
+        self.scope = GliderSDK.shared.scope
         
         // Capture the current context if set.
         self.scope.captureContext()

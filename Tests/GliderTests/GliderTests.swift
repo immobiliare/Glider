@@ -59,7 +59,7 @@ final class GliderTests: XCTestCase {
                 } else {
                     hasPassed = true
                 }
-                return .init("dummy event")
+                $0.message = "dummy event"
             })
             
             if shouldPass && hasPassed == false {
@@ -81,7 +81,7 @@ final class GliderTests: XCTestCase {
         }
         
         let sentEvent = log.debug?.write {
-            Event("This is a dummy event")
+            $0.message = "This is a dummy event"
         }
         
         XCTAssertNotNil(sentEvent, "Event should be dispatched correctly")
@@ -183,7 +183,7 @@ final class GliderTests: XCTestCase {
         
         let event1 = log.debug?.write(message: "Literal msg")
         let event2 = log.debug?.write(event: {
-            Event("Computed msg with event")
+            $0.message = "Computed msg with event"
         })
         let event3 = log.debug?.write(message: {
             "Computed msg with string"
@@ -243,32 +243,46 @@ final class GliderTests: XCTestCase {
             "extra4": "scope_value"
         ]
         
+        let eventExtra: Metadata = [
+            "extra1": "event_value",
+            "extra3": "event_value"
+        ]
+        
+        let tagsExtra: Tags = [
+            "tag1": "event_value",
+            "tag3": "event_value"
+        ]
+        
         // Attach to event custom extra and tags values, some of them will override existing
         // keys inside the scope's extra and tags.
-        var proposedEvent = Event("test message",
-                      extra: [
-                        "extra1": "event_value",
-                        "extra3": "event_value"
-                      ], tags: [
-                        "tag1": "event_value",
-                        "tag3": "event_value"
-                      ])
+        var event = Event("test message", extra: eventExtra, tags: tagsExtra)
+        let proposedEvent = log.debug?.write(event: &event)
+        let proposedEvent2 = log.debug?.write(event: {
+            $0.message = "test message #2"
+        })
         
-        guard let sentEvent = log.debug?.write(event: &proposedEvent) else {
-            XCTFail()
-            return
-        }
-            
-        // Check if the resulting event combines two dictionary values.
-        XCTAssertEqual(sentEvent.scope.tags.keys.count, 3)
-        XCTAssertEqual(sentEvent.scope.tags["tag1"], "event_value")
-        XCTAssertEqual(sentEvent.scope.tags["tag2"], "scope_value")
-        XCTAssertEqual(sentEvent.scope.tags["tag3"], "event_value")
+        validateEvent(proposedEvent)
+        validateEvent(proposedEvent2!)
 
-        XCTAssertEqual(sentEvent.scope.extra.keys.count, 4)
-        XCTAssertEqual(sentEvent.scope.extra["extra1"] as? String, "event_value")
-        XCTAssertEqual(sentEvent.scope.extra["extra2"] as? String, "scope_value")
-        XCTAssertEqual(sentEvent.scope.extra["extra4"] as? String, "scope_value")
+        func validateEvent(_ sentEvent: Event?) {
+            guard let sentEvent = sentEvent else {
+                XCTFail()
+                return
+            }
+            
+            // Check if the resulting event combines two dictionary values.
+            XCTAssertEqual(sentEvent.scope.tags.keys.count, 3)
+            XCTAssertEqual(sentEvent.scope.tags["tag1"], "event_value")
+            XCTAssertEqual(sentEvent.scope.tags["tag2"], "scope_value")
+            XCTAssertEqual(sentEvent.scope.tags["tag3"], "event_value")
+            
+            XCTAssertEqual(sentEvent.scope.extra.keys.count, 4)
+            XCTAssertEqual(sentEvent.scope.extra["extra1"] as? String, "event_value")
+            XCTAssertEqual(sentEvent.scope.extra["extra2"] as? String, "scope_value")
+            XCTAssertEqual(sentEvent.scope.extra["extra4"] as? String, "scope_value")
+        }
+        
+        
     }
     
 }
