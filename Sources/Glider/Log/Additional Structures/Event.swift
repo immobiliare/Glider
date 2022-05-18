@@ -26,6 +26,10 @@ public struct Event {
     /// Object to serialize.
     public var object: SerializableObject?
     
+    /// You can override global SDK serialization strategies here.
+    /// If not specified the global value is used instead.
+    public var serializationStrategies: SerializationStrategies?
+    
     /// Date when the event has occurred.
     public let timestamp = Date()
     
@@ -44,7 +48,7 @@ public struct Event {
     // MARK: - Internal Properties
     
     /// Hold the serialized data of the object's associated.
-    private var serializedObject: (metadata: Metadata?, data: Data)?
+    internal private(set) var serializedObject: (metadata: Metadata?, data: Data)?
     
     // MARK: - Initialization
     
@@ -71,15 +75,35 @@ public struct Event {
         self.scope.captureContext()
     }
     
-    public init() {
+    /// Initialize a new empty event.
+    internal init() {
         self.message = ""
         self.scope = GliderSDK.shared.scope
         
         // Capture the current context if set.
         self.scope.captureContext()
     }
+    
+    // MARK: - Internal Functions
 
+    internal mutating func serializeObjectIfNeeded(withTransportManager manager: TransportManager) {
+        guard serializedObject == nil else {
+            return // value is cached
+        }
+
+        let strategy = serializationStrategies ?? manager.serializedStrategies
+
+        guard let object = object,
+              let data = object.serialize(with: strategy) else {
+            return // object is not set
+        }
+
+        self.serializedObject = (object.serializeMetadata(), data)
+    }
+    
 }
+
+// MARK: - Dictionary Extensions
 
 extension Dictionary {
     

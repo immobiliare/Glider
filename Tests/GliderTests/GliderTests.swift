@@ -282,6 +282,57 @@ final class GliderTests: XCTestCase {
             XCTAssertEqual(sentEvent.scope.extra["extra4"] as? String, "scope_value")
         }
         
+    }
+    
+    func test_eventObjectSerialization() async throws {
+        
+        struct People: SerializableObject, Codable {
+            func serializeMetadata() -> Metadata? {
+                [
+                    "class": "People",
+                    "interesting_key": "any_value"
+                ]
+            }
+            
+            func serialize(with strategies: SerializationStrategies) -> Data? {
+                try? JSONEncoder().encode(self)
+            }
+            
+            var name: String
+            var age: Int
+            var avatar: URL?
+        }
+        
+        let transport = TestTransport {
+            XCTAssertNotNil($0.serializedObject, "Failed to transport serialized data")
+            
+            // Validate metadata
+            XCTAssertEqual($0.serializedObject?.metadata?["class"] as? String, "People")
+            XCTAssertEqual($0.serializedObject?.metadata?["interesting_key"] as? String, "any_value")
+            
+            // Validate serialized data
+            do {
+                guard let data = $0.serializedObject?.data else {
+                    XCTFail("Failed to transport serialized data of the object")
+                    return
+                }
+                
+                _ = try JSONDecoder().decode(People.self, from: data)
+            } catch {
+                XCTFail("Failed to decoded transported serialized data: \(error.localizedDescription)")
+            }
+        }
+        
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [ transport ]
+        }
+        
+        let people = People(name: "Mark", age: 11, avatar: URL(string: "http://mywebsite.com/users/avatars/user12.jpg"))
+        
+        log.info?.write(event: {
+            $0.object = people
+        })
         
     }
     

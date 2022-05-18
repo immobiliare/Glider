@@ -82,7 +82,7 @@ public class Channel {
         event.category = log.category
         event.scope.attach(function: function, filePath: filePath, fileLine: fileLine)
         
-        log.transporter.write(event)
+        log.transporter.write(&event)
         return event
     }
     

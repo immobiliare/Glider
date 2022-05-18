@@ -29,7 +29,7 @@ public class TransportManager {
     private let isSynchronous: Bool
     
     /// Serialized strategies
-    private let serializedStrategies: SerializationStrategies
+    internal private(set) var serializedStrategies: SerializationStrategies
         
     /// This is the dispatch queue which make in order the payload received from different channels.
     private let acceptQueue: DispatchQueue
@@ -61,9 +61,12 @@ public class TransportManager {
     /// Record a new event to underlying transports.
     ///
     /// - Parameter event: event to log.
-    internal func write(_ event: Event) {
+    internal func write(_ event: inout Event) {
+        // serialize the assigned object, if any.
+        event.serializeObjectIfNeeded(withTransportManager: self)
+        
         let mainExecutor = executorForQueue(acceptQueue, synchronous: isSynchronous)
-        mainExecutor { [filters, transports] in
+        mainExecutor { [event, filters, transports] in
             // Verify if payload pass the filters check (if set).
             guard filters.canAcceptEvent(event) else {
                 return
