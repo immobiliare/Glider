@@ -26,6 +26,27 @@ public struct Event {
     /// Object to serialize.
     public var object: SerializableObject?
     
+    /// Tags are key/value string pairs.
+    /// Some transports may index and make them searchable (like sentry).
+    /// Values can be overriden by the event's `tags` informations.
+    public var tags: Tags?
+    
+    /// Arbitrary additional information that will be sent with the event.
+    /// Values can be overriden by the event's `extra` informations.
+    public var extra: Metadata?
+    
+    /// Return cumulative list of all tags where the base is scope's tags
+    /// merged with event's specific tags
+    public var allTags: Tags? {
+        Dictionary.merge(baseDictionary: scope.tags, additionalData: tags)
+    }
+    
+    /// Return cumulative list of all metadata where the base is scope's metadata
+    /// merged with event's specific metadata.
+    public var allExtra: Metadata? {
+        Dictionary.merge(baseDictionary: scope.extra, additionalData: extra)
+    }
+    
     /// You can override global SDK serialization strategies here.
     /// If not specified the global value is used instead.
     public var serializationStrategies: SerializationStrategies?
@@ -68,8 +89,8 @@ public struct Event {
         self.message = message
         self.object = object
         self.scope = scope
-        self.scope.extra = Dictionary.merge(baseDictionary: scope.extra, additionalData: extra)
-        self.scope.tags = Dictionary.merge(baseDictionary: scope.tags, additionalData: tags)
+        self.extra = extra
+        self.tags = tags
         
         // Capture the current context if set.
         self.scope.captureContext()
@@ -77,11 +98,7 @@ public struct Event {
     
     /// Initialize a new empty event.
     internal init() {
-        self.message = ""
-        self.scope = GliderSDK.shared.scope
-        
-        // Capture the current context if set.
-        self.scope.captureContext()
+        self.init("", object: nil, extra: nil, tags: nil)
     }
     
     // MARK: - Internal Functions

@@ -63,5 +63,11 @@ public extension SerializableObject where Self: Encodable {
     func serialize(with strategies: SerializationStrategies) -> Data? {
         try? JSONEncoder().encode(self)
     }
+    
+    func serializeMetadata() -> Metadata? {
+        [
+            "class": String(describing: self)
+        ]
+    }
 
 }

@@ -64,6 +64,7 @@ public class TransportManager {
     internal func write(_ event: inout Event) {
         // serialize the assigned object, if any.
         event.serializeObjectIfNeeded(withTransportManager: self)
+
         
         let mainExecutor = executorForQueue(acceptQueue, synchronous: isSynchronous)
         mainExecutor { [event, filters, transports] in

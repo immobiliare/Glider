@@ -102,8 +102,8 @@ final class GliderTests: XCTestCase {
         
         let refDate = Date(timeIntervalSince1970: 0)
         
-        let event1 = log.debug?.write(message: "Hello")
-        let event2 = log.debug?.write(message: {
+        let event1 = log.debug?.write("Hello")
+        let event2 = log.debug?.write({
             let date = ISO8601DateFormatter().string(from: refDate)
             return "Hello, it's \(date)"
         })
@@ -127,18 +127,18 @@ final class GliderTests: XCTestCase {
         // - filter only values below 50 excluded
         // - moreover the first log event should not be read because has a lower level than expected
         let oddFilter = CallbackFilter {
-            ($0.scope.extra["idx"] as! Int).isMultiple(of: 2)
+            ($0.extra?["idx"] as! Int).isMultiple(of: 2)
         }
         
         let maxValueFilter = CallbackFilter {
-            ($0.scope.extra["idx"] as! Int) < 50
+            ($0.extra?["idx"] as! Int) < 50
         }
         
         // We'll check if transport receive correct events filtered.
         var countReceivedEvents = 0
         var prevReceivedValue: Int?
         let finalTransport = TestTransport { eventReceived in
-            let valueAssociated = eventReceived.scope.extra["idx"] as! Int
+            let valueAssociated = eventReceived.extra?["idx"] as! Int
             XCTAssertTrue(valueAssociated.isMultiple(of: 2), "Odd filter does not work as expected")
             XCTAssertTrue(valueAssociated < 50, "Max value filter does not work as expected")
             XCTAssertEqual("Message #\(valueAssociated)", eventReceived.message, "Message received is wrong")
@@ -181,11 +181,11 @@ final class GliderTests: XCTestCase {
             $0.level = .debug
         }
         
-        let event1 = log.debug?.write(message: "Literal msg")
+        let event1 = log.debug?.write("Literal msg")
         let event2 = log.debug?.write(event: {
             $0.message = "Computed msg with event"
         })
-        let event3 = log.debug?.write(message: {
+        let event3 = log.debug?.write({
             "Computed msg with string"
         })
         
@@ -208,18 +208,18 @@ final class GliderTests: XCTestCase {
 
         // Test if context is not captured when turned off the option
         GliderSDK.shared.contextsCaptureOptions = .none
-        let noContextEvent = log.debug?.write(message: "")
+        let noContextEvent = log.debug?.write("")
         XCTAssertNil(noContextEvent?.scope.context, "Context should be not captured in this mode")
         
         // Test if context is captured correctly when turned on
         GliderSDK.shared.contextsCaptureOptions = [.os]
-        let onlyOSContextEvent = log.debug?.write(message: "")
+        let onlyOSContextEvent = log.debug?.write("")
         XCTAssertNotNil(onlyOSContextEvent?.scope.context?.os, "OS related context attributes must be present")
         XCTAssertNil(onlyOSContextEvent?.scope.context?.device, "Device related context attributes must not be present")
         
         // Test if context is captured correctly when all flags are turned on
         GliderSDK.shared.contextsCaptureOptions = .all
-        let allContextsCapturedEvent = log.debug?.write(message: "")
+        let allContextsCapturedEvent = log.debug?.write("")
         XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.os, "OS related context attributes must be present")
         XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.device, "Device related context attributes must be present")
     }
@@ -258,7 +258,9 @@ final class GliderTests: XCTestCase {
         var event = Event("test message", extra: eventExtra, tags: tagsExtra)
         let proposedEvent = log.debug?.write(event: &event)
         let proposedEvent2 = log.debug?.write(event: {
-            $0.message = "test message #2"
+            $0.message = "test message"
+            $0.tags = tagsExtra
+            $0.extra = eventExtra
         })
         
         validateEvent(proposedEvent)
@@ -271,19 +273,45 @@ final class GliderTests: XCTestCase {
             }
             
             // Check if the resulting event combines two dictionary values.
-            XCTAssertEqual(sentEvent.scope.tags.keys.count, 3)
-            XCTAssertEqual(sentEvent.scope.tags["tag1"], "event_value")
-            XCTAssertEqual(sentEvent.scope.tags["tag2"], "scope_value")
-            XCTAssertEqual(sentEvent.scope.tags["tag3"], "event_value")
+            XCTAssertEqual(sentEvent.allTags?.keys.count, 3)
+            XCTAssertEqual(sentEvent.allTags?["tag1"], "event_value")
+            XCTAssertEqual(sentEvent.allTags?["tag2"], "scope_value")
+            XCTAssertEqual(sentEvent.allTags?["tag3"], "event_value")
             
-            XCTAssertEqual(sentEvent.scope.extra.keys.count, 4)
-            XCTAssertEqual(sentEvent.scope.extra["extra1"] as? String, "event_value")
-            XCTAssertEqual(sentEvent.scope.extra["extra2"] as? String, "scope_value")
-            XCTAssertEqual(sentEvent.scope.extra["extra4"] as? String, "scope_value")
+            XCTAssertEqual(sentEvent.allExtra?.keys.count, 4)
+            XCTAssertEqual(sentEvent.allExtra?["extra1"] as? String, "event_value")
+            XCTAssertEqual(sentEvent.allExtra?["extra2"] as? String, "scope_value")
+            XCTAssertEqual(sentEvent.allExtra?["extra4"] as? String, "scope_value")
         }
         
     }
     
+    /// The following tests check if automatic encoding of `UIImage` works properly.
+    func test_eventObjectSerializationWithUIImage() async throws {
+        let imageData = try! Data(contentsOf: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Wikisource-logo.png/360px-Wikisource-logo.png")!)
+        let image = UIImage(data: imageData)
+        
+        let transport = TestTransport {
+            guard let _ = UIImage(data: $0.serializedObject!.data) else {
+                XCTFail("Failed to decoded the image")
+                return
+            }
+            
+            XCTAssertNotNil($0.serializedObject?.metadata)
+        }
+        
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [ transport ]
+        }
+        
+        log.info?.write(event: {
+            $0.object = image
+        })
+        
+    }
+    
+    /// The following test check if custom serialization for `SerializableObject` objects works properly.
     func test_eventObjectSerializationWithCustomSerializeFunction() async throws {
         
         struct Company: SerializableObject {

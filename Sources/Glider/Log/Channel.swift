@@ -104,7 +104,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(message stringBuilder: @escaping () -> String,
+    public func write(_ stringBuilder: @escaping () -> String,
                       object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         // NOTE: this additional check is to avoid unnecessary string evaluation, it's not redudant in write() for event
@@ -128,7 +128,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(message: String,
+    public func write(_ message: String,
                       object: SerializableObject? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         write(event: {
