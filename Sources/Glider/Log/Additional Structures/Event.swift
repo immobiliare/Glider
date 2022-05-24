@@ -26,6 +26,13 @@ public struct Event {
     /// Object to serialize.
     public var object: SerializableObject?
     
+    /// Sets the fingerprint in the scope.
+    /// A fingerprint is a way to uniquely identify an error, and all events have one.
+    /// Events with the same fingerprint may be grouped together into an issue depending
+    /// on the transport service used.
+    /// (For example Sentry group them in a single issue).
+    public var fingerprint: String?
+    
     /// Tags are key/value string pairs.
     /// Some transports may index and make them searchable (like sentry).
     /// Values can be overriden by the event's `tags` informations.

@@ -411,6 +411,42 @@ final class GliderTests: XCTestCase {
         
     }
     
+    /// The following test validate how the `FieldsFormatter` works.
+    func test_fieldBasedFormatter() async throws {
+        
+        // Create a field formatter
+        let fieldFormatter = FieldsFormatter(fields: [
+            .level(style: .short, {
+                $0.padding = .right(columns: 10)
+            }),
+            .delimiter(style: .custom(": ")),
+            .message(),
+            .delimiter(style: .space),
+            .extra(format: "Keys = {%@}", keys: ["key1","key2"], separator: ", ")
+        ])
+        
+        // File URL
+        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("test_fieldformatter")
+            .appendingPathExtension("log")
+        
+        try? FileManager.default.removeItem(at: fileURL)
+        
+        let fileTransport = FileTransport(fileURL: fileURL, formatters: [fieldFormatter])!
+        
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [fileTransport]
+        }
+        
+        log.info?.write(event: {
+            $0.message = "come va"
+            $0.extra = ["key1": "val1","key2": "val2", "key3": "val3"]
+        })
+        
+        print(fileURL)
+    }
+    
 }
 
 
