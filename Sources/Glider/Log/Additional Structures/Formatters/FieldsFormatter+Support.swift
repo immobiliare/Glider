@@ -415,3 +415,84 @@ extension FieldsFormatter.CallingThreadStyle {
     }
 
 }
+
+// MARK: - FieldsFormatter.StructureFormatStyle
+
+extension FieldsFormatter {
+    
+    /// Defines how the structures like array or dictionaries are encoded
+    /// inside the formatted string.
+    /// - `object`: structure is kept, this is useful when you have a format as JSON which support them
+    /// - `queryString`: values are composed in a string, like an url. This is useful for plain text formatter.
+    public enum StructureFormatStyle {
+        case object
+        case queryString
+        
+        // MARK: - Internal Functions
+        
+        internal func stringify(_ value: Any?, forField field: Field) -> String? {
+            guard let value = value else { return nil }
+
+            switch self {
+            case .object:
+                return stringifyAsObject(value, forField: field)
+            case .queryString:
+                return stringifyAsQueryString(value, forField: field)
+            }
+        }
+        
+        // MARK: - Private Functions
+        
+        private func stringifyAsQueryString(_ value: Any, forField field: Field) -> String? {
+            switch value {
+            case let stringValue as String:
+                return stringValue
+            case let dictValue as [String: Any?]:
+                guard dictValue.isEmpty == false else {
+                    return nil
+                }
+                
+                var components = [String]()
+                
+                for key in dictValue.keys.sorted() {
+                    if let value = dictValue[key], let value = value {
+                        components.append("\(key)=\(String(describing: value))")
+                    }
+                }
+                
+                return components.joined(separator: "&")
+            case let arrayValue as [Any?]:
+                guard arrayValue.isEmpty == false else {
+                    return nil
+                }
+                
+                return arrayValue.map({ $0.debugDescription }).joined(separator: field.separator)
+            default:
+                return nil
+            }
+        }
+        
+        private func stringifyAsObject(_ value: Any, forField field: Field) -> String? {
+            switch value {
+            case let stringValue as String:
+                return stringValue
+            case let dictValue as [String: Any?]:
+                guard dictValue.isEmpty == false else {
+                    return nil
+                }
+                
+                let json = try? JSONSerialization.data(withJSONObject: dictValue, options: .sortedKeys)
+                return try? json?.asString()
+            case let arrayValue as [Any?]:
+                guard arrayValue.isEmpty == false else {
+                    return nil
+                }
+                
+                return arrayValue.map({ $0.debugDescription }).joined(separator: field.separator)
+            default:
+                return String(describing: value)
+            }
+        }
+    }
+    
+}

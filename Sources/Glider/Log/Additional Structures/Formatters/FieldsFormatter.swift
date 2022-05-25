@@ -21,6 +21,11 @@ public class FieldsFormatter: EventFormatter {
     /// Formatted fields used to create the string.
     public var fields: [Field]
     
+    /// How array and dictionaries (like `tags` and `extra` are encoded).
+    /// The default's value is `queryString` but it may change depending
+    /// by the formatter.
+    public var structureFormatStyle: StructureFormatStyle = .queryString
+    
     // MARK: - Initialization
     
     /// Initialize with a list of given fields used to format the event.
@@ -67,46 +72,23 @@ public class FieldsFormatter: EventFormatter {
     
     open func valuesForEvent(event: Event) -> [String?] {
         fields.map { field in
-            guard var value = stringify(event.valueForFormatterField(field), forField: field) else {
+            guard let value = event.valueForFormatterField(field),
+                  var stringifiedValue = structureFormatStyle.stringify(value, forField: field) else {
                 return nil
             }
             
             // Custom text transform
             for transform in field.transforms ?? [] {
-                value = transform(value)
+                stringifiedValue = transform(stringifiedValue)
             }
             
-            var stringValue = value.trunc(field.truncate).padded(field.padding)
+            var stringValue = stringifiedValue.trunc(field.truncate).padded(field.padding)
             if let format = field.format {
                 stringValue = String.format(format, value: stringValue)
             }
             return stringValue
         }
         
-    }
-    
-    open func stringify(_ value: Any?, forField field: Field) -> String? {
-        guard let value = value else { return nil }
-        
-        switch value {
-        case let stringValue as String:
-            return stringValue
-        case let dictValue as [String: Any?]:
-            guard dictValue.isEmpty == false else {
-                return nil
-            }
-            
-            let json = try? JSONSerialization.data(withJSONObject: dictValue, options: .sortedKeys)
-            return try? json?.asString()
-        case let arrayValue as [Any?]:
-            guard arrayValue.isEmpty == false else {
-                return nil
-            }
-            
-            return arrayValue.map({ $0.debugDescription }).joined(separator: field.separator)
-        default:
-            return String(describing: value)
-        }
     }
     
 }

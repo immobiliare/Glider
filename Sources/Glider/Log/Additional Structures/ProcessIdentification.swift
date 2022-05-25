@@ -51,10 +51,10 @@ internal struct ProcessIdentification {
         processID = process.processIdentifier
     }
     
-    public static func threadID() -> UInt64 {
+    public lazy var threadID: UInt64 = {
         var threadID: UInt64 = 0
         pthread_threadid_np(nil, &threadID)
         return threadID
-    }
+    }()
     
 }

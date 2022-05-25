@@ -41,9 +41,13 @@ public class JSONFormatter: FieldsFormatter {
     public init(jsonOptions: JSONSerialization.WritingOptions = [],
                 encodeDataAsBase64: Bool = false,
                 fields: [FieldsFormatter.Field]) {
+        
         self.jsonOptions = jsonOptions
         self.encodeDataAsBase64 = encodeDataAsBase64
         super.init(fields: fields)
+        
+        // We want to keep the structure format in `JSONFormatter` because it can handle them.
+        self.structureFormatStyle = .object
     }
     
     /// Use the default JSON formatter message.

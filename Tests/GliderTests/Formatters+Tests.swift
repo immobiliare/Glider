@@ -105,6 +105,7 @@ final class FormattersTest: XCTestCase {
             .delimiter(style: .spacedPipe),
             .extra(keys: nil)
         ])
+        formatter.structureFormatStyle = .object
         
         let fileTransport = FileTransport(fileURL: fileURL, formatters: [formatter])!
         let log = Log {
@@ -152,6 +153,41 @@ final class FormattersTest: XCTestCase {
         }
     }
     
+    /// The following test check if structures like extra, tags and userData are correctly encoded
+    /// using `queryString` option.
+    func test_fieldBasedFormatterWithQueryStringEncodedStructures() async throws {
+        let fileURL = URL.newLogFileURL(removeContents: true)
+
+        let fieldFormatter = FieldsFormatter(fields: [
+            .message(),
+            .delimiter(style: .spacedPipe),
+            .userData(keys: nil),
+            .delimiter(style: .spacedPipe),
+            .extra(keys: nil),
+            .delimiter(style: .spacedPipe),
+            .tags(keys: nil)
+        ])
+        fieldFormatter.structureFormatStyle = .queryString
+
+        let fileTransport = FileTransport(fileURL: fileURL, formatters: [fieldFormatter])!
+
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [fileTransport]
+        }
+                
+        log.info?.write(event: {
+            $0.message = "test message one"
+            $0.extra = ["key1": "val1","key2": "val2", "key3": "val3"]
+            $0.tags = ["tag1":"v1"]
+            $0.scope.user = User(userId: "id", data: ["ukey":"val"])
+        })
+        
+        let writtenLine = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").first
+        let expectedLine = "test message one | userData={ukey=val} | extra={key1=val1&key2=val2&key3=val3} | tags={tag1=v1}"
+        XCTAssertEqual(writtenLine, expectedLine)
+    }
+    
     /// The following test validate how the `FieldsFormatter` works.
     func test_fieldsBasedFormatter() async throws {
         let fileURL = URL.newLogFileURL(removeContents: true)
@@ -180,6 +216,8 @@ final class FormattersTest: XCTestCase {
             .delimiter(style: .space),
             .username()
         ])
+        
+        fieldFormatter.structureFormatStyle = .object
 
         let fileTransport = FileTransport(fileURL: fileURL, formatters: [fieldFormatter])!
         

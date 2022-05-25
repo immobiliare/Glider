@@ -88,7 +88,7 @@ final class GliderTests: XCTestCase {
         XCTAssertNotNil(sentEvent?.scope.context, "Runtime attributes should be not empty")
         XCTAssertEqual(sentEvent?.scope.fileName, (#file as NSString).lastPathComponent, "Incorrect runtime context attributes")
         
-        let currentThreadId = ProcessIdentification.threadID()
+        let currentThreadId = ProcessIdentification.shared.threadID
         XCTAssertEqual(sentEvent?.scope.threadID, currentThreadId, "Event should include correct thread identifier")
     }
     

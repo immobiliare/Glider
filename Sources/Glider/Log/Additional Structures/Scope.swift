@@ -52,7 +52,7 @@ public struct Scope {
     public private(set) var fileLine: Int?
     
     /// Calling thread id.
-    public let threadID = ProcessIdentification.threadID()
+    public let threadID = ProcessIdentification.shared.threadID
     
     // MARK: - Contexts
     
