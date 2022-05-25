@@ -12,6 +12,52 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
+    /// Test the MsgPack formatter.
+    func test_msgPackFormatter() async throws {
+        let fileURL = URL.newLogFileURL(removeContents: true)
+        
+        let msgPack = MsgPackFormatter.default()
+        let fileTransport = FileTransport(fileURL: fileURL, formatters: [msgPack])!
+
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [fileTransport]
+        }
+        
+        let object = UserTest(name: "Mark", surname: "Snow", age: 33)
+        log.error?.write("Event message", object: object, extra: ["extra1": "val"], tags: ["tag1": "val1"])
+        
+        guard let writtenData = try? Data(contentsOf: fileURL) else {
+            XCTFail()
+            return
+        }
+        
+        var decodedData = MessagePackReader(from: writtenData)
+        let payload = try decodedData.readDictionary()
+        
+        // Check main data
+        let message: String? = payload.valueAtKeyPath("message")
+        XCTAssertEqual(message, "Event message")
+
+        let level: String? = payload.valueAtKeyPath("level")
+        XCTAssertEqual(level, "3")
+
+        // Check object
+        let rawObjectData: Data? = payload.valueAtKeyPath("object")
+        let decodedUser = try JSONDecoder().decode(UserTest.self, from: rawObjectData!)
+        XCTAssertNotNil(decodedUser)
+        XCTAssertEqual(decodedUser.name, "Mark")
+        XCTAssertEqual(decodedUser.age, 33)
+        
+        // Check extra
+        let extraValue: String? = payload.valueAtKeyPath("extra.extra1")
+        XCTAssertEqual(extraValue, "val")
+
+        // Check tags
+        let tagsValue: String? = payload.valueAtKeyPath("tags.tag1")
+        XCTAssertEqual(tagsValue, "val1")
+    }
+    
     /// This tests check the `JSONFormatter`.
     func test_jsonFormatter() async throws {
         let fileURL = URL.newLogFileURL(removeContents: true)

@@ -74,7 +74,7 @@ public class JSONFormatter: FieldsFormatter {
     
     // MARK: - Public Functions
     
-    public override func format(event: Event) -> String? {
+    public override func format(event: Event) -> SerializableData? {
         let jsonDictionary = keyValuesForEvent(event: event)
         return try? JSONSerialization.data(withJSONObject: jsonDictionary, options: jsonOptions).asString()
     }

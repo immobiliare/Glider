@@ -37,8 +37,17 @@ public class FileTransport: Transport {
     /// endpoints.
     public var queue: DispatchQueue?
     
+    /// Current file size (expressed in bytes).
+    public var size: UInt64 {
+        fileHandle?.seekToEndOfFile() ?? 0
+    }
+    
     /// Newline characters, by default `\n` are used.
-    public var newlines: [Character] = ["\n"]
+    public var newlines = "\n" {
+        didSet {
+            self.newLinesData = newlines.data(using: .utf8)
+        }
+    }
     
     /// URL of the local file where the data is stored.
     /// The containing directory must exist and be writable by the process.
@@ -53,10 +62,16 @@ public class FileTransport: Transport {
     /// the log entry is silently ignored and not recorded.
     public let formatters: [EventFormatter]
     
-    
     // MARK: - Private Functions
     
+    /// New lines data.
+    private var newLinesData: Data?
+    
     /// Pointer to the file handler.
+    private lazy var fileHandle: FileHandle? = {
+        FileHandle(forWritingAtPath: fileURL.path)
+    }()
+    
     private let handler: UnsafeMutablePointer<FILE>?
     
     // MARK: - Initialization
@@ -81,6 +96,10 @@ public class FileTransport: Transport {
         self.fileURL = fileURL
         self.formatters = formatters
         self.handler = fileHandler
+        
+        defer {
+            self.newlines = "\n"
+        }
     }
     
     deinit {
@@ -94,25 +113,18 @@ public class FileTransport: Transport {
     // MARK: - Public Functions
     
     public func record(event: Event) -> Bool {
-        guard let message = formatters.format(event: event) else {
+        guard let message = formatters.format(event: event)?.asData(),
+              message.isEmpty == false else {
             return false
         }
         
-        var addNewline = true
-        if !message.isEmpty {
-            let lastChar = message[message.index(before: message.endIndex)]
-            addNewline = !newlines.contains(lastChar)
+        fileHandle?.seekToEndOfFile()
+        
+        fileHandle?.write(message)
+        if let newLinesData = newLinesData {
+            fileHandle?.write(newLinesData)
         }
 
-        fputs(message, handler)
-
-        if addNewline {
-            for char in newlines {
-                fputc(Int32(char.asciiValue!), handler)
-            }
-        }
-
-        fflush(handler)
         return true
     }
     

@@ -62,7 +62,7 @@ public class FieldsFormatter: EventFormatter {
     
     // MARK: - Public Functions
     
-    open func format(event: Event) -> String? {
+    open func format(event: Event) -> SerializableData? {
         return valuesForEvent(event: event).reduce(into: String()) { partialResult, fieldValue in
             if let fieldValue = fieldValue {
                 partialResult.append(fieldValue)
@@ -195,7 +195,7 @@ public class CallbackFormatter: EventFormatter {
     
     // MARK: - Public Functions
     
-    public func format(event: Event) -> String? {
+    public func format(event: Event) -> SerializableData? {
         callback(event)
     }
     

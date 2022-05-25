@@ -482,7 +482,7 @@ extension FieldsFormatter {
                 }
                 
                 let json = try? JSONSerialization.data(withJSONObject: dictValue, options: .sortedKeys)
-                return try? json?.asString()
+                return json?.asString()
             case let arrayValue as [Any?]:
                 guard arrayValue.isEmpty == false else {
                     return nil
