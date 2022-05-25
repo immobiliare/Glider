@@ -12,6 +12,21 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
+    func test_sysLogFormatter() async throws {
+        let fileURL = URL.newLogFileURL(removeContents: true)
+
+        let sysLog = SysLogFormatter(hostname: "myhost", extraFields: [.callingThread(style: .integer), .eventUUID()])
+        let fileTransport = FileTransport(fileURL: fileURL, formatters: [sysLog])!
+
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [fileTransport]
+        }
+        
+        log.error?.write("Event message", extra: ["extra1": "val"], tags: ["tag1": "val1"])
+
+    }
+    
     /// Test the MsgPack formatter.
     func test_msgPackFormatter() async throws {
         let fileURL = URL.newLogFileURL(removeContents: true)

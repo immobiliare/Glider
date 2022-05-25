@@ -12,6 +12,7 @@
 
 import Foundation
 
+/// The `MsgPackDataFormatter` allows to transform payload or scopes into message-pack data format.
 public class MsgPackFormatter: FieldsFormatter {
     
     /// Return the default formatter for `MsgPackFormatter` with the following fields:

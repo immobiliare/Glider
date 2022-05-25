@@ -21,6 +21,9 @@ public class GliderSDK {
     
     /// SDK Current Version.
     public static let version = "1.0.0"
+
+    /// Identifier of the package
+    public static let identifier = "com.glider-logger"
     
     public var scope: Scope = Scope()
     
