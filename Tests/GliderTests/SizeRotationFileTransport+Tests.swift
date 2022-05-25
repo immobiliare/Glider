@@ -1,8 +1,13 @@
 //
-//  File.swift
+//  Glider
+//  Fast, Lightweight yet powerful logging system for Swift.
 //
+//  Created by Daniele Margutti
+//  Email: <hello@danielemargutti.com>
+//  Web: <http://www.danielemargutti.com>
 //
-//  Created by Daniele Margutti on 24/05/22.
+//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
@@ -22,9 +27,7 @@ final class SizeRotationTransportTests: XCTestCase, SizeRotationFileTransportDel
         self.prunedFiles = 0
         self.filesCount = 0
     }
-    
-    // MARK: - SizeRotationFileTransport
-    
+        
     func test_sizeRotationFileTransport() async throws {
         guard let directoryURL = URL.newDirectoryURL() else {
             XCTFail()
