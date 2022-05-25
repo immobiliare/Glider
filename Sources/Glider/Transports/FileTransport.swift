@@ -105,9 +105,7 @@ public class FileTransport: Transport {
     deinit {
         // we've implemented FileLogRecorder as a class so we
         // can have a de-initializer to close the file
-        if handler != nil {
-            fclose(handler)
-        }
+        close()
     }
     
     // MARK: - Public Functions
@@ -126,6 +124,12 @@ public class FileTransport: Transport {
         }
 
         return true
+    }
+    
+    /// Close pointer to file handler.
+    internal func close() {
+        try? fileHandle?.close()
+        fileHandle = nil
     }
     
 }

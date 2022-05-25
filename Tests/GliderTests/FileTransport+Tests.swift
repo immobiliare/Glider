@@ -10,7 +10,7 @@ import Foundation
 import XCTest
 @testable import Glider
 
-final class TransportsTests: XCTestCase {
+final class FileTransportTests: XCTestCase {
     
     /// The following test check if `FileLogTransport` transport layer.
     func test_fileLogTransport() {
@@ -65,6 +65,23 @@ extension URL {
         }
         
         return fileURL
+    }
+    
+    static func newDirectoryURL(removeIfExists: Bool = true) -> URL? {
+        do {
+            let dirURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent("logDirectory")
+            
+            var isDir = ObjCBool(false)
+            if removeIfExists && FileManager.default.fileExists(atPath: dirURL.path, isDirectory: &isDir) && isDir.boolValue {
+                try FileManager.default.removeItem(at: dirURL)
+            }
+            
+            try FileManager.default.createDirectory(at: dirURL, withIntermediateDirectories: true, attributes: nil)
+            return dirURL
+        } catch {
+            return nil
+        }
     }
     
 }
