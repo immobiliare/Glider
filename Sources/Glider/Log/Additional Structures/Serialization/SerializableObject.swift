@@ -58,7 +58,7 @@ public protocol SerializableObject {
 
 // MARK: - SerializableObject for Encodable objects
 
-public extension SerializableObject where Self: Encodable {
+public extension SerializableObject where Self: Codable {
     
     func serialize(with strategies: SerializationStrategies) -> Data? {
         try? JSONEncoder().encode(self)
@@ -66,7 +66,8 @@ public extension SerializableObject where Self: Encodable {
     
     func serializeMetadata() -> Metadata? {
         [
-            "class": String(describing: self)
+            "class": String(describing: type(of: self)),
+            "codable": true
         ]
     }
 

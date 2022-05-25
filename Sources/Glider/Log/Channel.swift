@@ -99,6 +99,8 @@ public class Channel {
     ///                     this function which will be executed only if the message is actually sent
     ///                     in order to avoid unnecessary overheads when the generation may result expensive.
     ///   - object: object you can send for automatic serialization.
+    ///   - extra: extra data to associate.
+    ///   - tags: extra indexable tags to associate.
     ///   - function: function name of the caller (filled automastically)
     ///   - filePath: file path of the caller (filled automatically)
     ///   - fileLine: file line of the caller (filled automatically)
@@ -106,6 +108,8 @@ public class Channel {
     @discardableResult
     public func write(_ stringBuilder: @escaping () -> String,
                       object: SerializableObject? = nil,
+                      extra: Metadata? = nil,
+                      tags: Tags? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         // NOTE: this additional check is to avoid unnecessary string evaluation, it's not redudant in write() for event
         guard let log = log, log.isEnabled  else {
@@ -123,6 +127,8 @@ public class Channel {
     /// - Parameters:
     ///   - message: message literal to write.
     ///   - object: object you can send for automatic serialization.
+    ///   - extra: extra data to associate.
+    ///   - tags: extra indexable tags to associate.
     ///   - function: function name of the caller (filled automastically)
     ///   - filePath: file path of the caller (filled automatically)
     ///   - fileLine: file line of the caller (filled automatically)
@@ -130,10 +136,14 @@ public class Channel {
     @discardableResult
     public func write(_ message: String,
                       object: SerializableObject? = nil,
+                      extra: Metadata? = nil,
+                      tags: Tags? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         write(event: {
             $0.message = message
             $0.object = object
+            $0.extra = extra
+            $0.tags = tags
         }, function: function, filePath: filePath, fileLine: fileLine)
     }
     

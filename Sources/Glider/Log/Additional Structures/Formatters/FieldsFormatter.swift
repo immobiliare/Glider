@@ -12,6 +12,8 @@
 
 import Foundation
 
+/// `FieldsFormatter` is used to format log messages using specified fields you can
+/// compose in a custom format.
 public class FieldsFormatter: EventFormatter {
     
     // MARK: - Public Properties
@@ -28,11 +30,44 @@ public class FieldsFormatter: EventFormatter {
         self.fields = fields
     }
     
+    /// Return the default log formatter.
+    /// It's composed by:
+    ///     - timestamp as ISO8601 padded right with 20 chars
+    ///     - a pipe
+    ///     - short event's severity level
+    ///     - delimiter with space
+    ///     - message
+    ///
+    /// Example:
+    ///     `2022-05-24T13:20:52Z | INFO test message one`
+    /// - Returns: `FieldsFormatter`
+    open class func `default`() -> FieldsFormatter {
+        FieldsFormatter(fields: [
+            .timestamp(style: .iso8601, {
+                $0.padding = .right(columns: 20)
+            }),
+            .delimiter(style: .spacedPipe),
+            .level(style: .short, {
+                $0.padding = .left(columns: 3)
+            }),
+            .delimiter(style: .space),
+            .message()
+        ])
+    }
+    
     // MARK: - Public Functions
     
     open func format(event: Event) -> String? {
-        let values: [String?] = fields.map { field in
-            guard var value = event.valueForFormatterField(field) else {
+        return valuesForEvent(event: event).reduce(into: String()) { partialResult, fieldValue in
+            if let fieldValue = fieldValue {
+                partialResult.append(fieldValue)
+            }
+        }
+    }
+    
+    open func valuesForEvent(event: Event) -> [String?] {
+        fields.map { field in
+            guard var value = stringify(event.valueForFormatterField(field), forField: field) else {
                 return nil
             }
             
@@ -41,22 +76,46 @@ public class FieldsFormatter: EventFormatter {
                 value = transform(value)
             }
             
-            return value.trunc(field.truncate).padded(field.padding)
+            var stringValue = value.trunc(field.truncate).padded(field.padding)
+            if let format = field.format {
+                stringValue = String.format(format, value: stringValue)
+            }
+            return stringValue
         }
         
-        // Compose string
-        return values.reduce(into: String()) { partialResult, fieldValue in
-            if let fieldValue = fieldValue {
-                partialResult.append(fieldValue)
+    }
+    
+    open func stringify(_ value: Any?, forField field: Field) -> String? {
+        guard let value = value else { return nil }
+        
+        switch value {
+        case let stringValue as String:
+            return stringValue
+        case let dictValue as [String: Any?]:
+            guard dictValue.isEmpty == false else {
+                return nil
             }
+            
+            let json = try? JSONSerialization.data(withJSONObject: dictValue, options: .sortedKeys)
+            return try? json?.asString()
+        case let arrayValue as [Any?]:
+            guard arrayValue.isEmpty == false else {
+                return nil
+            }
+            
+            return arrayValue.map({ $0.debugDescription }).joined(separator: field.separator)
+        default:
+            return String(describing: value)
         }
     }
     
 }
 
-fileprivate extension Event {
+// MARK: - Event Extension
+
+internal extension Event {
     
-    func valueForFormatterField(_ field: FieldsFormatter.Field) -> String? {
+    func valueForFormatterField(_ field: FieldsFormatter.Field) -> Any? {
         switch field.field {
         case .timestamp(let style):
             return timestamp.format(style: style)
@@ -84,49 +143,27 @@ fileprivate extension Event {
         case .message:
             return message
             
-        case .objectMetadata:
-            guard let json = serializedObject?.metadata,
-                  let rawJSON = try? JSONSerialization.data(withJSONObject: json, options: .fragmentsAllowed),
-                  let rawJSONString = String(data: rawJSON, encoding: .utf8) else {
-                      return nil
-                  }
+        case .object:
+            return serializedObject?.data
             
-            return rawJSONString
-            
-        case .objectMetadataKeys(let prefix, let keys, let separator):
-            return (prefix ?? "") + keys
-                .compactMap( { serializedObject?.metadata?[$0] as? String })
-                .joined(separator: separator)
-            
+        case .objectMetadata(let keys):
+            return serializedObject?.metadata?.filteredByKeys(keys)
+
         case .delimiter(let style):
             return style.delimiter
             
         case .literal(let value):
             return value
             
-        case .tags(let format, let tags, let separator):
-            let value = tags.compactMap( { allTags?[$0] }).joined(separator: separator)
-            return String.format(format, value: value)
-
-        case .extra(let format, let extra, let separator):
-            let value = extra.compactMap( {
-                guard let value = allExtra?[$0] else {
-                    return nil
-                }
-                
-                if let value = value as? String {
-                    return value
-                }
-                
-                return String(describing: value)
-                
-            }).joined(separator: separator)
+        case .tags(let keys):
+            return allTags?.filteredByKeys(keys)
             
-            return String.format(format, value: value)
+        case .extra(let keys):
+            return allExtra?.filteredByKeys(keys)
 
         case .custom(let formatter):
             return formatter.format(event: self)
-         
+            
         case .category:
             return category?.description
         
@@ -148,9 +185,8 @@ fileprivate extension Event {
         case .ipAddress:
             return scope.user?.userId
             
-        case .userData(let format, let keys, let separator):
-            let value = keys.compactMap( { scope.user?.data?[$0] as? String }).joined(separator: separator)
-            return String.format(format, value: value)
+        case .userData(let keys):
+            return scope.user?.data?.filteredByKeys(keys)
             
         case .fingerprint:
             return fingerprint ?? scope.fingerprint
@@ -179,6 +215,21 @@ public class CallbackFormatter: EventFormatter {
     
     public func format(event: Event) -> String? {
         callback(event)
+    }
+    
+}
+
+extension Dictionary {
+    
+    func filteredByKeys(_ keys: [Key]?) -> Dictionary {
+        guard let keys = keys else {
+            return self
+        }
+
+        let filteredKeys = Set(keys)
+        return filter {
+            filteredKeys.contains($0.key)
+        }
     }
     
 }

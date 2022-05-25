@@ -37,8 +37,8 @@ public class FileTransport: Transport {
     /// endpoints.
     public var queue: DispatchQueue?
     
-    /// Newline characters, by default \n\r are used.
-    public var newlines: [Character] = ["\n", "\r"]
+    /// Newline characters, by default `\n` are used.
+    public var newlines: [Character] = ["\n"]
     
     /// URL of the local file where the data is stored.
     /// The containing directory must exist and be writable by the process.
@@ -52,6 +52,7 @@ public class FileTransport: Transport {
     /// non-`nil` value will be recorded. If every formatter returns `nil`,
     /// the log entry is silently ignored and not recorded.
     public let formatters: [EventFormatter]
+    
     
     // MARK: - Private Functions
     
@@ -67,9 +68,9 @@ public class FileTransport: Transport {
     /// - Parameters:
     ///   - fileURL: path of the file to be written (directory must be exists and user
     ///   must have the permissions to write).
-    ///   - formatters: formatters used to record the event.
+    ///   - formatters: formatters used to record the event. If not specified `FieldsFormatter`'s `default()` format isued.
     ///   - queue : The GCD queue that should be used for logging actions related to the receiver.
-    public init?(fileURL: URL, formatters: [EventFormatter],
+    public init?(fileURL: URL, formatters: [EventFormatter] = [FieldsFormatter.default()],
                  queue: DispatchQueue? = nil) {
         let fileHandler = fopen(fileURL.path, "a")
         guard fileHandler != nil else {
@@ -106,7 +107,9 @@ public class FileTransport: Transport {
         fputs(message, handler)
 
         if addNewline {
-            fputc(0x0A, handler)
+            for char in newlines {
+                fputc(Int32(char.asciiValue!), handler)
+            }
         }
 
         fflush(handler)

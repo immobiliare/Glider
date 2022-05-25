@@ -38,8 +38,26 @@ public struct User {
     /// Initialize a new user with the id.
     ///
     /// - Parameter userId: id of the user.
-    public init(userId: String) {
+    
+    
+    /// Initialize a new user with the id.
+    ///
+    /// - Parameters:
+    ///   - userId: user id.
+    ///   - email: user email.
+    ///   - username: username.
+    ///   - ipAddress: ip address.
+    ///   - data: data.
+    public init(userId: String,
+                email: String? = nil,
+                username: String? = nil,
+                ipAddress: String? = nil,
+                data: [String: Any]? = nil) {
         self.userId = userId
+        self.email = email
+        self.username = username
+        self.ipAddress = ipAddress
+        self.data = data
     }
     
 }

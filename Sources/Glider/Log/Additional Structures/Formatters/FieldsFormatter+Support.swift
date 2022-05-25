@@ -38,6 +38,13 @@ extension FieldsFormatter {
         /// Some formatters (like the `JSONFormatter`= uses this value to print the field's readable label.
         public var label: String?
         
+        /// For array and dictionaries (like extra or tags) you can specify a format where the content is
+        /// encapsulasted (for example `keys={%@}` for tags will produce something like `keys={k1=v1,k2=v2}`).
+        public var format: String?
+        
+        /// When encoding a field which contains array or dictionary the item separator is used to compose the string.
+        public var separator: String = ","
+        
         // MARK: - Initialization
                
         /// Initialize a new `FieldsFormatter` with given identifier and an optional
@@ -87,12 +94,16 @@ extension FieldsFormatter {
             self.init(.literal(value), configure)
         }
         
-        public static func tags(format: String? = nil, keys: [String], separator: String = ",", _ configure: Configure? = nil) -> Field {
-            self.init(.tags(format, keys, separator), configure)
+        public static func tags(keys: [String]?, _ configure: Configure? = nil) -> Field {
+            var field = self.init(.tags(keys), configure)
+            field.format = "tags={%@}"
+            return field
         }
         
-        public static func extra(format: String? = nil, keys: [String], separator: String = ",", _ configure: Configure? = nil) -> Field {
-            self.init(.extra(format, keys, separator), configure)
+        public static func extra(keys: [String]?, _ configure: Configure? = nil) -> Field {
+            var field = self.init(.extra(keys), configure)
+            field.format = "extra={%@}"
+            return field
         }
         
         public static func custom(_ callback: @escaping CallbackFormatter.Callback, _ configure: Configure? = nil) -> Field {
@@ -128,22 +139,26 @@ extension FieldsFormatter {
             self.init(.ipAddress, configure)
         }
         
-        public static func userData(format: String? = nil, keys: [String], separator: String, _ configure: Configure? = nil) -> Field {
-            self.init(.userData(format, keys, separator), configure)
+        public static func userData(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
+            var field = self.init(.userData(keys), configure)
+            field.format = "userData={%@}"
+            return field
         }
         
         public static func fingerprint(_ configure: Configure? = nil) -> Field {
             self.init(.fingerprint, configure)
         }
         
-        public static func objectMetadata(_ configure: Configure? = nil) -> Field {
-            self.init(.objectMetadata, configure)
+        public static func objectMetadata(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
+            var field = self.init(.objectMetadata(keys), configure)
+            field.format = "metadata={%@}"
+            return field
         }
         
-        public static func objectMetadataKeys(format: String? = nil, keys: [String], separator: String,_ configure: Configure? = nil) -> Field {
-            self.init(.objectMetadataKeys(format, keys, separator), configure)
+        public static func object() -> Field {
+            self.init(.object, nil)
         }
-    
+        
         // MARK: - Internal Function
         
         internal func value(forEvent event: Event) -> String? {
@@ -170,13 +185,13 @@ extension FieldsFormatter {
     /// - `userEmail`: when assigned the currently logged user email which generate the event.
     /// - `username`: when assigned the currently logged username which generate the event.
     /// - `ipAddress`: if set the assigned logged user's ip address which generate the event.
-    /// - `userData`: `(format, keys, separator)` values for given `keys` found in user's data.
+    /// - `userData`: `keys` values for given `keys` found in user's data.
     /// - `fingerprint`: the fingerprint used for event, if not found the `scope`'s fingerprint.
     /// - `objectMetadata`: a json string representation of the event's associated object metadata.
-    /// - `objectMetadataKeys`: `(format, keys, separator)` values for given `keys` found in associated object's metadata.
+    /// - `objectMetadataKeys`: `keys` values for given `keys` found in associated object's metadata.
     /// - `delimiter`: delimiter.
-    /// - `tags`: `(format, keys, separator)` values for given `keys` found in event's `tags`.
-    /// - `extra`: `(format, keys, separator)` values for given `keys` found in event's `extra`.
+    /// - `tags`: `keys` values for given `keys` found in event's `tags`.
+    /// - `extra`: `keys` values for given `keys` found in event's `extra`.
     /// - `custom`: apply custom tranformation function which receive the `event` instance.
     public enum FieldIdentifier {
         case category
@@ -194,15 +209,42 @@ extension FieldsFormatter {
         case userEmail
         case username
         case ipAddress
-        case userData(String?, [String], String)
+        case userData([String]?)
         case fingerprint
-        case objectMetadata
-        case objectMetadataKeys(String?, [String], String)
+        case objectMetadata([String]?)
+        case object
         case delimiter(DelimiterStyle)
         case literal(String)
-        case tags(String?, [String],String)
-        case extra(String?, [String],String)
+        case tags([String]?)
+        case extra([String]?)
         case custom(EventFormatter)
+        
+        internal var defaultLabel: String? {
+            switch self {
+            case .category: return "category"
+            case .subsystem: return "subsystem"
+            case .eventUUID: return "uuid"
+            case .timestamp: return "timestamp"
+            case .level: return "level"
+            case .callSite: return "callSite"
+            case .stackFrame: return "stackFrame"
+            case .callingThread: return "callingThread"
+            case .processName: return "processName"
+            case .processID: return "processID"
+            case .message: return "message"
+            case .userId: return "userId"
+            case .userEmail: return "userEmail"
+            case .username: return "username"
+            case .ipAddress: return "ip"
+            case .userData: return "userData"
+            case .object: return "object"
+            case .fingerprint: return "fingerprint"
+            case .objectMetadata: return "objectMetadata"
+            case .tags: return "tags"
+            case .extra: return "extra"
+            default: return nil
+            }
+        }
     }
     
     /// The timestamp style used to format dates.
