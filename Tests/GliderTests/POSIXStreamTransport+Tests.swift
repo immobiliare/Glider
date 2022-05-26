@@ -16,8 +16,8 @@ import XCTest
 
 final class POSIXStreamsTransportTests: XCTestCase, OutputListenerDelegate {
     
-    var stdOutListener = OutputListener(streamType: .stdout)
-    var stdErrListener = OutputListener(streamType: .stderr)
+    var stdOutListener: OutputListener? = OutputListener(streamType: .stdout)
+    var stdErrListener: OutputListener? = OutputListener(streamType: .stderr)
 
     private var stdOutData = ""
     private var stdErrData = ""
@@ -28,11 +28,11 @@ final class POSIXStreamsTransportTests: XCTestCase, OutputListenerDelegate {
         stdErrData = ""
         stdOutData = ""
         
-        stdOutListener.delegate = self
-        stdOutListener.start()
+        stdOutListener?.delegate = self
+        stdOutListener?.start()
         
-        stdErrListener.delegate = self
-        stdErrListener.start()
+        stdErrListener?.delegate = self
+        stdErrListener?.start()
     }
     
     /// The following test check if `POSIXStreamsTransportTests` transport layer
@@ -54,11 +54,15 @@ final class POSIXStreamsTransportTests: XCTestCase, OutputListenerDelegate {
             $0.message = "Error Message"
         })
         
+        sleep(2)
+        
         XCTAssertNotNil(stdOutData.isEmpty)
         XCTAssertTrue(stdOutData.contains("INFO Info Message"))
+        XCTAssertTrue(stdOutData.contains("ERROR Info Message") == false)
 
         XCTAssertNotNil(stdErrData.isEmpty)
         XCTAssertTrue(stdErrData.contains("ERROR Info Message"))
+        XCTAssertTrue(stdErrData.contains("INFO Info Message") == false)
     }
     
     // MARK: - OutputListenerDelegate
@@ -78,6 +82,8 @@ final class POSIXStreamsTransportTests: XCTestCase, OutputListenerDelegate {
                         didCloseHandle fileHandle: FileHandle) { }
     
 }
+
+// MARK: - Helper Class
 
 
 /// Test helper for monitoring strings written to stdout.

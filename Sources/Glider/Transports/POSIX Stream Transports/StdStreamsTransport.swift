@@ -54,10 +54,10 @@ public class StdStreamsTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        if event.level <= .info {
-            return stdoutTransport.record(event: event)
-        } else {
+        if event.level.isMoreSevere(than: .info) {
             return stderrTransport.record(event: event)
+        } else {
+            return stdoutTransport.record(event: event)
         }
     }
     
