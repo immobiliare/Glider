@@ -47,8 +47,9 @@ public class StdStreamsTransport: Transport {
                 queue: DispatchQueue? = nil) {
         self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
         self.formatters = formatters
-        self.stderrTransport = POSIXStreamTransport(stream: stderr, formatters: formatters, queue: self.queue)
-        self.stdoutTransport = POSIXStreamTransport(stream: stdout, formatters: formatters, queue: self.queue)
+        
+        self.stdoutTransport = POSIXStreamTransport.stdOut(formatters: formatters, queue: self.queue)
+        self.stderrTransport = POSIXStreamTransport.stdErr(formatters: formatters, queue: self.queue)
     }
 
     // MARK: - Conformance

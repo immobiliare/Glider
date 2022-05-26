@@ -47,6 +47,17 @@ public class POSIXStreamTransport: Transport {
         POSIXStreamTransport(stream: stdout, formatters: formatters, queue: queue)
     }
     
+    /// Create a `stderr` transport formatter.
+    /// - Parameters:
+    ///   - formatters: formatters to use. When not specificed `defaultStdStreamFormatter` is used.
+    ///   - queue: queue to use for dispatch. When not specified a new queue is created.
+    /// - Returns: `StdStreamTransport`
+    public static func stdErr(formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
+                              queue: DispatchQueue? = nil) -> POSIXStreamTransport {
+        POSIXStreamTransport(stream: stderr, formatters: formatters, queue: queue)
+    }
+    
+    
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
