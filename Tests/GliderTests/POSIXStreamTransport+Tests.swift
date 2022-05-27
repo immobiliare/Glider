@@ -72,7 +72,6 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
         XCTAssertNotNil(stdErrData.isEmpty)
         XCTAssertTrue(stdErrData.contains("ERRR Message"))
         XCTAssertTrue(stdErrData.contains("INFO Message") == false)
-
     }
     
     // MARK: - OutputListenerDelegate
