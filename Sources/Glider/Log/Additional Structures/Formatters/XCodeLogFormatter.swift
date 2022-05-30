@@ -30,11 +30,11 @@ public class XCodeLogFormatter: FieldsFormatter {
     public init(showCallSite: Bool = true) {
         var fields: [FieldsFormatter.Field] = [
             .timestamp(style: .iso8601),
-            .delimiter(style: .spacedPipe),
+            .literal(" "),
             .level(style: .short, {
                 $0.padding = .right(columns: 4)
             }),
-            .delimiter(style: .custom(": ")),
+            .literal(": "),
             .message()
         ]
         
