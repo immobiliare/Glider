@@ -25,7 +25,7 @@ extension SQLiteDb {
         private let stmt: OpaquePointer
         private let db: SQLiteDb
         private var paramIndex = 0
-        
+
         // MARK: - Public Properties
         
         public static let autoParam = -1
@@ -52,6 +52,29 @@ extension SQLiteDb {
         deinit {
             finalize()
         }
+        
+        // MARK: - Fetching
+        
+        private var lastResult: Int32 = SQLITE_OK
+        
+        /// Iterate rows of a select query.
+        ///
+        /// - Parameter handler: handler to parse the data.
+        /// - Returns: an array of T
+        public func iterateRows<T>(_ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) -> [T] {
+            var parsedRows = [T]()
+            
+            let columnsCount = sqlite3_column_count(stmt)
+            while lastResult == SQLITE_ROW {
+                if let row = handler(columnsCount, self) {
+                    parsedRows.append(row)
+                }
+                lastResult = sqlite3_step(stmt)
+            }
+            
+            return parsedRows
+        }
+        
         
         // MARK: - Data Reading
         
@@ -273,7 +296,75 @@ extension SQLiteDb {
             return UUID(uuidString: text)
         }
         
+        // MARK: Parameters Query
+        
+        /// Returns the number of parameters of this statement.
+        /// NOTE: Parameters are indexed starting at 1.
+        public var paramCount: Int {
+            Int(sqlite3_bind_parameter_count(stmt))
+        }
+        
+        /// Returns the parameter index for the parameter with name `name`.
+        public func paramIndex(_ name: String) throws -> Int {
+            Int(sqlite3_bind_parameter_index(stmt, name.cString(using: .utf8)))
+        }
+        
+        /// Returns the parameter name of the parameter at index `idx`.
+        public func paramName(_ idx: Int) throws -> String? {
+            String(cString: sqlite3_bind_parameter_name(stmt, Int32(idx)))
+        }
+        
         // MARK: - Data Binding
+        
+        /// Bind an array of values to the statement.
+        ///
+        /// - Parameter values: values to bind.
+        /// - Throws: throw an exception if something fails.
+        public func bind(_ values: [Any?]) throws {
+            guard !values.isEmpty else {
+                return
+            }
+            
+            // Reset bindings
+            try reset()
+            
+            // Validate the expected params and received ones.
+            let bindParamsCount = Int(sqlite3_bind_parameter_count(stmt))
+            guard values.count == bindParamsCount else {
+                fatalError("\(sqlite3_bind_parameter_count(stmt)) values expected, \(values.count) passed")
+            }
+            
+            // Execute binding
+            for idx in 1...values.count {
+                try bind(values[idx - 1], idx)
+            }
+        }
+        
+        /// Bind a single value to a specified index.
+        ///
+        /// - Parameters:
+        ///   - value: values to bind.
+        ///   - idx: index.
+        /// - Throws: throw an exception if binding fails.
+        public func bind(_ value: Any?, _ idx: Int) throws {
+            if value == nil {
+                sqlite3_bind_null(stmt, Int32(idx))
+            } else if let value = value as? Data {
+                sqlite3_bind_blob(stmt, Int32(idx), value.bytes, Int32(value.bytes.count), SQLiteDb.SQLITE_TRANSIENT)
+            } else if let value = value as? Double {
+                sqlite3_bind_double(stmt, Int32(idx), value)
+            } else if let value = value as? Int64 {
+                sqlite3_bind_int64(stmt, Int32(idx), value)
+            } else if let value = value as? String {
+                sqlite3_bind_text(stmt, Int32(idx), value, -1, SQLiteDb.SQLITE_TRANSIENT)
+            } else if let value = value as? Int {
+                sqlite3_bind_int64(stmt, Int32(idx), Int64(value)) // just INTEGER
+            } else if let value = value as? Bool {
+                sqlite3_bind_int64(stmt, Int32(idx), Int64((value ? 1 : 0))) // just INTEGER
+            } else if let value = value {
+                fatalError("Tried to bind unexpected value \(value)")
+            }
+        }
         
         /// Bind a nil value.
         ///
@@ -570,6 +661,16 @@ extension SQLiteDb.Statement {
         case data
         case integer
         case null
+    }
+    
+}
+
+// MARK: - Data Extension
+
+fileprivate extension Data {
+    
+    var bytes: [UInt8] {
+        return [UInt8](self)
     }
     
 }
