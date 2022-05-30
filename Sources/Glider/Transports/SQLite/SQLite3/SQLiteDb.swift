@@ -38,6 +38,14 @@ public class SQLiteDb {
     /// it means that codable will use JSONs as strings, and not data.
     public var useJSON1 = true
     
+    /// JSONEncoder used when you need to encode `Codable` object.
+    /// `useJSON1` must be present.
+    public var jsonEncoder = JSONEncoder()
+    
+    /// JSONDecoder used to decode data encoded via `Codable`.
+    /// `useJSON1` must be active.
+    public var jsonDecoder = JSONDecoder()
+    
     /// The `rowid` of the last row inserted.
     /// It returns -1 if no database handle is opened.
     public var lastRowId: Int64 {
@@ -70,6 +78,10 @@ public class SQLiteDb {
     }
 
     // MARK: - Private Properties
+    
+    // See [here](https://stackoverflow.com/questions/26883131/sqlite-transient-undefined-in-swift).
+    internal static let SQLITE_STATIC = unsafeBitCast(0, to: sqlite3_destructor_type.self)
+    internal static let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     
     /// Internal handler to sqlite database connection.
     internal var handle: OpaquePointer?
@@ -136,7 +148,7 @@ public class SQLiteDb {
     ///   - template: A string format containing a single %@ sequence, to be replaced with the schema identifier if available
     ///   - schema: Optional schema name
     /// - Returns: An SQL statement with or without a schema
-    private func schemaStatement(template:String,schema:String?) -> String{
+    internal func schemaStatement(template:String,schema:String?) -> String{
         let schema_prefix: String
         if let schema = schema {
             schema_prefix = schema.appending(".")
@@ -153,6 +165,15 @@ public class SQLiteDb {
         SQLiteDb.logger?.info?.write("Executing: \(sql)")
         
         try check(sqlite3_exec(handle, sql, nil, nil, nil))
+    }
+    
+    /// A convenience utility to create a new statement.
+    /// 
+    /// - Parameter sql: SQL statement
+    /// - Throws: DatabaseError
+    /// - Returns: A new statement associated with this database connection
+    public func statement<S: Statement>(sql:String) throws -> S {
+        return try S(database: self, sql: sql)
     }
     
     /// Validate an operation result and throw error if it's failure.
@@ -194,6 +215,10 @@ public class SQLiteDb {
         handle = nil
         
         SQLiteDb.logger?.debug?.write("Closed database")
+    }
+    
+    deinit {
+        close()
     }
     
     // MARK: - Static Functions

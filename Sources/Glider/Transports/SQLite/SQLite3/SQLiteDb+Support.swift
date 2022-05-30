@@ -311,3 +311,19 @@ extension SQLiteDb {
     }
     
 }
+
+// MARK: - SQLiteDb.Version
+
+extension SQLiteDb {
+    
+    /// Version type .
+    /// - `data`: See [PRAGMA data_version](https://sqlite.org/pragma.html#pragma_data_version)
+    /// - `schema`: See [PRAGMA schema_version](https://sqlite.org/pragma.html#pragma_schema_version)
+    /// - `user`: See [PRAGMA user_version](https://sqlite.org/pragma.html#pragma_user_version)
+    public enum Version : String {
+        case data = "data_version"
+        case schema = "schema_version"
+        case user = "user_version"
+    }
+    
+}

@@ -60,6 +60,18 @@ final class FileTransportTests: XCTestCase {
 
 extension URL {
     
+    static func temporaryFileName(fileName: String? = nil, fileExtension: String, removeIfExists: Bool = true) -> URL {
+        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(fileName ?? UUID().uuidString)
+            .appendingPathExtension(fileExtension)
+        
+        if removeIfExists {
+            try? FileManager.default.removeItem(at: fileURL)
+        }
+        
+        return fileURL
+    }
+    
     static func newLogFileURL(removeContents: Bool = true) -> URL {
         let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("test")
