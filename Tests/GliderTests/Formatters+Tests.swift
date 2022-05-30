@@ -17,6 +17,22 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
+    func test_xcodeLogFormatter() async throws {
+        let xcodeFormatter = XCodeLogFormatter()
+        let console = ConsoleTransport(formatters: [xcodeFormatter])
+        
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [console]
+        }
+        
+        for i in 0..<100 {
+            let level: Level = Level.allCases.randomElement() ?? .info
+            log[level]?.write("Event message", extra: ["extra1": "val"], tags: ["tag1": "val1"])
+        }
+        
+    }
+    
     func test_sysLogFormatter() async throws {
         let fileURL = URL.newLogFileURL(removeContents: true)
 
