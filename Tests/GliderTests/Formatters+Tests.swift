@@ -29,7 +29,6 @@ final class FormattersTest: XCTestCase {
         }
         
         log.error?.write("Event message", extra: ["extra1": "val"], tags: ["tag1": "val1"])
-
     }
     
     /// Test the MsgPack formatter.
