@@ -111,6 +111,63 @@ final class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
             XCTAssertTrue(allMessages[i].message == "test message \(i)!")
         }
     }
+    
+    func test_throttledManualFlus() async throws {
+        let exp = expectation(description: "end of sent")
+        
+        let format = FieldsFormatter(fields: [
+            .message({
+                $0.truncate = .head(length: 10)
+            }),
+        ])
+
+        let transport = ThrottledTransport(bufferSize: 100, flushInterval: 5, formatters: [format], delegate: self)
+
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [transport]
+        }
+        
+        var totalEvents = [Event]()
+
+        captureDelegateBlock = { events, reason in
+            if totalEvents.isEmpty {
+                XCTAssertTrue(events.count == 99)
+            } else {
+                XCTAssertTrue(events.count == 1)
+            }
+            
+            for event in events {
+                totalEvents.append(event.0)
+            }
+            
+            print("Captured \(events.count) events via flush \(reason.rawValue) (total=\(totalEvents.count))")
+            
+            if totalEvents.count == 100 {
+                exp.fulfill()
+            }
+        }
+        
+        for i in 0..<99 {
+            log.info?.write(event: {
+                $0.message = "test message \(i)!"
+            })
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            transport.flush()
+            
+            log.info?.write(event: {
+                $0.message = "final"
+            })
+        }
+        
+        wait(for: [exp], timeout: 60)
+        
+        XCTAssertTrue(totalEvents.count == 100)
+        XCTAssertTrue(totalEvents.last?.message == "final")
+        XCTAssertTrue(totalEvents.first?.message == "test message 0!")
+    }
 
     
     func record(_ transport: ThrottledTransport, events: [ThrottledTransport.Payload],

@@ -80,7 +80,10 @@ public class ThrottledTransport: Transport {
     
     /// Perform manual flush.
     public func flush() {
-        flush(reason: .byUser)
+        self.lastFlushDate = Date()
+        queue!.async {
+            self.flush(reason: .byUser)
+        }
     }
     
     // MARK: - Overridable Functions
@@ -144,7 +147,7 @@ public class ThrottledTransport: Transport {
             dispatchPrecondition(condition: .onQueue(queue!))
         }
         
-        if buffer.isEmpty{
+        if buffer.isEmpty {
             return
         }
         
