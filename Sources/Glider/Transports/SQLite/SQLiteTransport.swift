@@ -35,6 +35,11 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         throttledTransport?.flushInterval
     }
     
+    /// Pending payloads contained into the buffer.
+    public var pendingPayloads: [ThrottledTransport.Payload] {
+        throttledTransport?.pendingPayloads ?? []
+    }
+    
     /// Delegate.
     public weak var delegate: SQLiteTransportDelegate?
     
@@ -91,6 +96,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         
         if !fileExists {
             try prepareDatabaseStructure()
+            delegate?.sqliteTransport(self, openedDatabaseAtURL: location, isFileExist: fileExists)
         }
         
         self.throttledTransport = ThrottledTransport(bufferSize: bufferSize,
@@ -99,6 +105,11 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
                                                      queue: queue,
                                                      delegate: self)
     
+    }
+    
+    /// Flush remaining pending payloads.
+    public func flush() {
+        throttledTransport?.flush()
     }
     
     /// This method is called when a new database is created.
@@ -132,8 +143,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
                 })
             }
             
+            delegate?.sqliteTransport(self, writtenPayloads: payloads)
         } catch {
-            print("Error: \(error)")
+            delegate?.sqliteTransport(self, didFailQueryWithError: error)
         }
     }
     
@@ -224,7 +236,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
             return false
         }
         
-        try migrateDatabaseSchema(from: currentVersion, to: self.databaseVersion)
+        try migrateDatabaseSchema(from: currentVersion, to: databaseVersion)
+        delegate?.sqliteTransport(self, schemaMigratedFromVersion: currentVersion, toVersion: databaseVersion)
+        
         try db.setVersion(self.databaseVersion)
         return true
     }

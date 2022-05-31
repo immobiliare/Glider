@@ -38,6 +38,13 @@ public class ThrottledTransport: Transport {
     /// Formatters used to format events into messages.
     public var formatters: [EventFormatter]
     
+    /// Pending payloads contained into the buffer.
+    public var pendingPayloads: [Payload] {
+        queue?.sync {
+            buffer
+        } ?? []
+    }
+    
     // MARK: - Private Properties
     
     /// Timer used to auto-flush at intervals.
