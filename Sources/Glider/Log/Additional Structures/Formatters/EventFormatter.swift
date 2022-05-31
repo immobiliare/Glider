@@ -29,6 +29,30 @@ extension Data: SerializableData {
     
 }
 
+extension Bool: SerializableData {
+    
+    public func asData() -> Data? {
+        self.asString()?.data(using: .utf8)
+    }
+    
+    public func asString() -> String? {
+        self  == true ? "1" : "0"
+    }
+    
+}
+
+extension Int: SerializableData {
+    
+    public func asData() -> Data? {
+        self.asString()?.data(using: .utf8)
+    }
+    
+    public func asString() -> String? {
+        "\(self)"
+    }
+    
+}
+
 extension String: SerializableData {
     
     public func asString() -> String? {

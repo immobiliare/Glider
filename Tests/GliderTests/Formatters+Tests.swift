@@ -28,7 +28,7 @@ final class FormattersTest: XCTestCase {
         
         for i in 0..<100 {
             let level: Level = Level.allCases.randomElement() ?? .info
-            log[level]?.write("Event message", extra: ["extra1": "val"], tags: ["tag1": "val1"])
+            log[level]?.write("Event message \(i)", extra: ["extra1": "val"], tags: ["tag1": "val1"])
         }
         
     }

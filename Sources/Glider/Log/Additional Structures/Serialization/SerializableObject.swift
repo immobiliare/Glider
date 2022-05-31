@@ -24,7 +24,16 @@ import AppKit
 
 /// Metadata is a typealias for a dictionary of extra properties you can attach
 /// to one object managed by the logging platform.
-public typealias Metadata = [String: Any?]
+public typealias Metadata = [String: SerializableData?]
+
+extension Metadata {
+    
+    public func asString() -> String? {
+        let json = try? JSONSerialization.data(withJSONObject: self, options: .sortedKeys)
+        return json?.asString()
+    }
+    
+}
 
 /// Tags are arbitrary data can be indexed.
 public typealias Tags = [String: String]

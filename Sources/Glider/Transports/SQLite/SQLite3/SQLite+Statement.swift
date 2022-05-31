@@ -504,6 +504,13 @@ extension SQLiteDb {
             }
         }
         
+        /// Binds `null` to the parameter.
+        /// - Parameter idx: index of the parameter destination of the binding.
+        /// - Throws: throw an exception if binding fails
+        public func bindNull(param idx: Int) throws {
+            try db.check(sqlite3_bind_null(stmt, Int32(idx)))
+        }
+        
         /// Bind an Int32 double to a statement
         /// - Parameters:
         ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order

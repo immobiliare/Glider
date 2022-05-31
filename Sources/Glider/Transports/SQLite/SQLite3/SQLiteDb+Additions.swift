@@ -41,5 +41,28 @@ extension SQLiteDb {
         return stmt.integer(column: 0)!
     }
     
+    /// Has the database support for foreign keys.
+    ///
+    /// - Returns: Bool
+    public func hasForeignKeys() throws -> Bool {
+        let sql:String
+        sql = schemaStatement(template: "PRAGMA foreign_keys;", schema: nil)
+        let stmt = try statement(sql: sql)
+        guard try stmt.step() else {
+            throw DatabaseError(reason: "Error fetching version",code:-1)
+        }
+        return stmt.integer(column: 0) == 1
+    }
+    
+    /// Enable or disable foreign keys if database supports it.
+    ///
+    /// - Parameters:
+    ///   - enabled: enable or disable
+    ///   - schema: optional schema.
+    public func setForeignKeys(enabled: Bool, schema: String? = nil) throws {
+        let sql: String
+        sql = schemaStatement(template: "PRAGMA foreign_keys = \(enabled ? "ON" : "OFF")", schema: schema)
+        try exec(sql)
+    }
     
 }

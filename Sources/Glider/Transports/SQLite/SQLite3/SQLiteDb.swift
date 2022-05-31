@@ -140,6 +140,83 @@ public class SQLiteDb {
         return DatabaseError(reason: message, code: code)
     }
     
+    // MARK: - Query
+    
+    /// Execute an Update query statement.
+    ///
+    /// - Parameter SQL: SQL string.
+    /// - Throws: throw an exception if something fails executing query.
+    /// - Returns: Statement
+    @discardableResult
+    public func update(sql: String, bindTo values: [Any?]? = nil) throws -> Statement {
+        let statement = try prepare(sql: sql)
+        if let values = values {
+            try statement.bind(values)
+        }
+        try statement.step()
+        return statement
+    }
+    
+    /// Compile a prepared statement.
+    ///
+    /// - Parameter sql: SQL statement to compile.
+    /// - Throws: throw an exception if something fails.
+    /// - Returns: SQLiteStatement
+    public func prepare(sql: String) throws -> Statement {
+        guard handle != nil else {
+            throw DatabaseError(reason: "Database already closed", code: SQLITE_MISUSE)
+        }
+        
+        return try Statement(database: self, sql: sql)
+    }
+    
+    /// Execute a select query statement.
+    ///
+    /// - Parameters:
+    ///   - SQL: SQL string.
+    ///   - values: values to bind.
+    /// - Throws: throw an exception if something fails executing query.
+    /// - Returns: Statement
+    public func select<T>(sql: String, bindTo values: [Any?]? = nil,
+                       _ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) throws -> [T] {
+        let statement = try prepare(sql: sql)
+        if let values = values {
+            try statement.bind(values)
+        }
+        try statement.step()
+        return statement.iterateRows(handler)
+    }
+    
+    /// Executes a BEGIN, calls the provided closure and executes a ROLLBACK if an exception occurs or a COMMIT if no exception occurs.
+    ///
+    /// - parameter closure: Block to be executed inside transaction
+    /// - throws: ErrorType
+    public func updateWithTransaction(_ closure: () throws -> ()) throws {
+        try update(sql: "BEGIN")
+        do {
+            try closure()
+            try update(sql: "COMMIT")
+        } catch let e {
+            try update(sql: "ROLLBACK")
+            throw e
+        }
+    }
+    
+    /// Execute a select statement and bind values.
+    ///
+    /// - Parameters:
+    ///   - SQL: sql query.
+    ///   - values: binded values
+    /// - Returns: Statement
+    public func select(SQL: String, bindTo values: [Any?]? = nil) throws -> Statement {
+        let statement = try prepare(sql: SQL)
+        if let values = values {
+            try statement.bind(values)
+        }
+        try statement.step()
+        return statement
+    }
+    
     // MARK: - Private Functions
     
     /// It is not possible to use prepared statement parameters for the statement name

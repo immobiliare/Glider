@@ -15,12 +15,19 @@ import Foundation
 import XCTest
 @testable import Glider
 
-final class SQLiteTransportTests: XCTestCase {
+final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     
     func test_sqliteTransport() async throws {
+        let exp = expectation(description: "sqlite")
+        
         let dbURL = URL.temporaryFileName(fileName: "log", fileExtension: "sqlite", removeIfExists: true)
         
-        let sqliteTransport = try  SQLiteTransport(location: .fileURL(dbURL), bufferSize: 100, flushInterval: nil)
+        print(dbURL.path)
+        let sqliteTransport = try  SQLiteTransport(location: .fileURL(dbURL), bufferSize: 100, flushInterval: nil, delegate: self)
+        
+        
+        print("ok")
+        
         
         let log = Log {
             $0.level = .debug
@@ -32,8 +39,12 @@ final class SQLiteTransportTests: XCTestCase {
 
             log[level]?.write(event: {
                 $0.message = "test message \(i)!"
+                $0.tags = ["tag1": "value1", "tag2": "value2"]
+                $0.extra = ["extrakey": "value"]
             })
         }
+        
+        wait(for: [exp], timeout: 60)
         
     }
     

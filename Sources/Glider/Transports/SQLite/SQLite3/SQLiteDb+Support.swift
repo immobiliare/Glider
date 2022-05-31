@@ -23,7 +23,7 @@ extension SQLiteDb {
         public let code : Int32
         
         public var description: String {
-            "\(reason) (code=\(code)"
+            "'\(reason)' (code=\(code))"
         }
     }
     
