@@ -144,9 +144,10 @@ public class AsyncTransport: Transport {
     ///   - retryAttempt: retry attempt.
     @discardableResult
     private func store(event: Event, withMessage message: SerializableData?, retryAttempt: Int) throws -> String {
+        let data = try JSONEncoder().encode(event)
         try recordPayloadStmt?.bind([
             event.timestamp.timeIntervalSince1970,
-            JSONEncoder().encode(event),
+            data,
             message,
             retryAttempt
         ])
@@ -241,6 +242,11 @@ public class AsyncTransport: Transport {
         
         let limit = (itemsCount - bufferSize)
         try db.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
+        
+        if let delegate = delegate {
+            let countRemoved = try? db.select(SQL: "SELECT changes()").integer(column: 0)
+            delegate.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
+        }
     }
     
     /// Fetch the next chunk of payloads to send to the external service.
@@ -299,7 +305,7 @@ internal extension AsyncTransport {
         
         /// Statement compiled to insert payload into db.
         static let recordPayload = """
-            INSERT INTO log
+            INSERT INTO buffer
                 (timestamp, data, message, retryAttempt)
             VALUES
                 (?, ?, ?, ?);
@@ -339,5 +345,12 @@ public protocol AsyncTransportDelegate: AnyObject {
     ///   - transport: transport.
     ///   - sentEventIDs: event identifiers sent.
     func asyncTransport(_ transport: AsyncTransport, sentEventIDs: Set<String>)
+    
+    /// Called when a trim due to buffer size limit reached occour.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - discardedEventsFromBuffer: number of events discarded from the oldest.
+    func asyncTransport(_ transport: AsyncTransport, discardedEventsFromBuffer: Int)
 
 }

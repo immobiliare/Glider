@@ -11,8 +11,10 @@ public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
     
     // MARK: - Public Properties
     
+    /// Dictionary.
     public private(set) var values = [String: SerializableData?]()
     
+    /// Keys stored.
     public var keys: [String] {
         Array(values.keys)
     }
@@ -69,18 +71,16 @@ public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let encodableExtraDict: [String: Data?] = values.mapValues({ $0?.asData() })
-        let encodedData = try JSONSerialization.data(withJSONObject: encodableExtraDict, options: .sortedKeys)
-        try container.encodeIfPresent(encodedData, forKey: .values)
+
+        let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableExtraDict, requiringSecureCoding: false)
+        try container.encode(rawData, forKey: .values)
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        if let data = try container.decodeIfPresent(Data.self, forKey: .values),
-           let decodedExtraData: [String: SerializableData] = try JSONSerialization.jsonObject(with: data) as? [String: Data] {
-            self.values = decodedExtraData
-        } else {
-            self.values = [:]
-        }
+        
+        let rawValues = try container.decode(Data.self, forKey: .values)
+        self.values = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawValues) as? [String: Data?] ?? [:]
     }
     
     
