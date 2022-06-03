@@ -23,6 +23,10 @@ public class AsyncTransport: Transport {
     /// GCD queue for operations.
     public var queue: DispatchQueue?
     
+    /// Perform flush if necessary when a new record event is set.
+    /// By default is set to `false`.
+    public var flushOnRecord = false
+    
     /// Data formatters.
     public let formatters: [EventFormatter]
     
@@ -99,9 +103,19 @@ public class AsyncTransport: Transport {
     public func record(event: Event) -> Bool {
         queue!.async { [weak self] in
             guard let self = self else { return }
-        
-            let message = self.formatters.format(event: event)
-            _ = try? self.store(event: event, withMessage: message, retryAttempt: 0)
+            
+            do {
+                let message = self.formatters.format(event: event)
+                _ = try self.store(event: event, withMessage: message, retryAttempt: 0)
+                
+                if self.flushOnRecord,
+                   let countStoredItems = try? self.db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
+                   countStoredItems > self.bufferSize {
+                    self.flush()
+                }
+            } catch {
+                self.delegate?.asyncTransport(self, errorOccurred: error)
+            }
         }
         
         return true
@@ -111,6 +125,19 @@ public class AsyncTransport: Transport {
     public func flush() {
         queue!.async {
             self.flushCache()
+        }
+    }
+    
+    /// Count the number of buffered events pending for sent.
+    ///
+    /// - Returns: Int
+    public func countBufferedEvents() throws -> Int {
+        queue!.sync {
+            do {
+                return try db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0
+            } catch {
+                return 0
+            }
         }
     }
     
@@ -186,7 +213,7 @@ public class AsyncTransport: Transport {
     private func flushCache() -> Int {
         do {
             // Cleanup cache if needed.
-            try vacuumCache()
+            _ = try vacuumCache()
             let chunk = try fetchNextPayloadsChunk()
             
             guard chunk.isEmpty == false else {
@@ -234,38 +261,46 @@ public class AsyncTransport: Transport {
     }
     
     /// Remove payloads to respect the `bufferSize` if needed.
-    private func vacuumCache() throws {
-        let itemsCount = try Int(db.select(SQL: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0)
+    private func vacuumCache() throws -> Int {
+        let itemsCount = try Int(db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0)
         guard itemsCount > bufferSize else {
-            return // below the maximum size
+            return itemsCount // below the maximum size
         }
         
         let limit = (itemsCount - bufferSize)
         try db.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
         
         if let delegate = delegate {
-            let countRemoved = try? db.select(SQL: "SELECT changes()").integer(column: 0)
+            let countRemoved = try? db.select(sql: "SELECT changes()").int64(column: 0)
             delegate.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
         }
+        
+        return limit
     }
     
     /// Fetch the next chunk of payloads to send to the external service.
     ///
     /// - Returns: `[CachedPayload]`
     private func fetchNextPayloadsChunk() throws -> [Chunk] {
-        let result = try db.select(SQL: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(blockSize);")
+        let result = try db.select(sql: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(blockSize);")
         
         var rowIds = [String]()
         let payloads: [Chunk] = result.iterateRows { _, stmt in
-            if let result = fromBufferDatabase(stmt) {
-                rowIds.append(String(result.rowId))
-                return (result.event, result.message, result.attempt)
+            do {
+                if let result = try fromBufferDatabase(stmt) {
+                    rowIds.append(String(result.rowId))
+                    return (result.event, result.message, result.attempt)
+                } else {
+                    return nil
+                }
+            } catch {
+                delegate?.asyncTransport(self, errorOccurred: error)
+                return nil
             }
-            return nil
         }
         
         // Remove from buffer.
-        try db.update(sql: "DELETE FROM log WHERE rowId IN (\(rowIds.joined(separator: ",")))")
+        try db.update(sql: "DELETE FROM buffer WHERE rowId IN (\(rowIds.joined(separator: ",")))")
         return payloads
     }
     
@@ -273,16 +308,17 @@ public class AsyncTransport: Transport {
     ///
     /// - Parameter stmt: statement of query from select.
     /// - Returns: (rowId, event, message, attempt)
-    private func fromBufferDatabase(_ stmt: SQLiteDb.Statement) -> (rowId: Int64, event: Event, message: SerializableData?,  attempt: Int)? {
+    private func fromBufferDatabase(_ stmt: SQLiteDb.Statement) throws
+        -> (rowId: Int64, event: Event, message: SerializableData?,  attempt: Int)? {
         guard let rowId = stmt.int64(column: 0),
               let eventData = stmt.data(column: 2),
               let message = stmt.data(column: 3),
-              let attempt = stmt.integer(column: 4),
-              let event = try? JSONDecoder().decode(Event.self, from: eventData)
+              let attempt = stmt.integer(column: 4)
         else {
             return nil
         }
 
+        let event = try JSONDecoder().decode(Event.self, from: eventData)
         return (rowId, event, message, attempt)
     }
     
@@ -351,6 +387,6 @@ public protocol AsyncTransportDelegate: AnyObject {
     /// - Parameters:
     ///   - transport: transport.
     ///   - discardedEventsFromBuffer: number of events discarded from the oldest.
-    func asyncTransport(_ transport: AsyncTransport, discardedEventsFromBuffer: Int)
+    func asyncTransport(_ transport: AsyncTransport, discardedEventsFromBuffer: Int64)
 
 }

@@ -208,13 +208,30 @@ public class SQLiteDb {
     ///   - SQL: sql query.
     ///   - values: binded values
     /// - Returns: Statement
-    public func select(SQL: String, bindTo values: [Any?]? = nil) throws -> Statement {
-        let statement = try prepare(sql: SQL)
+    public func select(sql: String, bindTo values: [Any?]? = nil) throws -> Statement {
+        let statement = try prepare(sql: sql)
         if let values = values {
             try statement.bind(values)
         }
         try statement.step()
         return statement
+    }
+    
+    /// Execute a select query statement.
+    ///
+    /// - Parameters:
+    ///   - SQL: SQL string.
+    ///   - values: values to bind.
+    /// - Throws: throw an exception if something fails executing query.
+    /// - Returns: Statement.
+    public func select<T>(SQL: String, bindTo values: [Any?]? = nil,
+                       _ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) throws -> [T] {
+        let statement = try prepare(sql: SQL)
+        if let values = values {
+            try statement.bind(values)
+        }
+        try statement.step()
+        return statement.iterateRows(handler)
     }
     
     // MARK: - Private Functions
@@ -283,7 +300,7 @@ public class SQLiteDb {
     }
     
     /// Close a database connection.
-    public func close(){
+    public func close() {
         guard handle != nil else {
             return
         }

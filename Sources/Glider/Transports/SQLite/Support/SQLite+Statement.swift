@@ -586,15 +586,15 @@ extension SQLiteDb {
                 SQLiteDb.logger?.info?.write(sql)
             }
             
-            let rc = sqlite3_step(stmt)
-            switch rc {
+            lastResult = sqlite3_step(stmt)
+            switch lastResult {
             case SQLITE_ROW:
                 return true
             case SQLITE_DONE:
                 return false
             default:
-                assert(rc != SQLITE_OK,"Invalid return code")
-                try check(rc)
+                assert(lastResult != SQLITE_OK,"Invalid return code")
+                try check(lastResult)
             }
             fatalError("Should never get here")
         }
