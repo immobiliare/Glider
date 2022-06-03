@@ -30,12 +30,12 @@ extension UIImage: SerializableObject {
     }
     
     public func serializeMetadata() -> Metadata? {
-        [
+        return Metadata([
             "class": String(describing: type(of: self)),
             "origin_scale": "\(scale)",
             "origin_width": "\(size.width)",
             "origin_height": "\(size.height)"
-        ]
+        ])
     }
     
 }

@@ -14,7 +14,7 @@ import Foundation
 
 // MARK: - Scope
 
-public struct Scope {
+public struct Scope: Codable {
     
     // MARK: - Public Properties
 
@@ -52,7 +52,7 @@ public struct Scope {
     public private(set) var fileLine: Int?
     
     /// Calling thread id.
-    public let threadID = ProcessIdentification.shared.threadID
+    public private(set) var threadID: UInt64
     
     // MARK: - Contexts
     
@@ -78,6 +78,19 @@ public struct Scope {
         self.function = fName
         self.filePath = fPath
         self.fileLine = fLine
+        self.threadID = ProcessIdentification.shared.threadID
+    }
+    
+    // MARK: - Initialiation
+    
+    public init() {
+        self.threadID = ProcessIdentification.shared.threadID
+    }
+    
+    // MARK: - Codable
+    
+    enum CodingKeys: String, CodingKey {
+        case user, tags, extra, fingerprint, function, filePath, fileLine, threadID, context
     }
     
 }

@@ -26,9 +26,7 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
         exp = expectation(description: "sqlite")
         
         let dbURL = URL.temporaryFileName(fileName: "log", fileExtension: "sqlite", removeIfExists: true)
-        
-        print(dbURL.path)
-        
+                
         bufferSize = 100
         countWrittenPayloads = 0
         payloadsToWrite = 110
@@ -56,13 +54,13 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
         
         wait(for: [exp!], timeout: 10)
         
+        // 10 remaining payloads pending in buffer
         let pendingPayloads = sqliteTransport.pendingPayloads
         
         XCTAssertEqual(countWrittenPayloads, bufferSize)
         XCTAssertEqual(pendingPayloads.count, (payloadsToWrite - bufferSize))
         
         sqliteTransport.flush()
-
     }
     
     // MARK: - SQLiteTransportDelegate
@@ -78,8 +76,10 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     func sqliteTransport(_ transport: SQLiteTransport, writtenPayloads: [ThrottledTransport.Payload]) {
         countWrittenPayloads += writtenPayloads.count
         if countWrittenPayloads == bufferSize {
+            // initial set
             exp?.fulfill()
         } else {
+            // flushing buffer
             let remaining = (payloadsToWrite - bufferSize)
             if remaining != writtenPayloads.count {
                 XCTFail()

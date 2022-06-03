@@ -83,10 +83,10 @@ public class JSONFormatter: FieldsFormatter {
         var dictionary = [String: Any?]()
         
         for field in fields {
-            if case .object = field.field, let data = event.serializedObject?.data {
+            if case .object = field.field, let data = event.serializedObjectData {
                 // Only objects encoded as JSON data (basically any Codable) can be
                 // expressed inside a JSON node. Raw
-                if let isCodable = event.serializedObject?.metadata?["codable"] as? Bool, isCodable == true,
+                if let isCodable = event.serializedObjectMetadata?["codable"] as? Bool, isCodable == true,
                    let encodedObject = String(data: data, encoding: .utf8) {
                     dictionary["object"] = encodedObject
                 } else if encodeDataAsBase64 {

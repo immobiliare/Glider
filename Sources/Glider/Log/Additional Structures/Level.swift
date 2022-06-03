@@ -33,7 +33,7 @@ import os.log
 /// - `debug`:      Messages meant to be useful only during development.
 ///                 This is meant to be disabled in shipping code.
 public enum Level: Int, Comparable, CaseIterable,
-                   CustomStringConvertible {
+                   CustomStringConvertible, Codable {
     case emergency = 0
     case alert
     case critical

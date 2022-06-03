@@ -12,7 +12,7 @@
 
 import Foundation
 
-public struct Event {
+public struct Event: Codable {
 
     // MARK: - Public Properties
     
@@ -51,7 +51,7 @@ public struct Event {
     /// Return cumulative list of all metadata where the base is scope's metadata
     /// merged with event's specific metadata.
     public var allExtra: Metadata? {
-        Dictionary.merge(baseDictionary: scope.extra, additionalData: extra)
+        scope.extra.merge(with: extra)
     }
     
     /// You can override global SDK serialization strategies here.
@@ -62,10 +62,10 @@ public struct Event {
     public let timestamp = Date()
     
     /// Associated subsystem.
-    public internal(set) var subsystem: LogUUID? = nil
+    public internal(set) var subsystem: String? = nil
     
     /// Associated category.
-    public internal(set) var category: LogUUID? = nil
+    public internal(set) var category: String? = nil
     
     /// scope assigned to the event.
     public internal(set) var scope: Scope
@@ -76,7 +76,9 @@ public struct Event {
     // MARK: - Internal Properties
     
     /// Hold the serialized data of the object's associated.
-    internal private(set) var serializedObject: (metadata: Metadata?, data: Data)?
+    internal private(set) var serializedObjectData: Data?
+    internal private(set) var serializedObjectMetadata: Metadata?
+    internal private(set) var isSerialized = false
     
     // MARK: - Initialization
     
@@ -114,7 +116,7 @@ public struct Event {
     ///
     /// - Parameter manager: manager.
     internal mutating func serializeObjectIfNeeded(withTransportManager manager: TransportManager) {
-        guard serializedObject == nil else {
+        guard isSerialized == false else {
             return // value is cached
         }
 
@@ -125,12 +127,22 @@ public struct Event {
             return // object is not set
         }
 
-        self.serializedObject = (object.serializeMetadata(), data)
+        self.serializedObjectMetadata = object.serializeMetadata()
+        self.serializedObjectData = data
+        isSerialized = true
     }
     
-}
+    // MARK: - Codable
+    
+    enum CodingKeys: String, CodingKey {
+        case id, message, timestamp, fingerprint, level,
+             tags, extra, subsystem, category,
+             scope,
+             serializationStrategies,
+             serializedObjectData, serializedObjectMetadata, isSerialized
+    }
 
-// MARK: - Dictionary Extensions
+}
 
 extension Dictionary {
     

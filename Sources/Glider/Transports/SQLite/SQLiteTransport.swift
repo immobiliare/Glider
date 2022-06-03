@@ -193,14 +193,14 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         try payloadStmt?.bind(param: 7, event.scope.function)
         try payloadStmt?.bind(param: 8, event.scope.fileName)
         try payloadStmt?.bind(param: 9, event.scope.fileLine)
-        if let isCodable = event.serializedObject?.metadata?["codable"] as? Bool, isCodable == true {
-            try payloadStmt?.bind(param: 10, event.serializedObject?.data.asString())
+        if let isCodable = event.serializedObjectMetadata?["codable"] as? Bool, isCodable == true {
+            try payloadStmt?.bind(param: 10, event.serializedObjectData?.asString())
             try payloadStmt?.bindNull(param: 11)
         } else {
             try payloadStmt?.bindNull(param: 10)
-            try payloadStmt?.bind(param: 11, event.serializedObject?.data)
+            try payloadStmt?.bind(param: 11, event.serializedObjectData)
         }
-        try payloadStmt?.bind(param: 11, event.serializedObject?.metadata?.asString())
+        try payloadStmt?.bind(param: 11, event.serializedObjectMetadata?.asString())
         
         try payloadStmt?.step()
         
@@ -213,7 +213,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         try tagStmt?.step()
         
         // Add extra
-        try event.allExtra?.forEach({ key, value in
+        try event.allExtra?.values.forEach({ key, value in
             try extraStmt?.bind(param: 1, event.id)
             try extraStmt?.bind(param: 2, key)
             try extraStmt?.bind(param: 3, value?.asData())

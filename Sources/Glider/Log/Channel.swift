@@ -78,8 +78,8 @@ public class Channel {
         
         // Generate the event and decorate it with the current scope and runtime attributes
         event.level = self.level
-        event.subsystem = log.subsystem
-        event.category = log.category
+        event.subsystem = log.subsystem.description
+        event.category = log.category.description
         event.scope.attach(function: function, filePath: filePath, fileLine: fileLine)
         
         log.transporter.write(&event)

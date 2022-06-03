@@ -24,8 +24,15 @@ public class ConsoleTransport: Transport {
     
     // MARK: - Initialization
     
-    public init(formatters: [EventFormatter] = [FieldsFormatter.default()]) {
+    /// Initialize new console transport.
+    ///
+    /// - Parameters:
+    ///   - formatters: formatters to use.
+    ///   - queue: queue to use, `nil` create a new queue by default.
+    public init(formatters: [EventFormatter] = [FieldsFormatter.default()],
+                queue: DispatchQueue? = nil) {
         self.formatters = formatters
+        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
     }
     
     // MARK: - Public Functions

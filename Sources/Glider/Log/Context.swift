@@ -22,7 +22,7 @@ import AppKit
 
 // MARK: - Context
 
-public struct Context {
+public struct Context: Codable {
     public typealias OSAttributes = [OSKeys: String]
     public typealias DeviceAttributes = [DeviceKeys: String]
 
@@ -52,11 +52,11 @@ public struct Context {
 
 extension Context {
     
-    public enum OSKeys: String {
+    public enum OSKeys: String, Codable {
         case name, version, theme
     }
     
-    public enum DeviceKeys: String {
+    public enum DeviceKeys: String, Codable {
         case hostname, family, model
         case screen_resolution, screen_density
         case build_type, simulator

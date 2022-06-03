@@ -15,7 +15,7 @@ import Foundation
 // MARK: - SerializationStrategies
 
 /// Defines the strategies used to serialize data based upon their type.
-public struct SerializationStrategies {
+public struct SerializationStrategies: Codable {
     
     /// Serialization strategy for images.
     public var images: Image = Image()
@@ -27,12 +27,12 @@ public struct SerializationStrategies {
 extension SerializationStrategies {
     
     /// The encoding strategy for images.
-    public struct Image {
+    public struct Image: Codable {
         
         /// Format of the image.
         /// - `png`: png format.
         /// - `jpg`: jpg format.
-        public enum Format {
+        public enum Format: Codable {
             case png
             case jpg(quality: Float)
         }

@@ -126,10 +126,10 @@ internal extension Event {
             return message
             
         case .object:
-            return serializedObject?.data
+            return serializedObjectData
             
         case .objectMetadata(let keys):
-            return serializedObject?.metadata?.filteredByKeys(keys)
+            return serializedObjectMetadata?.filteredByKeys(keys)
 
         case .delimiter(let style):
             return style.delimiter

@@ -304,12 +304,12 @@ final class GliderTests: XCTestCase {
         let image = UIImage(data: imageData)
         
         let transport = TestTransport {
-            guard let _ = UIImage(data: $0.serializedObject!.data) else {
+            guard let _ = UIImage(data: $0.serializedObjectData!) else {
                 XCTFail("Failed to decoded the image")
                 return
             }
             
-            XCTAssertNotNil($0.serializedObject?.metadata)
+            XCTAssertNotNil($0.serializedObjectMetadata)
         }
         
         let log = Log {
@@ -347,13 +347,13 @@ final class GliderTests: XCTestCase {
         let company = Company(name: "ExSpace", foundedDate: Date(), homepage: URL(string: "http://www.exspace.com")!, founders: ["Mark","Jane"])
 
         let transport = TestTransport {
-            XCTAssertNotNil($0.serializedObject, "Failed to transport serialized data")
+            XCTAssertNotNil($0.serializedObjectData, "Failed to transport serialized data")
             
             // Validate metadata
-            XCTAssertEqual($0.serializedObject?.metadata?["class"] as? String, "company_class")
+            XCTAssertEqual($0.serializedObjectMetadata?["class"] as? String, "company_class")
          
             // Validate data
-            guard let rawData = $0.serializedObject?.data else {
+            guard let rawData = $0.serializedObjectData else {
                 XCTFail("Failed to read the serialized object data")
                 return
             }
@@ -391,15 +391,15 @@ final class GliderTests: XCTestCase {
         }
         
         let transport = TestTransport {
-            XCTAssertNotNil($0.serializedObject, "Failed to transport serialized data")
+            XCTAssertNotNil($0.serializedObjectData, "Failed to transport serialized data")
             
             // Validate metadata
-            XCTAssertEqual($0.serializedObject?.metadata?["class"] as? String, "People")
-            XCTAssertEqual($0.serializedObject?.metadata?["interesting_key"] as? String, "any_value")
+            XCTAssertEqual($0.serializedObjectMetadata?["class"] as? String, "People")
+            XCTAssertEqual($0.serializedObjectMetadata?["interesting_key"] as? String, "any_value")
             
             // Validate serialized data
             do {
-                guard let data = $0.serializedObject?.data else {
+                guard let data = $0.serializedObjectData else {
                     XCTFail("Failed to transport serialized data of the object")
                     return
                 }
