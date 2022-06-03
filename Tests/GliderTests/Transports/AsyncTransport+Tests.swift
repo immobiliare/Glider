@@ -50,9 +50,6 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
     private func prepareAsyncTransport(id: String) async throws {
         exp = expectation(description: "test_\(id)")
         
-        let dbURL = URL.temporaryFileName(fileName: "buffer", fileExtension: "sqlite", removeIfExists: true)
-        print(dbURL)
-        
         let format = FieldsFormatter(fields: [
             .level(style: .numeric),
             .delimiter(style: .tab),
@@ -65,7 +62,7 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
                                                         blockSize: blockSize,
                                                         flushInterval: flushInterval,
                                                         formatters: [format],
-                                                        location: .fileURL(dbURL),
+                                                        location: .inMemory,
                                                         delegate: self)
         asyncTransport.maxRetries = maxRetries
         asyncTransport.id = id
@@ -166,7 +163,6 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         if t.id != failureID {
             XCTFail("Not expecting failure")
         }
-        
         
     }
     

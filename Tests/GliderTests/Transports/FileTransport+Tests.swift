@@ -19,7 +19,7 @@ final class FileTransportTests: XCTestCase {
     
     /// The following test check if `FileLogTransport` transport layer.
     func test_fileLogTransport() {
-        let fileURL = URL.newLogFileURL(removeContents: true)
+        let fileURL = URL.temporaryFileURL(fileName: nil, fileExtension: "log", removeIfExists: true)
         
         let format = FieldsFormatter(fields: [
             .message({
@@ -60,24 +60,15 @@ final class FileTransportTests: XCTestCase {
 
 extension URL {
     
-    static func temporaryFileName(fileName: String? = nil, fileExtension: String, removeIfExists: Bool = true) -> URL {
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+    static func temporaryFileURL(fileName: String? = nil, fileExtension: String? = nil, removeIfExists: Bool = true) -> URL {
+        var fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent(fileName ?? UUID().uuidString)
-            .appendingPathExtension(fileExtension)
         
-        if removeIfExists {
-            try? FileManager.default.removeItem(at: fileURL)
+        if let fileExtension = fileExtension {
+            fileURL = fileURL.appendingPathExtension(fileExtension)
         }
         
-        return fileURL
-    }
-    
-    static func newLogFileURL(removeContents: Bool = true) -> URL {
-        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent("test")
-            .appendingPathExtension("log")
-        
-        if removeContents {
+        if removeIfExists {
             try? FileManager.default.removeItem(at: fileURL)
         }
         

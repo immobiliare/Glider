@@ -13,7 +13,7 @@
 import XCTest
 @testable import Glider
 
-final class GliderTests: XCTestCase {
+final class CoreTests: XCTestCase {
     
     /// Test the log levels hierarchy of severities.
     func test_logLevels() throws {

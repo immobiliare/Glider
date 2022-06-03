@@ -18,13 +18,24 @@ import SQLite3
 extension SQLiteDb {
     
     /// Database error
-    public struct DatabaseError : Error, CustomStringConvertible {
+    public struct DatabaseError : Error, CustomStringConvertible, LocalizedError {
+        
+        // MARK: - Public Properties
+        
+        /// Human readable reason of the error.
         public let reason : String
+        
+        /// Code of the error.
         public let code : Int32
         
         public var description: String {
             "'\(reason)' (code=\(code))"
         }
+        
+        public var errorDescription: String? {
+            description
+        }
+        
     }
     
 }

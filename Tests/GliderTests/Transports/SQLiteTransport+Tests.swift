@@ -20,18 +20,18 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     var countWrittenPayloads: Int = 0
     var payloadsToWrite: Int = 0
     var bufferSize: Int = 0
-    var exp: XCTestExpectation? = nil
+    var exp: XCTestExpectation!
 
     func test_sqliteTransport() async throws {
-        exp = expectation(description: "sqlite")
+        exp = expectation(description: "SQLiteTransportTests")
         
-        let dbURL = URL.temporaryFileName(fileName: "log", fileExtension: "sqlite", removeIfExists: true)
+        let dbURL = URL.temporaryFileURL()
                 
         bufferSize = 100
         countWrittenPayloads = 0
         payloadsToWrite = 110
 
-        let sqliteTransport = try  SQLiteTransport(location: .fileURL(dbURL),
+        let sqliteTransport = try  SQLiteTransport(location: .inMemory,
                                                    bufferSize: bufferSize,
                                                    flushInterval: nil,
                                                    delegate: self)
@@ -52,7 +52,7 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
             })
         }
         
-        wait(for: [exp!], timeout: 10)
+        wait(for: [exp], timeout: 60)
         
         // 10 remaining payloads pending in buffer
         let pendingPayloads = sqliteTransport.pendingPayloads

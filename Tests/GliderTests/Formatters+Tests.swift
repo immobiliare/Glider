@@ -34,7 +34,7 @@ final class FormattersTest: XCTestCase {
     }
     
     func test_sysLogFormatter() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
+        let fileURL = URL.temporaryFileURL()
 
         let sysLog = SysLogFormatter(hostname: "myhost", extraFields: [.callingThread(style: .integer), .eventUUID()])
         let fileTransport = FileTransport(fileURL: fileURL, formatters: [sysLog])!
@@ -49,8 +49,8 @@ final class FormattersTest: XCTestCase {
     
     /// Test the MsgPack formatter.
     func test_msgPackFormatter() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
-        
+        let fileURL = URL.temporaryFileURL()
+
         let msgPack = MsgPackFormatter.default()
         let fileTransport = FileTransport(fileURL: fileURL, formatters: [msgPack])!
 
@@ -95,7 +95,7 @@ final class FormattersTest: XCTestCase {
     
     /// This tests check the `JSONFormatter`.
     func test_jsonFormatter() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
+        let fileURL = URL.temporaryFileURL()
 
         let jsonFormatter = JSONFormatter.default()
         let fileTransport = FileTransport(fileURL: fileURL, formatters: [jsonFormatter])!
@@ -144,7 +144,7 @@ final class FormattersTest: XCTestCase {
     
     /// This test the `JSONFormatter` encoding an `UIImage` and checking the result along with the metadata associated.
     func test_jsonFormatterWithBase64ImageEncoded() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
+        let fileURL = URL.temporaryFileURL()
 
         let jsonFormatter = JSONFormatter.default()
         jsonFormatter.fields.append(.extra(keys: nil))
@@ -177,7 +177,10 @@ final class FormattersTest: XCTestCase {
     }
 
     func test_defaultFieldsBasedFormatterWithCustomFields() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
+        let fileURL = URL.temporaryFileURL()
+
+        GliderSDK.shared.scope.extra = [:]
+        GliderSDK.shared.scope.tags = [:]
 
         let formatter = FieldsFormatter(fields: [
             .message(),
@@ -213,8 +216,8 @@ final class FormattersTest: XCTestCase {
     
     /// Test the default human readable format using `FileTransport` transport layer.
     func test_defaultFieldsBasedFormatter() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
-        
+        let fileURL = URL.temporaryFileURL()
+
         let fileTransport = FileTransport(fileURL: fileURL, formatters: [FieldsFormatter.default()])!
         let log = Log {
             $0.level = .debug
@@ -237,7 +240,7 @@ final class FormattersTest: XCTestCase {
     /// The following test check if structures like extra, tags and userData are correctly encoded
     /// using `queryString` option.
     func test_fieldBasedFormatterWithQueryStringEncodedStructures() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
+        let fileURL = URL.temporaryFileURL()
 
         let fieldFormatter = FieldsFormatter(fields: [
             .message(),
@@ -271,8 +274,8 @@ final class FormattersTest: XCTestCase {
     
     /// The following test validate how the `FieldsFormatter` works.
     func test_fieldsBasedFormatter() async throws {
-        let fileURL = URL.newLogFileURL(removeContents: true)
-        
+        let fileURL = URL.temporaryFileURL()
+
         GliderSDK.shared.scope.tags = ["tag0": "valtag0"]
         GliderSDK.shared.scope.user = User(userId: "1234bqbdki9344kd", email: "user@user.com", username: "username", ipAddress: "192.168.0.1", data: ["ukey": "val"])
         

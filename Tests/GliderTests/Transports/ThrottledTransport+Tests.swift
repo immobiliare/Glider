@@ -16,7 +16,7 @@ import XCTest
 @testable import Glider
 import CloudKit
 
-final class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
+class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
     
     var numberOfEvents = 100
     var bufferSize = 10
@@ -25,14 +25,29 @@ final class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
     
     var emitTimer: Timer?
     
+    func record(_ transport: ThrottledTransport, events: [ThrottledTransport.Payload],
+                reason: ThrottledTransport.FlushReason, _ completion: ThrottledTransport.Completion?) {
+        captureDelegateBlock?(events, reason)
+    }
+    
     /// The following test check if the buffer size flush is respected.
     func tests_throttledTransportBufferFlush() async throws {
+        let exp = expectation(description: "tests_throttledTransportBufferFlush")
         let format = FieldsFormatter(fields: [
             .message({
                 $0.truncate = .head(length: 10)
             }),
         ])
         format.structureFormatStyle = .object
+        
+        var countBlocks = 0
+        captureDelegateBlock = { events, reason in
+            countBlocks += 1
+            
+            if countBlocks == 10 {
+                exp.fulfill()
+            }
+        }
         
         let transport = ThrottledTransport(bufferSize: bufferSize, flushInterval: 5, formatters: [format], delegate: self)
         
@@ -47,14 +62,9 @@ final class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
             })
         }
         
-        var countBlocks = 0
-        captureDelegateBlock = { events, reason in
-            countBlocks += 1
-        }
-        
-        XCTAssertTrue(countBlocks == 10)
+        wait(for: [exp], timeout: 80)
     }
-    
+
     /// Tests if transport flush interval set is respected.
     func tests_throttledTransportBufferTimeInterval() async throws {
         let exp = expectation(description: "end of sent")
@@ -111,8 +121,8 @@ final class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
             XCTAssertTrue(allMessages[i].message == "test message \(i)!")
         }
     }
-    
-    func test_throttledManualFlus() async throws {
+
+    func test_throttledManualFlusj() async throws {
         let exp = expectation(description: "end of sent")
         
         let format = FieldsFormatter(fields: [
@@ -169,10 +179,4 @@ final class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         XCTAssertTrue(totalEvents.first?.message == "test message 0!")
     }
 
-    
-    func record(_ transport: ThrottledTransport, events: [ThrottledTransport.Payload],
-                reason: ThrottledTransport.FlushReason, _ completion: ThrottledTransport.Completion?) {
-        captureDelegateBlock?(events, reason)
-    }
-    
 }
