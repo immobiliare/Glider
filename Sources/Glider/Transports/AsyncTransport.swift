@@ -232,30 +232,35 @@ public class AsyncTransport: Transport {
                 }
                 
                 // increment attempt, re-insert data into database
-                var retryIDs = Set<String>()
+                var retryIDs = [(String, Int)]()
                 var discardedIDs = Set<String>()
                 for payload in chunk {
-                    if (payload.countAttempts + 1) < maxRetries {
-                        if let id = try? self.store(event: payload.event, withMessage: payload.message, retryAttempt: payload.countAttempts + 1) {
-                            retryIDs.insert(id)
+                    if (payload.countAttempts + 1) <= maxRetries {
+                        if let id = try? self.store(event: payload.event, withMessage: payload.message,
+                                                    retryAttempt: payload.countAttempts + 1) {
+                            retryIDs.append( (id, payload.countAttempts + 1) )
                         }
                     } else {
                         discardedIDs.insert(payload.event.id)
                     }
                 }
                 
-                if retryIDs.isEmpty == false {
-                    self.delegate?.asyncTransport(self,
-                                                  willPerformRetriesOnEventIDs: retryIDs,
-                                                  discardedEvents: discardedIDs,
-                                                  error: error)
+                if retryIDs.isEmpty == false || discardedIDs.isEmpty == false  {
+                    DispatchQueue.main.async {
+                        self.delegate?.asyncTransport(self,
+                                                      willPerformRetriesOnEventIDs: retryIDs,
+                                                      discardedEvents: discardedIDs,
+                                                      error: error)
+                    }
                 }
             }
             
             return chunk.count
         
         } catch {
-            delegate?.asyncTransport(self, errorOccurred: error)
+            DispatchQueue.main.async {
+                self.delegate?.asyncTransport(self, errorOccurred: error)
+            }
             return 0
         }
     }
@@ -272,7 +277,9 @@ public class AsyncTransport: Transport {
         
         if let delegate = delegate {
             let countRemoved = try? db.select(sql: "SELECT changes()").int64(column: 0)
-            delegate.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
+            DispatchQueue.main.async {
+                delegate.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
+            }
         }
         
         return limit
@@ -294,7 +301,9 @@ public class AsyncTransport: Transport {
                     return nil
                 }
             } catch {
-                delegate?.asyncTransport(self, errorOccurred: error)
+                DispatchQueue.main.async {
+                    self.delegate?.asyncTransport(self, errorOccurred: error)
+                }
                 return nil
             }
         }
@@ -367,11 +376,11 @@ public protocol AsyncTransportDelegate: AnyObject {
     ///
     /// - Parameters:
     ///   - transport: transport.
-    ///   - willPerformRetriesOnEventIDs: events marked for retry attempt.
+    ///   - retryIDs: events marked for retry attempt (tuple with id of the event, attempt)
     ///   - discardedEvents: discarded events, will be removed from cache and never sent.
     ///   - error: error occurred, typically a network related one.
     func asyncTransport(_ transport: AsyncTransport,
-                        willPerformRetriesOnEventIDs: Set<String>,
+                        willPerformRetriesOnEventIDs retryIDs: [(String, Int)],
                         discardedEvents: Set<String>,
                         error: Error)
     

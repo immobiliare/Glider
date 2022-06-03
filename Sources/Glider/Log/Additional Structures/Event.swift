@@ -18,7 +18,7 @@ public struct Event: Codable {
     
     /// Identifier of the event.
     /// It will be set automatically on init.
-    public let id: String = UUID().uuidString
+    public private(set) var id: String
     
     /// Message to record.
     public var message: String
@@ -95,6 +95,7 @@ public struct Event: Codable {
                 tags: Tags? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
                 
+        self.id = UUID().uuidString
         self.message = message
         self.object = object
         self.scope = scope
