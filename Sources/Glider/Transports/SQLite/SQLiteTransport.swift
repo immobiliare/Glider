@@ -56,11 +56,6 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     }
     
     // MARK: - Private Properties
-        
-    /// Precompiled statements for insertions.
-    private var payloadStmt: SQLiteDb.Statement?
-    private var tagStmt: SQLiteDb.Statement?
-    private var extraStmt: SQLiteDb.Statement?
 
     /// Throttled transport.
     private var throttledTransport: ThrottledTransport?
@@ -96,7 +91,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         
         if !fileExists {
             try prepareDatabaseStructure()
-            delegate?.sqliteTransport(self, openedDatabaseAtURL: location, isFileExist: fileExists)
+            DispatchQueue.main.async {
+                delegate?.sqliteTransport(self, openedDatabaseAtURL: location, isFileExist: fileExists)
+            }
         }
         
         self.throttledTransport = ThrottledTransport(bufferSize: bufferSize,
@@ -127,25 +124,24 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// You can override this method to perform your own store.
     ///
     /// - Parameter payloads: payloads.
-    open func storeEventsPayloads(_ payloads: [ThrottledTransport.Payload]) {
+    open func storeEventsPayloads(_ payloads: [ThrottledTransport.Payload]) throws  {
         // Payloads are recorder by chunks in order to avoid too many writes.
-        do {
-            if payloadStmt == nil { // Prepare and reuse statement
-                payloadStmt = try db.prepare(sql: Queries.recordEvent)
-                tagStmt = try db.prepare(sql: Queries.recordTag)
-                extraStmt = try db.prepare(sql: Queries.recordExtra)
+        let  payloadStmt = try db.prepare(sql: Queries.recordEvent)
+        let  tagStmt = try db.prepare(sql: Queries.recordTag)
+        let  extraStmt = try db.prepare(sql: Queries.recordExtra)
+        
+        // The entire process is inside a transaction.
+        try db.updateWithTransaction {
+            try payloads.forEach({
+                try executeInsertPayloadStmt($0,
+                                             payloadStmt: payloadStmt, tagStmt: tagStmt, extraStmt: extraStmt)
+            })
+        }
+        
+        if let delegate = delegate {
+            DispatchQueue.main.async { [weak self] in
+                delegate.sqliteTransport(self!, writtenPayloads: payloads)
             }
-
-            // The entire process is inside a transaction.
-            try db.updateWithTransaction {
-                try payloads.forEach({
-                    try executeInsertPayloadStmt($0)
-                })
-            }
-            
-            delegate?.sqliteTransport(self, writtenPayloads: payloads)
-        } catch {
-            delegate?.sqliteTransport(self, didFailQueryWithError: error)
         }
     }
     
@@ -165,7 +161,15 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
                        events: [ThrottledTransport.Payload],
                        reason: ThrottledTransport.FlushReason,
                        _ completion: ThrottledTransport.Completion?) {
-        storeEventsPayloads(events)
+        do {
+            try storeEventsPayloads(events)
+        } catch {
+            if let delegate = delegate {
+                DispatchQueue.main.async { [weak self] in
+                    delegate.sqliteTransport(self!, didFailQueryWithError: error)
+                }
+            }
+        }
     }
     
     // MARK: - Conformance
@@ -180,7 +184,10 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     ///
     /// - Parameter payload: payload.
     /// - Returns: Bool
-    private func executeInsertPayloadStmt(_ payload: ThrottledTransport.Payload) throws {
+    private func executeInsertPayloadStmt(_ payload: ThrottledTransport.Payload,
+                                          payloadStmt: SQLiteDb.Statement?,
+                                          tagStmt: SQLiteDb.Statement?,
+                                          extraStmt: SQLiteDb.Statement?) throws {
         let event = payload.0
         
         // Add log
@@ -203,27 +210,29 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         try payloadStmt?.bind(param: 11, event.serializedObjectMetadata?.asString())
         
         try payloadStmt?.step()
-        
+        try payloadStmt?.reset()
+
         // Add tags
-        try event.allTags?.forEach({ key, value in
-            try tagStmt?.bind(param: 1, event.id)
-            try tagStmt?.bind(param: 2, key)
-            try tagStmt?.bind(param: 3, value)
-        })
-        try tagStmt?.step()
+        if (event.allTags?.isEmpty ?? true) == false {
+            try event.allTags?.forEach({ key, value in
+                try tagStmt?.bind(param: 1, event.id)
+                try tagStmt?.bind(param: 2, key)
+                try tagStmt?.bind(param: 3, value)
+            })
+            try tagStmt?.step()
+            try tagStmt?.reset()
+        }
         
         // Add extra
-        try event.allExtra?.values.forEach({ key, value in
-            try extraStmt?.bind(param: 1, event.id)
-            try extraStmt?.bind(param: 2, key)
-            try extraStmt?.bind(param: 3, value?.asData())
-        })
-        try extraStmt?.step()
-        
-        // Reset the state
-        try payloadStmt?.reset()
-        try tagStmt?.reset()
-        try extraStmt?.reset()
+        if (event.allExtra?.values.isEmpty ?? true) == false {
+            try event.allExtra?.values.forEach({ key, value in
+                try extraStmt?.bind(param: 1, event.id)
+                try extraStmt?.bind(param: 2, key)
+                try extraStmt?.bind(param: 3, value?.asData())
+            })
+            try extraStmt?.step()
+            try extraStmt?.reset()
+        }
     }
     
     /// Perform migration if needed.
@@ -237,7 +246,11 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         }
         
         try migrateDatabaseSchema(from: currentVersion, to: databaseVersion)
-        delegate?.sqliteTransport(self, schemaMigratedFromVersion: currentVersion, toVersion: databaseVersion)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.delegate?.sqliteTransport(self, schemaMigratedFromVersion: currentVersion, toVersion: self.databaseVersion)
+        }
         
         try db.setVersion(self.databaseVersion)
         return true
