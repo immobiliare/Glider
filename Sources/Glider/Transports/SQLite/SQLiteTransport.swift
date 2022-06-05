@@ -24,6 +24,16 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         set { throttledTransport?.queue = newValue }
         get { throttledTransport?.queue }
     }
+    
+    /// The maximum age of a log before it it will be removed automatically
+    /// to preserve the space. Set as you needs, by default is 1h.
+    public var logsLifeTimeInterval: TimeInterval?
+    
+    /// Flushing old logs can't happens every time we wrote something
+    /// on db. So this interval is the minimum time interval to pass
+    /// before calling flush another time.
+    /// Typically is set as 3x the `logsLifeTimeInterval`.
+    public var flushMinimumInterval: TimeInterval?
 
     /// Size of the buffer.
     public var bufferSize: Int {
@@ -60,6 +70,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// Throttled transport.
     private var throttledTransport: ThrottledTransport?
     
+    /// The date of the last flush for old logs.
+    private var lastFlushOldLogsDate = Date()
+    
     // MARK: - Initialization
     
     /// Initialize a new SQLite3 local database transport with a db at given URL.
@@ -71,6 +84,8 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     ///   - version: version of the SQLite database. If an existing log dictionary is opened with old version `migrateDatabase()` is called.
     ///   - formatters: formatters used to eventually convert messages.
     ///   - bufferSize: size of the buffer. Messages are collected in groups before being written into db. By default is 50 events.
+    ///   - logsLifeTimeInterval: only timestamp newer than `now - logsLifeTimeInterval` are kept in database, in order to avoid
+    ///                           increase of the database. You should always set a value; by default is set to 3600s (1h).
     ///   - flushInterval: auto flush interval used to write data on db even if not enough events are collected. By default is `15`.
     ///   - queue: queue in which the operations are executed into.
     ///   - delegate: delegate.
@@ -79,6 +94,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
                 version: Int = 0,
                 formatters: [EventFormatter] = [],
                 bufferSize: Int = 50,
+                logsLifeTimeInterval: TimeInterval? = 60, //3_600,
                 flushInterval: TimeInterval? = 15,
                 queue: DispatchQueue? = nil,
                 delegate: SQLiteTransportDelegate? = nil) throws {
@@ -88,6 +104,8 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         self.db = try SQLiteDb(location, options: options)
         self.databaseVersion = version
         self.delegate = delegate
+        self.logsLifeTimeInterval = logsLifeTimeInterval
+        self.flushMinimumInterval = (logsLifeTimeInterval != nil ? logsLifeTimeInterval! * 3.0 : nil)
         
         if !fileExists {
             try prepareDatabaseStructure()
@@ -104,9 +122,36 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     }
     
-    /// Flush remaining pending payloads.
-    public func flush() {
+    /// Flush remaining pendng payloads.
+    public func flushPendingLogs() {
         throttledTransport?.flush()
+    }
+    
+    /// Flush old logs.
+    /// This happens automatically so generally you don't need to call it directly.
+    ///
+    /// - Parameter andVacuum: optionally vacuum the database, by default is set to `true`.
+    /// - Returns: Removed Logs
+    @discardableResult
+    public func flushOldLogs(andVacuum: Bool = true) throws -> Int64 {
+       try queue!.sync {
+            guard let logsLifeTimeInterval = logsLifeTimeInterval,
+                  let flushMinimumInterval = flushMinimumInterval,
+                  Date().timeIntervalSince(lastFlushOldLogsDate) >= flushMinimumInterval else {
+                return 0
+            }
+            
+            let oldestAge = Date(timeInterval: -logsLifeTimeInterval, since: Date())
+            try db.update(sql: "DELETE FROM log WHERE timestamp < \(oldestAge.timeIntervalSince1970)")
+            let countRemoved = try db.select(sql: "SELECT changes()").int64(column: 0) ?? 0
+            
+            if andVacuum {
+                try db.vacuum()
+            }
+
+           lastFlushOldLogsDate = Date()
+            return countRemoved
+        }
     }
     
     /// This method is called when a new database is created.
@@ -126,9 +171,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// - Parameter payloads: payloads.
     open func storeEventsPayloads(_ payloads: [ThrottledTransport.Payload]) throws  {
         // Payloads are recorder by chunks in order to avoid too many writes.
-        let  payloadStmt = try db.prepare(sql: Queries.recordEvent)
-        let  tagStmt = try db.prepare(sql: Queries.recordTag)
-        let  extraStmt = try db.prepare(sql: Queries.recordExtra)
+        let payloadStmt = try db.prepare(sql: Queries.recordEvent)
+        let tagStmt = try db.prepare(sql: Queries.recordTag)
+        let extraStmt = try db.prepare(sql: Queries.recordExtra)
         
         // The entire process is inside a transaction.
         try db.updateWithTransaction {
@@ -143,6 +188,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
                 delegate.sqliteTransport(self!, writtenPayloads: payloads)
             }
         }
+        
+        
+        try flushOldLogs(andVacuum: true)
     }
     
     /// This method is called when the database version should be updated.

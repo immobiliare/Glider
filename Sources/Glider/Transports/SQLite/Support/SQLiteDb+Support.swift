@@ -272,7 +272,7 @@ extension SQLiteDb {
     ///           Note, however, that auto-vacuum only truncates the freelist pages from the file.
     ///           Auto-vacuum does not defragment the database nor repack individual database pages the way that the VACUUM command does.
     ///           In fact, because it moves pages around within the file, auto-vacuum can actually make fragmentation worse.
-    /// - `incrmeental`: When the value of auto-vacuum is 2 or "incremental" then the additional information needed to do auto-vacuuming
+    /// - `incremental`: When the value of auto-vacuum is 2 or "incremental" then the additional information needed to do auto-vacuuming
     ///                  is stored in the database file but auto-vacuuming does not occur automatically at each commit as it does
     ///                  with auto_vacuum=full. In incremental mode, the separate incremental_vacuum pragma must be invoked
     ///                  to cause the auto-vacuum to occur (See `func incrementalVacuum(pages:Int? = nil,schema:String? = nil) throws`)
