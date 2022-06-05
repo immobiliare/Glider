@@ -70,8 +70,8 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// Throttled transport.
     private var throttledTransport: ThrottledTransport?
     
-    /// The date of the last flush for old logs.
-    private var lastFlushOldLogsDate = Date()
+    /// The date of the last purge for old logs.
+    private var lastPurge = Date()
     
     // MARK: - Initialization
     
@@ -129,28 +129,39 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     /// Purge old logs.
     /// This happens automatically so generally you don't need to call it directly.
+    /// If not enough time is elapsed since last purge the operation is skipped automatically with no confirmation.
     ///
-    /// - Parameter andVacuum: optionally vacuum the database, by default is set to `true`.
+    /// - Parameter vacuum: optionally vacuum the database, by default is set to `true`.
     /// - Returns: Removed Logs
     @discardableResult
-    public func purgeLogs(andVacuum: Bool = true) throws -> Int64 {
+    public func purge(vacuum: Bool = true) throws -> Int64 {
        try queue!.sync {
             guard let logsLifeTimeInterval = logsLifeTimeInterval,
                   let flushMinimumInterval = purgeMinInterval,
-                  Date().timeIntervalSince(lastFlushOldLogsDate) >= flushMinimumInterval else {
+                  Date().timeIntervalSince(lastPurge) >= flushMinimumInterval else {
                 return 0
             }
-            
-            let oldestAge = Date(timeInterval: -logsLifeTimeInterval, since: Date())
-            try db.update(sql: "DELETE FROM log WHERE timestamp < \(oldestAge.timeIntervalSince1970)")
-            let countRemoved = try db.select(sql: "SELECT changes()").int64(column: 0) ?? 0
-            
-            if andVacuum {
-                try db.vacuum()
-            }
-
-           lastFlushOldLogsDate = Date()
-            return countRemoved
+           
+           // Purge old logs
+           let oldestAge = Date(timeInterval: -logsLifeTimeInterval, since: Date())
+           try db.update(sql: "DELETE FROM log WHERE timestamp < \(oldestAge.timeIntervalSince1970)")
+           let countRemoved = try db.select(sql: "SELECT changes()").int64(column: 0) ?? 0
+           
+           if vacuum { // vacum database
+               try db.vacuum()
+           }
+           
+           lastPurge = Date()
+           
+           // alert delegate
+           if let delegate = delegate {
+               DispatchQueue.main.async { [weak self] in
+                   guard let self = self else { return }
+                   delegate.sqliteTransport(self, purgedLogs: countRemoved)
+               }
+           }
+           
+           return countRemoved
         }
     }
     
@@ -189,8 +200,8 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
             }
         }
         
-        
-        try purgeLogs(andVacuum: true)
+        // ask for purge old logs if possible
+        try purge(vacuum: true)
     }
     
     /// This method is called when the database version should be updated.
