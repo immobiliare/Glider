@@ -33,7 +33,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// on db. So this interval is the minimum time interval to pass
     /// before calling flush another time.
     /// Typically is set as 3x the `logsLifeTimeInterval`.
-    public var flushMinimumInterval: TimeInterval?
+    public var purgeMinInterval: TimeInterval?
 
     /// Size of the buffer.
     public var bufferSize: Int {
@@ -105,7 +105,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         self.databaseVersion = version
         self.delegate = delegate
         self.logsLifeTimeInterval = logsLifeTimeInterval
-        self.flushMinimumInterval = (logsLifeTimeInterval != nil ? logsLifeTimeInterval! * 3.0 : nil)
+        self.purgeMinInterval = (logsLifeTimeInterval != nil ? logsLifeTimeInterval! * 3.0 : nil)
         
         if !fileExists {
             try prepareDatabaseStructure()
@@ -127,16 +127,16 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         throttledTransport?.flush()
     }
     
-    /// Flush old logs.
+    /// Purge old logs.
     /// This happens automatically so generally you don't need to call it directly.
     ///
     /// - Parameter andVacuum: optionally vacuum the database, by default is set to `true`.
     /// - Returns: Removed Logs
     @discardableResult
-    public func flushOldLogs(andVacuum: Bool = true) throws -> Int64 {
+    public func purgeLogs(andVacuum: Bool = true) throws -> Int64 {
        try queue!.sync {
             guard let logsLifeTimeInterval = logsLifeTimeInterval,
-                  let flushMinimumInterval = flushMinimumInterval,
+                  let flushMinimumInterval = purgeMinInterval,
                   Date().timeIntervalSince(lastFlushOldLogsDate) >= flushMinimumInterval else {
                 return 0
             }
@@ -190,7 +190,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         }
         
         
-        try flushOldLogs(andVacuum: true)
+        try purgeLogs(andVacuum: true)
     }
     
     /// This method is called when the database version should be updated.

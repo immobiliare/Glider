@@ -21,4 +21,7 @@ public protocol SQLiteTransportDelegate: AnyObject {
     /// Called when database schema was updated to a newer version.`
     func sqliteTransport(_ transport: SQLiteTransport, schemaMigratedFromVersion oldVersion: Int, toVersion newVersion: Int)
 
+    /// Called when database is purged by old logs.
+    func sqliteTransport(_ transport: SQLiteTransport, purgedLogs count: Int64)
+
 }
