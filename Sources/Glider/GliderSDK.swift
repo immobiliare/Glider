@@ -41,16 +41,26 @@ public class GliderSDK {
     
 }
 
+// MARK: - Glider Error
+
 public struct GliderError: Error, LocalizedError {
     
-    let message: String
+    // MARK: - Public Properties
     
-    public init(message: String) {
-        self.message = message
-    }
+    /// Message of the error.
+    public let message: String
     
     public var errorDescription: String? {
         message
+    }
+    
+    // MARK: - Initialixation
+    
+    /// Initialize a new error with message.
+    ///
+    /// - Parameter message: message to hold.
+    public init(message: String) {
+        self.message = message
     }
     
 }
