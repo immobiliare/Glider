@@ -12,7 +12,7 @@
 
 import Foundation
 
-open class HTTPTransport: Transport {
+open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Public Properties
     
@@ -45,6 +45,7 @@ open class HTTPTransport: Transport {
     public init(_ builder: ((inout Configuration) -> Void)? = nil) throws {
         self.configuration = try Configuration(builder)
         self.asyncTransport = configuration.asyncTransport
+        self.asyncTransport.delegate = self
         self.delegate = configuration.delegate
                 
         defer {
@@ -58,6 +59,23 @@ open class HTTPTransport: Transport {
         true
     }
     
+    // MARK: - AsyncTransportDelegate
+    
+    public func asyncTransport(_ transport: AsyncTransport, errorOccurred error: Error) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport, willPerformRetriesOnEventIDs retryIDs: [(String, Int)], discardedEvents: Set<String>, error: Error) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport, sentEventIDs: Set<String>) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport, discardedEventsFromBuffer: Int64) {
+        
+    }
     
 }
 
@@ -91,7 +109,7 @@ extension HTTPTransport {
         
         /// Initialize a new default `HTTPTransport` instance.
         public init(_ builder: ((inout Configuration) -> Void)?) throws {
-            self.asyncTransport = try AsyncTransport({ _ in })
+            self.asyncTransport = try AsyncTransport()
             self.session = URLSession(configuration: .default)
             builder?(&self)
         }

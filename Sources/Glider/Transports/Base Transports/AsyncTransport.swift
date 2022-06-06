@@ -54,7 +54,7 @@ public class AsyncTransport: Transport {
     ///   - options: storage options.
     ///   - queue: queue in which the operations are executed into.
     ///   - delegate: delegate for events.
-    public init(_ builder: ((inout Configuration) -> Void)) throws {
+    public init(_ builder: ((inout Configuration) -> Void)? = nil) throws {
         var config = Configuration()
         builder(&config)
         
