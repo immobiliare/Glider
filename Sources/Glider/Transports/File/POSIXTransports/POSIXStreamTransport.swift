@@ -18,23 +18,20 @@ public class POSIXStreamTransport: Transport {
     
     // MARK: - Public Properties
     
+    /// Configuration.
+    public let configuration: Configuration
+    
     /// Dispatch queue.
     public var queue: DispatchQueue?
     
-    /// Formatter used to transform a payload into a string.
-    public var formatters: [EventFormatter]
-    
-    /// POSIX strema used as output.
-    public let stream: UnsafeMutablePointer<FILE>
-    
     // MARK: - Initialization
     
-    public init(stream: UnsafeMutablePointer<FILE> = Darwin.stdout,
-                formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
-                queue: DispatchQueue? = nil) {
-        self.stream = stream
-        self.formatters = formatters
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
+    /// Initialize a new `POSIXStreamTransport` instance.
+    ///
+    /// - Parameter builder: builder configuration settings.
+    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.configuration = Configuration(builder)
+        self.queue = configuration.queue
     }
     
     /// Create a `stdout` transport formatter.
@@ -43,8 +40,12 @@ public class POSIXStreamTransport: Transport {
     ///   - queue: queue to use for dispatch. When not specified a new queue is created.
     /// - Returns: `StdStreamTransport`
     public static func stdOut(formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
-                              queue: DispatchQueue? = nil) -> POSIXStreamTransport {
-        POSIXStreamTransport(stream: stdout, formatters: formatters, queue: queue)
+                              queue: DispatchQueue = DispatchQueue(label: "Glider.\(UUID().uuidString)")) -> POSIXStreamTransport {
+        POSIXStreamTransport {
+            $0.stream = Darwin.stdout
+            $0.queue = queue
+            $0.formatters = formatters
+        }
     }
     
     /// Create a `stderr` transport formatter.
@@ -53,23 +54,60 @@ public class POSIXStreamTransport: Transport {
     ///   - queue: queue to use for dispatch. When not specified a new queue is created.
     /// - Returns: `StdStreamTransport`
     public static func stdErr(formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
-                              queue: DispatchQueue? = nil) -> POSIXStreamTransport {
-        POSIXStreamTransport(stream: stderr, formatters: formatters, queue: queue)
+                              queue: DispatchQueue = DispatchQueue(label: "Glider.\(UUID().uuidString)")) -> POSIXStreamTransport {
+        POSIXStreamTransport {
+            $0.stream = Darwin.stderr
+            $0.queue = queue
+            $0.formatters = formatters
+        }
     }
     
     
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        guard let message = formatters.format(event: event)?.asString(),
+        guard let message = configuration.formatters.format(event: event)?.asString(),
               message.isEmpty == false else {
             return false
         }
         
-        return fputs(message + "\n", stream) != EOF
+        return fputs(message + "\n", configuration.stream) != EOF
     }
     
 }
+
+// MARK: - Configuration
+
+extension POSIXStreamTransport {
+    
+    public struct Configuration {
+        
+        // MARK: - Configuration
+        
+        /// Dispatch queue.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// POSIX stream.
+        public var stream: UnsafeMutablePointer<FILE> = Darwin.stdout
+        
+        /// Formatter used to transform a payload into a string.
+        public var formatters: [EventFormatter] = [
+            FieldsFormatter.defaultStdStreamFormatter()
+        ]
+        
+        // MARK: - Initialization
+        
+        /// Initialize a new `POSIXStreamTransport`.
+        /// - Parameter builder: builder settings.
+        public init(_ builder: ((inout Configuration) -> Void)?) {
+            builder?(&self)
+        }
+        
+    }
+    
+}
+
+// MARK: - FieldsFormatter
 
 extension FieldsFormatter {
     

@@ -19,7 +19,10 @@ final class FormattersTest: XCTestCase {
     
     func test_xcodeLogFormatter() async throws {
         let xcodeFormatter = XCodeLogFormatter()
-        let console = ConsoleTransport(formatters: [xcodeFormatter])
+        
+        let console = ConsoleTransport {
+            $0.formatters = [xcodeFormatter]
+        }
         
         let log = Log {
             $0.level = .debug
@@ -37,8 +40,10 @@ final class FormattersTest: XCTestCase {
         let fileURL = URL.temporaryFileURL()
 
         let sysLog = SysLogFormatter(hostname: "myhost", extraFields: [.callingThread(style: .integer), .eventUUID()])
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [sysLog])!
-
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [sysLog]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -52,8 +57,10 @@ final class FormattersTest: XCTestCase {
         let fileURL = URL.temporaryFileURL()
 
         let msgPack = MsgPackFormatter.default()
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [msgPack])!
-
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [msgPack]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -98,8 +105,10 @@ final class FormattersTest: XCTestCase {
         let fileURL = URL.temporaryFileURL()
 
         let jsonFormatter = JSONFormatter.default()
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [jsonFormatter])!
-
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [jsonFormatter]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -149,8 +158,10 @@ final class FormattersTest: XCTestCase {
         let jsonFormatter = JSONFormatter.default()
         jsonFormatter.fields.append(.extra(keys: nil))
         jsonFormatter.encodeDataAsBase64 = true
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [jsonFormatter])!
-
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [jsonFormatter]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -191,7 +202,10 @@ final class FormattersTest: XCTestCase {
         ])
         formatter.structureFormatStyle = .object
         
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [formatter])!
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [formatter]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -218,7 +232,10 @@ final class FormattersTest: XCTestCase {
     func test_defaultFieldsBasedFormatter() async throws {
         let fileURL = URL.temporaryFileURL()
 
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [FieldsFormatter.default()])!
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [FieldsFormatter.default()]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -253,8 +270,10 @@ final class FormattersTest: XCTestCase {
         ])
         fieldFormatter.structureFormatStyle = .queryString
 
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [fieldFormatter])!
-
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters = [fieldFormatter]
+        })
+        
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -303,7 +322,9 @@ final class FormattersTest: XCTestCase {
         
         fieldFormatter.structureFormatStyle = .object
 
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [fieldFormatter])!
+        let fileTransport = try FileTransport(fileURL: fileURL, {
+            $0.formatters =  [fieldFormatter]
+        })
         
         let log = Log {
             $0.level = .debug

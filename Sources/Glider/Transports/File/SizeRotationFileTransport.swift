@@ -30,18 +30,12 @@ public class SizeRotationFileTransport: Transport {
     /// endpoints.
     public var queue: DispatchQueue?
     
-    /// URL of the directory with files.
-    public var directoryURL: URL
-    
     /// Configuration used.
     public let configuration: Configuration
     
-    /// Formatters used for data.
-    public let formatters: [EventFormatter]
-    
     /// URL of the current logging file.
     public var currentFileURL: URL {
-        directoryURL
+        configuration.directoryURL
             .appendingPathComponent(configuration.filePrefix)
             .appendingPathExtension(configuration.fileExtension)
     }
@@ -51,24 +45,31 @@ public class SizeRotationFileTransport: Transport {
     /// Current opened file where the log is happening.
     private var currentFileTransport: FileTransport?
     
+    /// FileManager instance.
     private let fManager = FileManager.default
 
     // MARK: - Initialization
     
-    public init(directoryURL: URL,
-                configuration: ((inout Configuration) -> Void),
-                formatters: [EventFormatter],
-                queue: DispatchQueue? = nil) {
-        self.directoryURL = directoryURL
+    /// Initialize a new `SizeRotationFileTransport` instance with given configuration.
+    ///
+    /// - Parameters:
+    ///   - directoryURL: directory url. If not available it will be created automatically.
+    ///   - builder: builder function to setup additional settings.
+    public init(directoryURL: URL, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        self.configuration = Configuration(directoryURL: directoryURL, builder)
         
-        var config = Configuration()
-        configuration(&config)
-        self.configuration = config
-        self.formatters = formatters
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
+        var isDirectory = ObjCBool(false)
+        if fManager.fileExists(atPath: directoryURL.path, isDirectory: &isDirectory) == false {
+            try fManager.createDirectory(at: directoryURL, withIntermediateDirectories: false)
+        }
         
-        self.currentFileTransport = FileTransport(fileURL: currentFileURL, formatters: formatters)
-        self.currentFileTransport?.newlines = config.newLines
+        self.queue = configuration.queue
+        self.delegate = configuration.delegate
+        
+        self.currentFileTransport = try FileTransport(fileURL: currentFileURL, {
+            $0.formatters = self.configuration.formatters
+        })
+        self.currentFileTransport?.newlines = configuration.newLines
     }
     
     // MARK: - Conformance
@@ -95,7 +96,7 @@ public class SizeRotationFileTransport: Transport {
         }
         
         currentFileTransport?.close()
-        let archivedFileURL = directoryURL.appendingPathComponent(archivedFilenameFormatter(fileName: configuration.filePrefix))
+        let archivedFileURL = configuration.directoryURL.appendingPathComponent(archivedFilenameFormatter(fileName: configuration.filePrefix))
         try fManager.copyItem(at: currentFileURL, to: archivedFileURL)
         try fManager.removeItem(at: currentFileURL)
         
@@ -104,8 +105,11 @@ public class SizeRotationFileTransport: Transport {
                                             newFileAtURL: currentFileURL)
         
         // Create new file for current logging
-        currentFileTransport = FileTransport(fileURL: currentFileURL, formatters: formatters, queue: queue)
-        currentFileTransport?.newlines = configuration.newLines
+        currentFileTransport = try FileTransport(fileURL: currentFileURL, {
+            $0.formatters = self.configuration.formatters
+            $0.queue = self.configuration.queue
+            $0.newlines = self.configuration.newLines
+        })
         
         // Remove old files which exceed the count
         if let prunedFileURLs = try removeExceededLogFiles(), !prunedFileURLs.isEmpty {
@@ -137,8 +141,8 @@ public class SizeRotationFileTransport: Transport {
     @discardableResult
     private func removeExceededLogFiles() throws -> [URL]? {
         let archivedFileURLs = try fManager
-            .contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            .filter { $0 != currentFileTransport?.fileURL }
+            .contentsOfDirectory(at: configuration.directoryURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            .filter { $0 != currentFileTransport?.configuration.fileURL }
         
         guard archivedFileURLs.count > configuration.maxFilesCount else {
             return nil // no needs to remove other files
@@ -163,29 +167,68 @@ public class SizeRotationFileTransport: Transport {
 
 extension SizeRotationFileTransport {
     
-    /// Represent the configuration file used to create a new transport.
     public struct Configuration {
+        
+        /// Delegate to listen relevant events of the transport layer.
+        public weak var delegate: SizeRotationFileTransportDelegate?
+        
+        /// the GCD queue that will be used when executing tasks related to
+        /// the receiver.
+        /// Log formatting and recording will be performed using this queue.
+        ///
+        /// A serial queue is typically used, such as when the underlying
+        /// log facility is inherently single-threaded and/or proper message ordering
+        /// wouldn't be ensured otherwise. However, a concurrent queue may also be
+        /// used, and might be appropriate when logging to databases or network
+        /// endpoints.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// URL of the directory with files.
+        public var directoryURL: URL
+        
+        /// Formatters used for data.
+        public var formatters: [EventFormatter] = [
+            FieldsFormatter.default()
+        ]
         
         /// Maximum size per single file.
         /// By default is set to 10MB.
-        var maxFileSize: FileSize = .megabytes(10)
+        public var maxFileSize: FileSize = .megabytes(10)
         
         /// Maximum number of files to store.
         /// By default is set to 8.
-        var maxFilesCount: Int = 8
+        public var maxFilesCount: Int = 8
         
         /// Filename prefix of each stored file.
         /// By default is set to empty string.
-        var filePrefix = ""
+        public var filePrefix = ""
         
         /// Extension of single log file.
         /// By default is set to `log`.
-        var fileExtension = "log"
+        public var fileExtension = "log"
         
         /// New lines format for each record.
-        var newLines: String = "\n"
+        public var newLines: String = "\n"
+        
+        // MARK: - Initialization
+        
+        /// Initialize a new configuration for an SizeRotationFileTransport transport.
+        ///
+        /// - Parameters:
+        ///   - directoryURL: directory url where logs are saved.
+        ///   - builder: builder configuration to setup additional settings.
+        public init(directoryURL: URL, _ builder: ((inout Configuration) -> Void)?) {
+            self.directoryURL = directoryURL
+            builder?(&self)
+        }
         
     }
+    
+}
+
+// MARK: - FileSize
+
+extension SizeRotationFileTransport {
     
     /// Specify the size of a file.
     public enum FileSize {

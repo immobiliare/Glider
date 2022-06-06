@@ -49,8 +49,13 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
             }
         }
         
-        let transport = ThrottledTransport(bufferSize: bufferSize, flushInterval: 5, formatters: [format], delegate: self)
-        
+        let transport = ThrottledTransport {
+            $0.bufferSize = bufferSize
+            $0.flushInterval = 5
+            $0.formatters = [format]
+            $0.delegate = self
+        }
+                
         let log = Log {
             $0.level = .debug
             $0.transports = [transport]
@@ -75,7 +80,12 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
             }),
         ])
 
-        let transport = ThrottledTransport(bufferSize: 100, flushInterval: 1, formatters: [format], delegate: self)
+        let transport = ThrottledTransport {
+            $0.bufferSize = 100
+            $0.flushInterval = 1
+            $0.formatters = [format]
+            $0.delegate = self
+        }
 
         let log = Log {
             $0.level = .debug
@@ -131,7 +141,12 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
             }),
         ])
 
-        let transport = ThrottledTransport(bufferSize: 100, flushInterval: 5, formatters: [format], delegate: self)
+        let transport = ThrottledTransport {
+            $0.bufferSize = 100
+            $0.flushInterval = 5
+            $0.formatters = [format]
+            $0.delegate = self
+        }
 
         let log = Log {
             $0.level = .debug

@@ -17,34 +17,58 @@ public class ConsoleTransport: Transport {
     
     // MARK: - Public Properties
     
+    /// GCD queue.
     public var queue: DispatchQueue? = nil
     
-    /// Formatter used to transform a payload into a string.
-    public let formatters: [EventFormatter]
+    /// Configuration.
+    public let configuration: Configuration
     
     // MARK: - Initialization
     
     /// Initialize new console transport.
     ///
-    /// - Parameters:
-    ///   - formatters: formatters to use.
-    ///   - queue: queue to use, `nil` create a new queue by default.
-    public init(formatters: [EventFormatter] = [FieldsFormatter.default()],
-                queue: DispatchQueue? = nil) {
-        self.formatters = formatters
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
+    /// - Parameter builder: builder to setup additional configurations.
+    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.configuration = Configuration(builder)
     }
     
     // MARK: - Public Functions
     
     public func record(event: Event) -> Bool {
-        guard let message = formatters.format(event: event)?.asString(),
+        guard let message = configuration.formatters.format(event: event)?.asString(),
               message.isEmpty == false else {
             return false
         }
         
         print(message)
         return true
+    }
+    
+}
+
+// MARK: - Configuration
+
+extension ConsoleTransport {
+    
+    public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// GCD queue. If not set a default one is created for you.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// Formatter used to transform a payload into a string.
+        public var formatters = [EventFormatter]()
+        
+        // MARK: - Initialization
+        
+        /// Initialize a new builder.
+        ///
+        /// - Parameter builder: builder configuration.
+        public init(_ builder: ((inout Configuration) -> Void)?) {
+            builder?(&self)
+        }
+        
     }
     
 }

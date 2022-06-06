@@ -23,20 +23,14 @@ public class ThrottledTransport: Transport {
 
     // MARK: - Public Properties
     
-    /// Size of the buffer.
-    public let bufferSize: Int
-    
-    /// Auto flush interval, if `nil` no autoflush is made.
-    public let flushInterval: TimeInterval?
-    
-    /// It will receive chunk of payloads to register.
-    public weak var delegate: ThrottledTransportDelegate?
-    
     /// Queue used to access to the buffer.
     public var queue: DispatchQueue?
+
+    /// Configuration
+    public let configuration: Configuration
     
-    /// Formatters used to format events into messages.
-    public var formatters: [EventFormatter]
+    /// Delegate for events.
+    public var delegate: ThrottledTransportDelegate?
     
     /// Pending payloads contained into the buffer.
     public var pendingPayloads: [Payload] {
@@ -62,24 +56,16 @@ public class ThrottledTransport: Transport {
         
     // MARK: - Initialization
     
-    /// Initialize a new buffered transport.
+    /// Initialize `ThrottledTransport` with given configuration.
     ///
-    /// - Parameters:
-    ///   - bufferSize: size of the buffer. Keep in mind: a big size may impact to the memory. Tiny sizes may impact on storage service load.
-    ///   - flushInterval: if specified this is the interval used to autoflush. By default is not set, the only constraint is the size of the buffer.
-    ///   - delegate: delegate which can receive chunks of data.
-    public init(bufferSize: Int,
-                flushInterval: TimeInterval? = nil,
-                formatters: [EventFormatter],
-                queue aQueue: DispatchQueue? = nil,
-                delegate: ThrottledTransportDelegate? = nil) {
-        self.bufferSize = bufferSize
-        self.delegate = delegate
-        self.flushInterval = flushInterval
-        self.formatters = formatters
-        buffer.reserveCapacity(bufferSize) // Reserve capacity to optimize storage in memory.
+    /// - Parameter builder: configuration callback.
+    public init(_ builder: ((inout Configuration) -> Void)) {
+        self.configuration = Configuration(builder)
         
-        self.queue = aQueue ?? DispatchQueue(label: "com.glider.transports.buffered.queue", qos: .background)
+        self.buffer.reserveCapacity(configuration.bufferSize) // Reserve capacity to optimize storage in memory.
+        self.delegate = configuration.delegate
+        
+        self.queue = configuration.queue
         queue!.sync { [weak self] in
             self?.setupAutoFlushIntervalIfNeeded()
         }
@@ -105,10 +91,10 @@ public class ThrottledTransport: Transport {
         queue!.async { [weak self] in
             guard let self = self else { return }
             
-            let message = self.formatters.format(event: event)
+            let message = self.configuration.formatters.format(event: event)
             
             self.buffer.append( (event, message) )
-            if self.buffer.count >= self.bufferSize {
+            if self.buffer.count >= self.configuration.bufferSize {
                 self.flush(reason: .byBufferSize)
             }
         }
@@ -118,7 +104,7 @@ public class ThrottledTransport: Transport {
     
     /// Initialize the autoflush interval.
     private func setupAutoFlushIntervalIfNeeded() {
-        guard let flushInterval = self.flushInterval else { return }
+        guard let flushInterval = configuration.flushInterval else { return }
         
         if #available(iOS 10.0, *) {
             dispatchPrecondition(condition: .onQueue(queue!))
@@ -158,7 +144,7 @@ public class ThrottledTransport: Transport {
             return
         }
         
-        let payloadsCount = min(buffer.count, bufferSize)
+        let payloadsCount = min(buffer.count, configuration.bufferSize)
         let newPayloadsBuffer = Array(buffer.dropFirst(payloadsCount))
         let droppedPayloads = Array(buffer[0..<payloadsCount])
         self.buffer = newPayloadsBuffer
@@ -169,6 +155,47 @@ public class ThrottledTransport: Transport {
             self.record(throttledEvents: droppedPayloads, reason: reason, completion: nil)
             self.delegate?.record(self, events: droppedPayloads, reason: reason, nil)
         }
+    }
+    
+}
+
+// MARK: - Configuration
+
+extension ThrottledTransport {
+    
+    public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Size of the buffer.
+        /// Keep in mind: a big size may impact to the memory. Tiny sizes may impact on storage service load.
+        ///
+        /// By default is set to 500.
+        public var bufferSize: Int = 500
+        
+        /// Auto flush interval, if `nil` no autoflush is made.
+        /// If specified this is the interval used to autoflush.
+        /// By default is not set, the only constraint is the size of the buffer.
+        public var flushInterval: TimeInterval?
+        
+        /// It will receive chunk of payloads to register.
+        public weak var delegate: ThrottledTransportDelegate?
+        
+        /// Queue used to access to the buffer.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// Formatters used to format events into messages.
+        public var formatters = [EventFormatter]()
+        
+        // MARK: - Initialization
+        
+        /// Initialize a new configuration for `ThrottledTransport`.
+        ///
+        /// - Parameter builder: builder function.
+        public init(_ builder: ((inout Configuration) -> Void)) {
+            builder(&self)
+        }
+        
     }
     
 }

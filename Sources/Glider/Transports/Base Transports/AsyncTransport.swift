@@ -23,27 +23,8 @@ public class AsyncTransport: Transport {
     /// GCD queue for operations.
     public var queue: DispatchQueue?
     
-    /// Perform flush if necessary when a new record event is set.
-    /// By default is set to `false`.
-    public var flushOnRecord = false
-    
-    /// Data formatters.
-    public let formatters: [EventFormatter]
-    
-    /// Number of retries per each payloads to be sent.
-    /// After reaching the maximum number payload is discarded automatically.
-    /// By default this value is set to 1.
-    public var maxRetries: Int = 1
-    
-    /// Maximum number of messages you can store in buffer.
-    /// When value is over the limit older events are automatically discarded.
-    public let bufferSize: Int
-    
-    /// Number of payloads sent at each trigger.
-    public let blockSize: Int
-    
-    /// Automatic interval for flushing data in buffer.
-    public let flushInterval: TimeInterval?
+    /// Configuration used.
+    public let configuration: Configuration
     
     /// Delegate which receive events from transport.
     public weak var delegate: AsyncTransportDelegate?
@@ -73,27 +54,20 @@ public class AsyncTransport: Transport {
     ///   - options: storage options.
     ///   - queue: queue in which the operations are executed into.
     ///   - delegate: delegate for events.
-    public init(bufferSize: Int,
-                blockSize: Int,
-                flushInterval: TimeInterval? = nil,
-                formatters: [EventFormatter],
-                location: SQLiteDb.Location = .inMemory,
-                options: SQLiteDb.Options = .init(),
-                queue: DispatchQueue? = nil,
-                delegate: AsyncTransportDelegate? = nil) throws {
-        self.formatters = formatters
-        self.bufferSize = bufferSize
-        self.blockSize = blockSize
-        self.flushInterval = flushInterval
+    public init(_ builder: ((inout Configuration) -> Void)) throws {
+        var config = Configuration()
+        builder(&config)
         
-        let fileExists = location.fileExists
-        self.db = try SQLiteDb(location, options: options)
+        self.configuration = config
+        
+        let fileExists = config.bufferStorage.fileExists
+        self.db = try SQLiteDb(config.bufferStorage, options: config.bufferStorageOptions)
         if !fileExists {
             try prepareDatabase()
         }
         
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
-        self.delegate = delegate
+        self.queue = config.queue
+        self.delegate = config.delegate
         
         setupAutoFlushInterval()
     }
@@ -105,12 +79,12 @@ public class AsyncTransport: Transport {
             guard let self = self else { return }
             
             do {
-                let message = self.formatters.format(event: event)
+                let message = self.configuration.formatters.format(event: event)
                 _ = try self.store(event: event, withMessage: message, retryAttempt: 0)
                 
-                if self.flushOnRecord,
+                if self.configuration.flushOnRecord,
                    let countStoredItems = try? self.db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
-                   countStoredItems > self.bufferSize {
+                   countStoredItems > self.configuration.bufferSize {
                     self.flush()
                 }
             } catch {
@@ -184,7 +158,7 @@ public class AsyncTransport: Transport {
     }
     
     private func setupAutoFlushInterval() {
-        guard let flushInterval = flushInterval else { return }
+        guard let flushInterval = configuration.flushInterval else { return }
         
         self.timer?.invalidate()
         let timer = Timer(timeInterval: flushInterval,
@@ -235,7 +209,7 @@ public class AsyncTransport: Transport {
                 var retryIDs = [(String, Int)]()
                 var discardedIDs = Set<String>()
                 for payload in chunk {
-                    if (payload.countAttempts + 1) <= maxRetries {
+                    if (payload.countAttempts + 1) <= configuration.maxRetries {
                         if let id = try? self.store(event: payload.event, withMessage: payload.message,
                                                     retryAttempt: payload.countAttempts + 1) {
                             retryIDs.append( (id, payload.countAttempts + 1) )
@@ -268,11 +242,11 @@ public class AsyncTransport: Transport {
     /// Remove payloads to respect the `bufferSize` if needed.
     private func vacuumCache() throws -> Int {
         let itemsCount = try Int(db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0)
-        guard itemsCount > bufferSize else {
+        guard itemsCount > configuration.bufferSize else {
             return itemsCount // below the maximum size
         }
         
-        let limit = (itemsCount - bufferSize)
+        let limit = (itemsCount - configuration.bufferSize)
         try db.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
         
         if let delegate = delegate {
@@ -289,7 +263,7 @@ public class AsyncTransport: Transport {
     ///
     /// - Returns: `[CachedPayload]`
     private func fetchNextPayloadsChunk() throws -> [Chunk] {
-        let result = try db.select(sql: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(blockSize);")
+        let result = try db.select(sql: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(configuration.chunksSize);")
         
         var rowIds = [String]()
         let payloads: [Chunk] = result.iterateRows { _, stmt in
@@ -355,6 +329,58 @@ internal extension AsyncTransport {
             VALUES
                 (?, ?, ?, ?);
         """
+        
+    }
+    
+}
+
+// MARK: - AsyncTransport.Configuration
+
+extension AsyncTransport {
+    
+    public struct Configuration {
+        
+        /// Data formatters.
+        public var formatters = [EventFormatter]()
+        
+        /// Number of retries per each payloads to be sent.
+        /// After reaching the maximum number payload is discarded automatically.
+        ///
+        /// By default this value is set to 1.
+        public var maxRetries = 1
+        
+        /// Maximum number of messages you can store in buffer.
+        /// When value is over the limit older events are automatically discarded.
+        ///
+        /// By default is set to 500.
+        public var bufferSize: Int = 500
+        
+        /// Size of the chunks (number of payloads) sent at each dispatch event.
+        ///
+        /// By default is set to 10.
+        public var chunksSize: Int = 10
+        
+        /// Automatic interval for flushing data in buffer.
+        public var flushInterval: TimeInterval?
+        
+        /// Perform flush if necessary when a new record event is set.
+        ///
+        /// By default is set to `false`.
+        public var flushOnRecord = false
+        
+        /// Storage where the buffered data is set.
+        ///
+        /// By default is `inMemory`.
+        public var bufferStorage: SQLiteDb.Location = .inMemory
+        
+        /// Options for buffer stroage.
+        public var bufferStorageOptions: SQLiteDb.Options = .init()
+        
+        /// GCD queue for operations.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// Delegate object.
+        public weak var delegate: AsyncTransportDelegate?
         
     }
     

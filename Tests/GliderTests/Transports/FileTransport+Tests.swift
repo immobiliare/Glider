@@ -18,7 +18,7 @@ import XCTest
 final class FileTransportTests: XCTestCase {
     
     /// The following test check if `FileLogTransport` transport layer.
-    func test_fileLogTransport() {
+    func test_fileLogTransport() async throws {
         let fileURL = URL.temporaryFileURL(fileName: nil, fileExtension: "log", removeIfExists: true)
         
         let format = FieldsFormatter(fields: [
@@ -30,7 +30,9 @@ final class FileTransportTests: XCTestCase {
         ])
         format.structureFormatStyle = .object
         
-        let fileTransport = FileTransport(fileURL: fileURL, formatters: [format])!
+        let fileTransport = try FileTransport(fileURL: fileURL) {
+            $0.formatters = [format]
+        }
         let log = Log {
             $0.level = .debug
             $0.transports = [fileTransport]
@@ -75,21 +77,17 @@ extension URL {
         return fileURL
     }
     
-    static func newDirectoryURL(removeIfExists: Bool = true) -> URL? {
-        do {
-            let dirURL = URL(fileURLWithPath: NSTemporaryDirectory())
-                .appendingPathComponent("logDirectory")
-            
-            var isDir = ObjCBool(false)
-            if removeIfExists && FileManager.default.fileExists(atPath: dirURL.path, isDirectory: &isDir) && isDir.boolValue {
-                try FileManager.default.removeItem(at: dirURL)
-            }
-            
-            try FileManager.default.createDirectory(at: dirURL, withIntermediateDirectories: true, attributes: nil)
-            return dirURL
-        } catch {
-            return nil
+    static func newDirectoryURL(removeIfExists: Bool = true) throws -> URL? {
+        let dirURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("logDirectory")
+        
+        var isDir = ObjCBool(false)
+        if removeIfExists && FileManager.default.fileExists(atPath: dirURL.path, isDirectory: &isDir) && isDir.boolValue {
+            try FileManager.default.removeItem(at: dirURL)
         }
+        
+        try FileManager.default.createDirectory(at: dirURL, withIntermediateDirectories: true, attributes: nil)
+        return dirURL
     }
     
 }

@@ -29,7 +29,7 @@ final class SizeRotationTransportTests: XCTestCase, SizeRotationFileTransportDel
     }
         
     func test_sizeRotationFileTransport() async throws {
-        guard let directoryURL = URL.newDirectoryURL() else {
+        guard let directoryURL = try URL.newDirectoryURL() else {
             XCTFail()
             return
         }
@@ -38,13 +38,13 @@ final class SizeRotationTransportTests: XCTestCase, SizeRotationFileTransportDel
         let maxFileCount = 4
         let filePrefix = "mylog_"
         
-        let sizeLogTransport = SizeRotationFileTransport(directoryURL: directoryURL, configuration: {
+        let sizeLogTransport = try SizeRotationFileTransport(directoryURL: directoryURL) {
             $0.maxFilesCount = maxFileCount
             $0.maxFileSize = maxFileSize
             $0.filePrefix = filePrefix
-        }, formatters: [JSONFormatter.default()])
-        
-        sizeLogTransport.delegate = self
+            $0.formatters = [JSONFormatter.default()]
+            $0.delegate = self
+        }
         
         let log = Log {
             $0.level = .debug

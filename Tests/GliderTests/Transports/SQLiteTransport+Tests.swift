@@ -24,18 +24,18 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
 
     func test_sqliteTransport() async throws {
         exp = expectation(description: "SQLiteTransportTests")
-        
-        let dbURL = URL.temporaryFileURL()
-                
-        bufferSize = 100
-        countWrittenPayloads = 0
-        payloadsToWrite = 110
+                        
+        self.bufferSize = 100
+        self.countWrittenPayloads = 0
+        self.payloadsToWrite = 110
 
-        let sqliteTransport = try  SQLiteTransport(location: .inMemory,
-                                                   bufferSize: bufferSize,
-                                                   flushInterval: nil,
-                                                   delegate: self)
-
+        let sqliteTransport = try SQLiteTransport(databaseLocation: .inMemory, {
+            $0.throttledTransport = .init({
+                $0.bufferSize = self.bufferSize
+                $0.flushInterval = nil
+            })
+            $0.delegate = self
+        })
         
         let log = Log {
             $0.level = .debug
@@ -60,7 +60,7 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
         XCTAssertEqual(countWrittenPayloads, bufferSize)
         XCTAssertEqual(pendingPayloads.count, (payloadsToWrite - bufferSize))
         
-        sqliteTransport.flush()
+        sqliteTransport.flushPendingLogs()
     }
     
     // MARK: - SQLiteTransportDelegate
@@ -88,6 +88,10 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     }
     
     func sqliteTransport(_ transport: SQLiteTransport, schemaMigratedFromVersion oldVersion: Int, toVersion newVersion: Int) {
+        
+    }
+    
+    func sqliteTransport(_ transport: SQLiteTransport, purgedLogs count: Int64) {
         
     }
     

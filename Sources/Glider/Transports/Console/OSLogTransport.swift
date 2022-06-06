@@ -21,12 +21,8 @@ public class OSLogTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// Defines how the Glider's `Level` of an event are translated to the relative `OSLogType`.
-    /// By default is set to `default`.
-    public var levelTranslator: LevelTranslator = .`default`
-    
-    /// Formatters.
-    public var formatters: [EventFormatter]
+    /// Configuration.
+    public let configuration: Configuration
     
     // The `OSLog` used to perform logging.
     public let log: OSLog
@@ -46,16 +42,14 @@ public class OSLogTransport: Transport {
     ///   - subsystem: The name of the subsystem performing the logging.
     ///                Defaults to the empty string (`""`) if not specified.
     ///   - queue : The GCD queue that should be used for logging actions related to the receiver.
-    public init?(formatters: [EventFormatter],
-                 subsystem: String = "",
-                 queue: DispatchQueue? = nil) {
+    public init?(_ builder: ((inout Configuration) -> Void)? = nil) throws {
         guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, watchOS 3.0, *) else {
-            return nil
+            throw GliderError(message: "OSLog is not supported in this platform")
         }
         
-        self.log = OSLog(subsystem: subsystem, category: "CleanroomLogger")
-        self.formatters = formatters
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
+        self.configuration = Configuration(builder)
+        self.log = OSLog(subsystem: configuration.subsystem, category: configuration.category)
+        self.queue = configuration.queue
     }
     
     // MARK: - Conformance
@@ -67,15 +61,51 @@ public class OSLogTransport: Transport {
             return false
         }
         
-        guard let message = formatters.format(event: event)?.asString(),
+        guard let message = configuration.formatters.format(event: event)?.asString(),
               message.isEmpty == false else {
             return false
         }
 
-        let level = levelTranslator.osLogTypeForEvent(event)
+        let level = configuration.levelTranslator.osLogTypeForEvent(event)
         os_log("%{public}@", log: self.log, type: level, message)
         
         return false
+    }
+    
+}
+
+// MARK: - Configuration
+
+extension OSLogTransport {
+    
+    public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// The name of the subsystem performing the logging.
+        /// Defaults to `Glider`.
+        public var category: String = "Glider"
+        
+        /// The name of the subsystem performing the logging.
+        /// Defaults to the empty string (`""`) if not specified.
+        public var subsystem: String = ""
+        
+        /// Defines how the Glider's `Level` of an event are translated to the relative `OSLogType`.
+        /// By default is set to `default`.
+        public var levelTranslator: LevelTranslator = .`default`
+        
+        /// Formatters.
+        public var formatters = [EventFormatter]()
+        
+        // The GCD queue used by the receiver to record messages.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        // MARK: - Initialization
+        
+        public init(_ builder: ((inout Configuration) -> Void)?) {
+            builder?(&self)
+        }
+        
     }
     
 }

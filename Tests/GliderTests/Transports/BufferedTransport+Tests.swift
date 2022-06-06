@@ -28,10 +28,14 @@ final class BufferedTransportTests: XCTestCase {
         format.structureFormatStyle = .object
         
         let bufferLimit = 5
-        let bufferedTransport: BufferedTransport<BItem> = .init(bufferLimit: bufferLimit, formatters: [format]) { event, data in
-            BItem(event: event, message: data)
-        }
         
+        let bufferedTransport: BufferedTransport<BItem> = .init(bufferedItemBuilder: { event, data in
+            BItem(event: event, message: data)
+        }, {
+            $0.bufferLimit = bufferLimit
+            $0.formatters = [format]
+        })
+
         let log = Log {
             $0.level = .debug
             $0.transports = [bufferedTransport]

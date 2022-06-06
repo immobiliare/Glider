@@ -40,3 +40,17 @@ public class GliderSDK {
     }
     
 }
+
+public struct GliderError: Error, LocalizedError {
+    
+    let message: String
+    
+    public init(message: String) {
+        self.message = message
+    }
+    
+    public var errorDescription: String? {
+        message
+    }
+    
+}

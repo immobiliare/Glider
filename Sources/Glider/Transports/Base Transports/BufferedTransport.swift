@@ -23,14 +23,8 @@ public class BufferedTransport<BufferItem>: Transport {
     
     // MARK: - Public Functions
     
-    /// The max number of items that will be stored in the receiver's buffer.
-    public let bufferLimit: Int
-    
-    /// The function used to create a `BufferItem` given a `Event` instance.
-    public let bufferedItemBuilder: BufferItemBuilder
-    
-    /// Formatters used to convert messages to strings.
-    public let formatters: [EventFormatter]
+    /// Configuration.
+    public let configuration: Configuration
     
     /// Dispatch queue where the record happens.
     public let queue: DispatchQueue?
@@ -41,42 +35,28 @@ public class BufferedTransport<BufferItem>: Transport {
     
     // MARK: - Initialization
     
-    /// Initializes a new buffered transport recorder.
+    /// Initializer a new `BufferedTransport`.
     ///
     /// - Parameters:
-    ///   - bufferLimit: If this value is positive, it specifies the
-    ///                  maximum number of items to store in the buffer. If `record(event: )` is called
-    ///                  when the buffer limit has been reached, the oldest item in the buffer will
-    ///                  be dropped. If this value is zero or negative, no limit will be applied.
-    ///
-    ///                  Note:
-    ///                  that this is potentially dangerous in production code, since memory
-    ///                  consumption will grow endlessly unless you manually clear the buffer periodically.
-    ///   - formatters: formatters used to transform the event into `SerializableData` conform object.
-    ///   - queue: The `DispatchQueue` to use for the recorder. If `nil` a new queue will be created.
-    ///   - builder: The function used to create `BufferItem` instances for each `Event` and formatted
-    ///              message string passed to the receiver's `record`(event: )` function.
-    public init(bufferLimit: Int = 10_000,
-                formatters: [EventFormatter],
-                queue: DispatchQueue? = nil,
-                builder: @escaping BufferItemBuilder) {
-        self.bufferLimit = bufferLimit
-        self.formatters = formatters
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
-        self.bufferedItemBuilder = builder
+    ///   - bufferedItemBuilder: The function used to create a `BufferItem` given a `Event` instance.
+    ///   - builder: builder function to setup additional settings.
+    public init(bufferedItemBuilder: @escaping BufferItemBuilder,
+                _ builder: ((inout Configuration) -> Void)) {
+        self.configuration = Configuration(bufferedItemBuilder: bufferedItemBuilder, builder)
+        self.queue = configuration.queue
     }
     
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        guard let message = formatters.format(event: event) else {
+        guard let message = configuration.formatters.format(event: event) else {
             return false
         }
         
-        let item = bufferedItemBuilder(event, message)
+        let item = configuration.bufferedItemBuilder(event, message)
         buffer.append(item)
 
-        if bufferLimit > 0 && buffer.count > bufferLimit {
+        if configuration.bufferLimit > 0 && buffer.count > configuration.bufferLimit {
             buffer.remove(at: 0)
         }
         
@@ -96,4 +76,47 @@ public class BufferedTransport<BufferItem>: Transport {
         }
     }
         
+}
+
+// MARK: - Configuration
+
+extension BufferedTransport {
+    
+    public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// The max number of items that will be stored in the receiver's buffer (default is 500).
+        ///
+        /// If this value is positive, it specifies the
+        /// maximum number of items to store in the buffer. If `record(event: )` is called
+        /// when the buffer limit has been reached, the oldest item in the buffer will
+        /// be dropped. If this value is zero or negative, no limit will be applied.
+        ///
+        /// Note:
+        /// that this is potentially dangerous in production code, since memory
+        /// consumption will grow endlessly unless you manually clear the buffer periodically.
+        public var bufferLimit: Int = 500
+        
+        /// The function used to create a `BufferItem` given a `Event` instance.
+        public var bufferedItemBuilder: BufferItemBuilder
+        
+        /// Formatters used to convert messages to strings.
+        public var formatters = [EventFormatter]()
+        
+        /// Dispatch queue where the record happens.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        // MARK: - Initialization
+        
+        /// Initialize a new `BufferedTransport` with configuration.
+        ///
+        /// - Parameter builder: builder configuration
+        public init(bufferedItemBuilder: @escaping BufferItemBuilder, _ builder: ((inout Configuration) -> Void)) {
+            self.bufferedItemBuilder = bufferedItemBuilder
+            builder(&self)
+        }
+        
+    }
+    
 }

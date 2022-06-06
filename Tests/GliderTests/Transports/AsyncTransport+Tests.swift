@@ -58,19 +58,22 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
             })
         ])
         
-        let asyncTransport = try AsyncTransportTestable(bufferSize: 100,
-                                                        blockSize: blockSize,
-                                                        flushInterval: flushInterval,
-                                                        formatters: [format],
-                                                        location: .inMemory,
-                                                        delegate: self)
-        asyncTransport.maxRetries = maxRetries
+        let asyncTransport = try AsyncTransportTestable({
+            $0.bufferSize = 100
+            $0.chunksSize = blockSize
+            $0.flushInterval = flushInterval
+            $0.formatters = [format]
+            $0.bufferStorage = .inMemory
+            $0.delegate = self
+            $0.maxRetries = maxRetries
+        })
+        
         asyncTransport.id = id
         countTotalRetries = 0
         
         asyncTransport.onChunkToSend = { chunk, completion in
             // Validate the size of the block
-            XCTAssert(chunk.count <= asyncTransport.blockSize)
+            XCTAssert(chunk.count <= asyncTransport.configuration.chunksSize)
             
             // Validate the integrity of the event
             let anyPayload = chunk.randomElement()

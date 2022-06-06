@@ -28,10 +28,12 @@ public class StdStreamsTransport: Transport {
     // MARK: - Public Properties
     
     /// Dispatch queue.
-    public var queue: DispatchQueue?
+    public var queue: DispatchQueue? {
+        configuration.queue
+    }
     
-    /// Formatter used to transform a payload into a string.
-    public var formatters: [EventFormatter]
+    /// Configuration settings.
+    public let configuration: Configuration
     
     // MARK: - Private Properties
     
@@ -43,13 +45,14 @@ public class StdStreamsTransport: Transport {
     
     // MARK: - Initialization
     
-    public init(formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
-                queue: DispatchQueue? = nil) {
-        self.queue = queue ?? DispatchQueue(label: String(describing: type(of: self)))
-        self.formatters = formatters
-        
-        self.stdoutTransport = POSIXStreamTransport.stdOut(formatters: formatters, queue: self.queue)
-        self.stderrTransport = POSIXStreamTransport.stdErr(formatters: formatters, queue: self.queue)
+    /// Initialize a new `StdStreamsTransport`.
+    ///
+    /// - Parameter builder: builder configuration
+    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.configuration = Configuration(builder)
+                
+        self.stdoutTransport = POSIXStreamTransport.stdOut(formatters: configuration.formatters, queue: configuration.queue)
+        self.stderrTransport = POSIXStreamTransport.stdErr(formatters: configuration.formatters, queue: configuration.queue)
     }
 
     // MARK: - Conformance
@@ -60,6 +63,36 @@ public class StdStreamsTransport: Transport {
         } else {
             return stdoutTransport.record(event: event)
         }
+    }
+    
+}
+
+// MARK: - Configuration
+
+extension StdStreamsTransport {
+    
+    public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Dispatch queue.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// Formatter used to transform a payload into a string.
+        /// By default is set to `FieldsFormatter.defaultStdStreamFormatter`.
+        public var formatters: [EventFormatter] = [
+            FieldsFormatter.defaultStdStreamFormatter()
+        ]
+        
+        // MARK: - Initialization
+        
+        /// initialize a new `StdStreamsTransport`.
+        ///
+        /// - Parameter builder: configuration callback.
+        public init(_ builder: ((inout Configuration) -> Void)?) {
+            builder?(&self)
+        }
+        
     }
     
 }

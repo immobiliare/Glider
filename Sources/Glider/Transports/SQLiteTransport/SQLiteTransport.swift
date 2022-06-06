@@ -20,29 +20,19 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     // MARK: - Public Properties
     
     /// Dispatch queue.
-    public var queue: DispatchQueue? {
-        set { throttledTransport?.queue = newValue }
-        get { throttledTransport?.queue }
-    }
+    public var queue: DispatchQueue?
     
-    /// The maximum age of a log before it it will be removed automatically
-    /// to preserve the space. Set as you needs, by default is 1h.
-    public var logsLifeTimeInterval: TimeInterval?
-    
-    /// Flushing old logs can't happens every time we wrote something
-    /// on db. So this interval is the minimum time interval to pass
-    /// before calling flush another time.
-    /// Typically is set as 3x the `logsLifeTimeInterval`.
-    public var purgeMinInterval: TimeInterval?
+    /// SQLiteTransport configuration.
+    public let configuration: Configuration
 
     /// Size of the buffer.
     public var bufferSize: Int {
-        throttledTransport!.bufferSize
+        throttledTransport!.configuration.bufferSize
     }
     
     /// Flush interval.
     public var flushInterval: TimeInterval? {
-        throttledTransport?.flushInterval
+        throttledTransport?.configuration.flushInterval
     }
     
     /// Pending payloads contained into the buffer.
@@ -58,12 +48,6 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     /// Database user's version.
     public var databaseVersion: Int = 0
-
-    /// Formatters for data.
-    public var formatters: [EventFormatter] {
-        set { throttledTransport!.formatters = newValue }
-        get { throttledTransport!.formatters }
-    }
     
     // MARK: - Private Properties
 
@@ -75,51 +59,26 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     // MARK: - Initialization
     
-    /// Initialize a new SQLite3 local database transport with a db at given URL.
-    /// If database does not exists it will be created automatically.
-    ///
-    /// - Parameters:
-    ///   - location: location of the database. Typically `fileURL` is used to save a local file on disk.
-    ///   - options: options for SQLite3 database.
-    ///   - version: version of the SQLite database. If an existing log dictionary is opened with old version `migrateDatabase()` is called.
-    ///   - formatters: formatters used to eventually convert messages.
-    ///   - bufferSize: size of the buffer. Messages are collected in groups before being written into db. By default is 50 events.
-    ///   - logsLifeTimeInterval: only timestamp newer than `now - logsLifeTimeInterval` are kept in database, in order to avoid
-    ///                           increase of the database. You should always set a value; by default is set to 3600s (1h).
-    ///   - flushInterval: auto flush interval used to write data on db even if not enough events are collected. By default is `15`.
-    ///   - queue: queue in which the operations are executed into.
-    ///   - delegate: delegate.
-    public init(location: SQLiteDb.Location,
-                options: SQLiteDb.Options = .init(),
-                version: Int = 0,
-                formatters: [EventFormatter] = [],
-                bufferSize: Int = 50,
-                logsLifeTimeInterval: TimeInterval? = 60, //3_600,
-                flushInterval: TimeInterval? = 15,
-                queue: DispatchQueue? = nil,
-                delegate: SQLiteTransportDelegate? = nil) throws {
-        
-        let fileExists = location.fileExists
+    public init(databaseLocation: SQLiteDb.Location, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        self.configuration = Configuration(databaseLocation: databaseLocation, builder)
 
-        self.db = try SQLiteDb(location, options: options)
-        self.databaseVersion = version
-        self.delegate = delegate
-        self.logsLifeTimeInterval = logsLifeTimeInterval
-        self.purgeMinInterval = (logsLifeTimeInterval != nil ? logsLifeTimeInterval! * 3.0 : nil)
+        let fileExists = databaseLocation.fileExists
+
+        self.db = try SQLiteDb(databaseLocation, options: configuration.databaseOptions)
+        self.databaseVersion = configuration.databaseVersion
+        self.delegate = configuration.delegate
+        self.queue = configuration.queue
         
         if !fileExists {
             try prepareDatabaseStructure()
-            DispatchQueue.main.async {
-                delegate?.sqliteTransport(self, openedDatabaseAtURL: location, isFileExist: fileExists)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.delegate?.sqliteTransport(self, openedDatabaseAtURL: databaseLocation, isFileExist: fileExists)
             }
         }
         
-        self.throttledTransport = ThrottledTransport(bufferSize: bufferSize,
-                                                     flushInterval: flushInterval,
-                                                     formatters: formatters,
-                                                     queue: queue,
-                                                     delegate: self)
-    
+        self.throttledTransport = configuration.throttledTransport
+        self.configuration.throttledTransport.delegate = self // must watch throttled transport delegate
     }
     
     /// Flush remaining pendng payloads.
@@ -136,8 +95,8 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     @discardableResult
     public func purge(vacuum: Bool = true) throws -> Int64 {
        try queue!.sync {
-            guard let logsLifeTimeInterval = logsLifeTimeInterval,
-                  let flushMinimumInterval = purgeMinInterval,
+           guard let logsLifeTimeInterval = configuration.logsLifeTimeInterval,
+                 let flushMinimumInterval = configuration.purgeMinInterval,
                   Date().timeIntervalSince(lastPurge) >= flushMinimumInterval else {
                 return 0
             }
@@ -390,6 +349,66 @@ fileprivate extension SQLiteTransport {
             VALUES
                 (?, ?, ?);
         """
+    }
+    
+}
+
+// MARK: - Configuration
+
+extension SQLiteTransport {
+    
+    public struct Configuration {
+        
+        /// Dispatch queue.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
+        /// The maximum age of a log before it it will be removed automatically
+        /// to preserve the space. Set as you needs.
+        ///
+        /// By default is 1h.
+        public var logsLifeTimeInterval: TimeInterval?
+        
+        /// Flushing old logs can't happens every time we wrote something
+        /// on db. So this interval is the minimum time interval to pass
+        /// before calling flush another time.
+        /// Typically is set as 3x the `logsLifeTimeInterval`.
+        public var purgeMinInterval: TimeInterval?
+        
+        /// Delegate.
+        public weak var delegate: SQLiteTransportDelegate?
+        
+        /// Location of the database.
+        public var databaseLocation: SQLiteDb.Location
+        
+        /// Options for database creation.
+        /// By default is the standard initialization of `SQLiteDb.Options`.
+        public var databaseOptions: SQLiteDb.Options = .init()
+        
+        /// Database user's version.
+        /// By default is 0.
+        public var databaseVersion: Int = 0
+        
+        /// Throttled transport used to perform buffering on database.
+        ///
+        /// By default is initialized with the default configuration
+        /// of the `ThrottledTransport`.
+        public var throttledTransport: ThrottledTransport
+        
+        // MARK: - Initialization
+        
+        /// Initialize Configuration.
+        ///
+        /// - Parameters:
+        ///   - databaseLocation: databasse location.
+        ///   - builder: builder function to setup additional settings.
+        public init(databaseLocation: SQLiteDb.Location,
+                    _ builder: ((inout Configuration) -> Void)?) {
+            self.databaseLocation = databaseLocation
+            self.throttledTransport = ThrottledTransport.init({ _ in })
+            self.purgeMinInterval = (logsLifeTimeInterval != nil ? logsLifeTimeInterval! * 3.0 : nil)
+            builder?(&self)
+        }
+        
     }
     
 }
