@@ -24,7 +24,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate {
             $0.maxConcurrentOperationCount = 3
             $0.formatters = [SysLogFormatter()]
             $0.asyncTransportConfiguration = .init({
-                $0.bufferSize = 100
+                $0.maxEntries = 100
                 $0.chunksSize = 5
                 $0.flushInterval = 5
             })

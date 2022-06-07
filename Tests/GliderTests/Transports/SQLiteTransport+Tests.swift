@@ -19,19 +19,19 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     
     var countWrittenPayloads: Int = 0
     var payloadsToWrite: Int = 0
-    var bufferSize: Int = 0
+    var maxEntries: Int = 0
     var exp: XCTestExpectation!
 
     func test_sqliteTransport() async throws {
         exp = expectation(description: "SQLiteTransportTests")
                         
-        self.bufferSize = 100
+        self.maxEntries = 100
         self.countWrittenPayloads = 0
         self.payloadsToWrite = 110
 
         let sqliteTransport = try SQLiteTransport(databaseLocation: .inMemory, {
             $0.throttledTransport = .init({
-                $0.bufferSize = self.bufferSize
+                $0.maxEntries = self.maxEntries
                 $0.flushInterval = nil
             })
             $0.delegate = self
@@ -57,8 +57,8 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
         // 10 remaining payloads pending in buffer
         let pendingPayloads = sqliteTransport.pendingPayloads
         
-        XCTAssertEqual(countWrittenPayloads, bufferSize)
-        XCTAssertEqual(pendingPayloads.count, (payloadsToWrite - bufferSize))
+        XCTAssertEqual(countWrittenPayloads, maxEntries)
+        XCTAssertEqual(pendingPayloads.count, (payloadsToWrite - maxEntries))
         
         sqliteTransport.flushPendingLogs()
     }
@@ -75,12 +75,12 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     
     func sqliteTransport(_ transport: SQLiteTransport, writtenPayloads: [ThrottledTransport.Payload]) {
         countWrittenPayloads += writtenPayloads.count
-        if countWrittenPayloads == bufferSize {
+        if countWrittenPayloads == maxEntries {
             // initial set
             exp?.fulfill()
         } else {
             // flushing buffer
-            let remaining = (payloadsToWrite - bufferSize)
+            let remaining = (payloadsToWrite - maxEntries)
             if remaining != writtenPayloads.count {
                 XCTFail()
             }

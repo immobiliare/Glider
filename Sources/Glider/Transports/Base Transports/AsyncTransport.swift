@@ -70,14 +70,8 @@ public class AsyncTransport: Transport {
     /// Initialize a new AsyncTransport system.
     ///
     /// - Parameters:
-    ///   - bufferSize: size of the buffer to hold data.
-    ///   - blockSize: size of each block sent outside for external sending.
-    ///   - flushInterval: periodic flush interval, `nil` to not set.
-    ///   - formatters: formatters used to format data.
-    ///   - location: storage where the buffered data is set. By default is `inMemory`.
-    ///   - options: storage options.
-    ///   - queue: queue in which the operations are executed into.
-    ///   - delegate: delegate for events.
+    ///   - delegate: delegate of events and behaviour.
+    ///   - builder: builder callback to configure extra options.
     public convenience init(delegate: AsyncTransportDelegate, _ builder: ((inout Configuration) -> Void)? = nil) throws {
         let configuration = Configuration(builder)
         try self.init(delegate: delegate, configuration: configuration)
@@ -95,7 +89,7 @@ public class AsyncTransport: Transport {
                 
                 if self.configuration.flushOnRecord,
                    let countStoredItems = try? self.db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
-                   countStoredItems > self.configuration.bufferSize {
+                   countStoredItems > self.configuration.maxEntries {
                     self.flush()
                 }
             } catch {
@@ -228,14 +222,14 @@ public class AsyncTransport: Transport {
         }
     }
     
-    /// Remove payloads to respect the `bufferSize` if needed.
+    /// Remove payloads to respect the `maxEntries` if needed.
     private func vacuumCache() throws -> Int {
         let itemsCount = try Int(db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0)
-        guard itemsCount > configuration.bufferSize else {
+        guard itemsCount > configuration.maxEntries else {
             return itemsCount // below the maximum size
         }
         
-        let limit = (itemsCount - configuration.bufferSize)
+        let limit = (itemsCount - configuration.maxEntries)
         try db.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
         
         let countRemoved = try? db.select(sql: "SELECT changes()").int64(column: 0)
@@ -278,12 +272,12 @@ public class AsyncTransport: Transport {
         -> (rowId: Int64, event: Event, message: SerializableData?,  attempt: Int)? {
         guard let rowId = stmt.int64(column: 0),
               let eventData = stmt.data(column: 2),
-              let message = stmt.data(column: 3),
               let attempt = stmt.integer(column: 4)
         else {
             return nil
         }
 
+        let message = stmt.data(column: 3)
         let event = try JSONDecoder().decode(Event.self, from: eventData)
         return (rowId, event, message, attempt)
     }
@@ -333,7 +327,7 @@ extension AsyncTransport {
         /// When value is over the limit older events are automatically discarded.
         ///
         /// By default is set to 500.
-        public var bufferSize: Int = 500
+        public var maxEntries: Int = 500
         
         /// Size of the chunks (number of payloads) sent at each dispatch event.
         ///

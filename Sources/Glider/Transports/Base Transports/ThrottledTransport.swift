@@ -62,7 +62,7 @@ public class ThrottledTransport: Transport {
     public init(_ builder: ((inout Configuration) -> Void)) {
         self.configuration = Configuration(builder)
         
-        self.buffer.reserveCapacity(configuration.bufferSize) // Reserve capacity to optimize storage in memory.
+        self.buffer.reserveCapacity(configuration.maxEntries) // Reserve capacity to optimize storage in memory.
         self.delegate = configuration.delegate
         
         self.queue = configuration.queue
@@ -94,8 +94,8 @@ public class ThrottledTransport: Transport {
             let message = self.configuration.formatters.format(event: event)
             
             self.buffer.append( (event, message) )
-            if self.buffer.count >= self.configuration.bufferSize {
-                self.flush(reason: .byBufferSize)
+            if self.buffer.count >= self.configuration.maxEntries {
+                self.flush(reason: .byLimitOfEntries)
             }
         }
         
@@ -144,7 +144,7 @@ public class ThrottledTransport: Transport {
             return
         }
         
-        let payloadsCount = min(buffer.count, configuration.bufferSize)
+        let payloadsCount = min(buffer.count, configuration.maxEntries)
         let newPayloadsBuffer = Array(buffer.dropFirst(payloadsCount))
         let droppedPayloads = Array(buffer[0..<payloadsCount])
         self.buffer = newPayloadsBuffer
@@ -171,7 +171,7 @@ extension ThrottledTransport {
         /// Keep in mind: a big size may impact to the memory. Tiny sizes may impact on storage service load.
         ///
         /// By default is set to 500.
-        public var bufferSize: Int = 500
+        public var maxEntries: Int = 500
         
         /// Auto flush interval, if `nil` no autoflush is made.
         /// If specified this is the interval used to autoflush.
@@ -222,11 +222,11 @@ extension ThrottledTransport {
     /// receive the group of events.
     ///
     /// - `byInterval`: flush interval passed, any events collected in buffer beside the buffer limit is sent
-    /// - `byBufferSize`: events in buffer reached the max size so they are sent.
+    /// - `byLimitOfEntries`: events in buffer reached the max size so they are sent.
     /// - `byUser`: manual flush.
     public enum FlushReason: String {
         case byInterval
-        case byBufferSize
+        case byLimitOfEntries
         case byUser
     }
     

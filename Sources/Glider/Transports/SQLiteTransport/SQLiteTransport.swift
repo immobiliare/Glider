@@ -25,16 +25,6 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// SQLiteTransport configuration.
     public let configuration: Configuration
 
-    /// Size of the buffer.
-    public var bufferSize: Int {
-        throttledTransport!.configuration.bufferSize
-    }
-    
-    /// Flush interval.
-    public var flushInterval: TimeInterval? {
-        throttledTransport?.configuration.flushInterval
-    }
-    
     /// Pending payloads contained into the buffer.
     public var pendingPayloads: [ThrottledTransport.Payload] {
         throttledTransport?.pendingPayloads ?? []

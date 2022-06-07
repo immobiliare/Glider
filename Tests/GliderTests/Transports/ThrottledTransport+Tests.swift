@@ -19,7 +19,7 @@ import CloudKit
 class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
     
     var numberOfEvents = 100
-    var bufferSize = 10
+    var maxEntries = 10
     
     var captureDelegateBlock: ((_ events: [ThrottledTransport.Payload], _ reason: ThrottledTransport.FlushReason) -> Void)?
     
@@ -50,7 +50,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
         
         let transport = ThrottledTransport {
-            $0.bufferSize = bufferSize
+            $0.maxEntries = maxEntries
             $0.flushInterval = 5
             $0.formatters = [format]
             $0.delegate = self
@@ -81,7 +81,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         ])
 
         let transport = ThrottledTransport {
-            $0.bufferSize = 100
+            $0.maxEntries = 100
             $0.flushInterval = 1
             $0.formatters = [format]
             $0.delegate = self
@@ -142,7 +142,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         ])
 
         let transport = ThrottledTransport {
-            $0.bufferSize = 100
+            $0.maxEntries = 100
             $0.flushInterval = 5
             $0.formatters = [format]
             $0.delegate = self
