@@ -21,13 +21,11 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate {
         let exp = expectation(description: "Test")
         
         let transport = try HTTPTransport(delegate: self) {
-            $0.maxConcurrentOperationCount = 3
+            $0.maxConcurrentRequests = 3
             $0.formatters = [SysLogFormatter()]
-            $0.asyncTransportConfiguration = .init({
-                $0.maxEntries = 100
-                $0.chunksSize = 5
-                $0.flushInterval = 5
-            })
+            $0.maxEntries = 100
+            $0.chunkSize = 5
+            $0.flushInterval = 5
         }
         
         let log = Log {

@@ -48,7 +48,7 @@ public final class AsyncURLRequestOperation: AsyncOperation {
             self?.onComplete?(result)
             self?.asyncFinish()
         }
-        transport?.configuration.session.execute(request)
+        transport?.configuration.urlSession.execute(request)
     }
     
 }

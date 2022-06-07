@@ -49,7 +49,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
                                                  configuration: configuration.asyncTransportConfiguration)
                 
         defer {
-            self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentOperationCount
+            self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentRequests
         }
     }
     
@@ -92,36 +92,73 @@ extension HTTPTransport {
     
     public struct Configuration {
         
+        // MARK: - Public Properties
+        
         /// The value in this property affects only the operations that
         /// the current queue has executing at the same time.
         ///
         /// By default is set to 3.
-        public var maxConcurrentOperationCount: Int = 3
+        public var maxConcurrentRequests: Int = 3
         
         /// URL Session used to send data.
         /// By default `.default` is used
-        public var session: URLSession
-        
-        /// Async transport used to configure the underlying service.
-        /// By default a default `AsyncTransport` class with default settings is used.
-        public var asyncTransportConfiguration: AsyncTransport.Configuration
+        public var urlSession: URLSession
         
         /// Formatters set.
-        /// NOTE: It will set automatically the underlying AsyncTransport.Configuration.
+        ///
+        /// NOTE:
+        /// This is a derivate properties of the `AsyncTransport.Configuration`,
+        /// it will set automatically the underlying AsyncTransport.Configuration.
         public var formatters: [EventFormatter] {
             set { asyncTransportConfiguration.formatters = newValue }
             get { asyncTransportConfiguration.formatters }
         }
         
+        /// Limit cap for stored message.
+        ///
+        /// NOTE:
+        /// This is a derivate properties of the `AsyncTransport.Configuration`,
+        /// it will set automatically the underlying AsyncTransport.Configuration.
+        public var maxEntries: Int {
+            set { asyncTransportConfiguration.maxRetries = newValue }
+            get { asyncTransportConfiguration.maxRetries }
+        }
+
+        /// Size of the chunks (number of payloads) sent at each dispatch event.
+        ///
+        /// NOTE:
+        /// This is a derivate properties of the `AsyncTransport.Configuration`,
+        /// it will set automatically the underlying AsyncTransport.Configuration.
+        public var chunkSize: Int {
+            set { asyncTransportConfiguration.chunksSize = newValue }
+            get { asyncTransportConfiguration.chunksSize }
+        }
+        
+        /// Automatic interval for flushing data in buffer.
+        ///
+        /// NOTE:
+        /// This is a derivate properties of the `AsyncTransport.Configuration`,
+        /// it will set automatically the underlying AsyncTransport.Configuration.
+        public var flushInterval: TimeInterval? {
+            set { asyncTransportConfiguration.flushInterval = newValue }
+            get { asyncTransportConfiguration.flushInterval }
+        }
+        
         /// GCD Queue.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
+        // MARK: - Private Properties
+        
+        /// Async transport used to configure the underlying service.
+        /// By default a default `AsyncTransport` class with default settings is used.
+        internal var asyncTransportConfiguration: AsyncTransport.Configuration
+        
         // MARK: - Initialization
         
         /// Initialize a new default `HTTPTransport` instance.
         public init(_ builder: ((inout Configuration) -> Void)?) throws {
             self.asyncTransportConfiguration = .init()
-            self.session = URLSession(configuration: .default)
+            self.urlSession = URLSession(configuration: .default)
             builder?(&self)
         }
         
