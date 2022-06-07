@@ -16,7 +16,12 @@ import Foundation
 /// It store logs locally before sending to the network and can retry unsent payloads.
 /// The underlying storage is an SQLite in memory database by default.
 public class AsyncTransport: Transport {
-    public typealias Chunk = (event: Event, message: SerializableData?, countAttempts: Int)
+    
+    // MARK: - Typealiases
+    
+    // payloads includes event, message and # attemopts for send
+    public typealias Payload = (event: Event, message: SerializableData?, countAttempts: Int)
+    public typealias Chunk = [Payload] // a chunk is a collection of payloads
     
     // MARK: - Public Properties
     
@@ -26,9 +31,9 @@ public class AsyncTransport: Transport {
     /// Configuration used.
     public let configuration: Configuration
     
-    /// Delegate which receive events from transport.
-    public weak var delegate: AsyncTransportDelegate?
-        
+    /// Behaviour.
+    public private(set) weak var delegate: AsyncTransportDelegate?
+    
     // MARK: - Private Properties
     
     /// Cache for buffered messages.
@@ -40,8 +45,27 @@ public class AsyncTransport: Transport {
     /// Autoflush timer.
     private var timer: Timer?
 
-    
     // MARK: - Initialization
+    
+    /// Initialize a new AsyncTransport.
+    ///
+    /// - Parameters:
+    ///   - delegate: delegate object. Must implement it in order to provide custom behaviour over the logic of the transport.
+    ///   - configuration: configuration.
+    public init(delegate: AsyncTransportDelegate, configuration: Configuration) throws {
+        self.delegate = delegate
+        self.configuration = configuration
+        self.queue = configuration.queue
+
+        let fileExists = configuration.bufferStorage.fileExists
+        self.db = try SQLiteDb(configuration.bufferStorage,
+                               options: configuration.bufferStorageOptions)
+        if !fileExists {
+            try prepareDatabase()
+        }
+        
+        setupAutoFlushInterval()
+    }
     
     /// Initialize a new AsyncTransport system.
     ///
@@ -54,22 +78,9 @@ public class AsyncTransport: Transport {
     ///   - options: storage options.
     ///   - queue: queue in which the operations are executed into.
     ///   - delegate: delegate for events.
-    public init(_ builder: ((inout Configuration) -> Void)? = nil) throws {
-        var config = Configuration()
-        builder(&config)
-        
-        self.configuration = config
-        
-        let fileExists = config.bufferStorage.fileExists
-        self.db = try SQLiteDb(config.bufferStorage, options: config.bufferStorageOptions)
-        if !fileExists {
-            try prepareDatabase()
-        }
-        
-        self.queue = config.queue
-        self.delegate = config.delegate
-        
-        setupAutoFlushInterval()
+    public convenience init(delegate: AsyncTransportDelegate, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        let configuration = Configuration(builder)
+        try self.init(delegate: delegate, configuration: configuration)
     }
     
     // MARK: - Conformance
@@ -88,7 +99,7 @@ public class AsyncTransport: Transport {
                     self.flush()
                 }
             } catch {
-                self.delegate?.asyncTransport(self, errorOccurred: error)
+                self.delegate?.asyncTransport(self, didFailWithError: error)
             }
         }
         
@@ -106,25 +117,11 @@ public class AsyncTransport: Transport {
     ///
     /// - Returns: Int
     public func countBufferedEvents() throws -> Int {
-        queue!.sync {
-            do {
-                return try db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0
-            } catch {
-                return 0
-            }
+        do {
+            return try db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0
+        } catch {
+            return 0
         }
-    }
-    
-    // MARK: - Overridable Functions
-    
-    /// Override this method to send a chunk of payloads to a remote service.
-    ///
-    /// - Parameters:
-    ///   - chunk: chunk of payloads to send.
-    ///   - completion: call completion to allows retry or send `nil` to mark them as sent and prevent them to be sent again.
-    open func record(chunk: [Chunk], completion: ((Error?) -> Void)) {
-        completion(nil) // by default are marked as sent
-        // Your own implementation should be manage this.
     }
     
     // MARK: - Private Functions
@@ -132,9 +129,9 @@ public class AsyncTransport: Transport {
     /// Prepare the database infrastructure.
     private func prepareDatabase() throws {
         try db.setForeignKeys(enabled: true)
-        try db.update(sql: Queries.createBufferLogTable)
+        try db.update(sql: AsyncTransportQueries.createBufferLogTable)
         
-        self.recordPayloadStmt = try db.prepare(sql: Queries.recordPayload)
+        self.recordPayloadStmt = try db.prepare(sql: AsyncTransportQueries.recordPayload)
     }
     
     /// Store message in cache.
@@ -194,14 +191,11 @@ public class AsyncTransport: Transport {
                 return 0 // no pending payloads
             }
             
-            record(chunk: chunk) { [weak self] error in
+            delegate?.asyncTransport(self, canSendPayloadsChunk: chunk, completion: { [weak self] error in
                 guard let self = self else { return }
                 
                 guard let error = error else {
-                    if let delegate = delegate {
-                        let sentIDs = chunk.map({ $0.event.id })
-                        delegate.asyncTransport(self, sentEventIDs: Set(sentIDs))
-                    }
+                    self.delegate?.asyncTransport(self, sentEventIDs: Set(chunk.map({ $0.event.id })))
                     return // all sent, nothing to do
                 }
                 
@@ -220,21 +214,16 @@ public class AsyncTransport: Transport {
                 }
                 
                 if retryIDs.isEmpty == false || discardedIDs.isEmpty == false  {
-                    DispatchQueue.main.async {
-                        self.delegate?.asyncTransport(self,
-                                                      willPerformRetriesOnEventIDs: retryIDs,
-                                                      discardedEvents: discardedIDs,
-                                                      error: error)
-                    }
+                    self.delegate?.asyncTransport(self,
+                                                  didFailSendingChunkWithError: error,
+                                                  willRetry: retryIDs,
+                                                  willDiscard: discardedIDs)
                 }
-            }
+            })
             
             return chunk.count
-        
         } catch {
-            DispatchQueue.main.async {
-                self.delegate?.asyncTransport(self, errorOccurred: error)
-            }
+            self.delegate?.asyncTransport(self, didFailWithError: error)
             return 0
         }
     }
@@ -249,12 +238,8 @@ public class AsyncTransport: Transport {
         let limit = (itemsCount - configuration.bufferSize)
         try db.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
         
-        if let delegate = delegate {
-            let countRemoved = try? db.select(sql: "SELECT changes()").int64(column: 0)
-            DispatchQueue.main.async {
-                delegate.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
-            }
-        }
+        let countRemoved = try? db.select(sql: "SELECT changes()").int64(column: 0)
+        delegate?.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
         
         return limit
     }
@@ -262,11 +247,11 @@ public class AsyncTransport: Transport {
     /// Fetch the next chunk of payloads to send to the external service.
     ///
     /// - Returns: `[CachedPayload]`
-    private func fetchNextPayloadsChunk() throws -> [Chunk] {
+    private func fetchNextPayloadsChunk() throws -> [Payload] {
         let result = try db.select(sql: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(configuration.chunksSize);")
         
         var rowIds = [String]()
-        let payloads: [Chunk] = result.iterateRows { _, stmt in
+        let payloads: [Payload] = result.iterateRows { _, stmt in
             do {
                 if let result = try fromBufferDatabase(stmt) {
                     rowIds.append(String(result.rowId))
@@ -275,9 +260,7 @@ public class AsyncTransport: Transport {
                     return nil
                 }
             } catch {
-                DispatchQueue.main.async {
-                    self.delegate?.asyncTransport(self, errorOccurred: error)
-                }
+                delegate?.asyncTransport(self, didFailWithError: error)
                 return nil
             }
         }
@@ -309,11 +292,9 @@ public class AsyncTransport: Transport {
 
 // MARK: - AsyncTransport.Queries
 
-internal extension AsyncTransport {
+fileprivate enum AsyncTransportQueries {
     
-    enum Queries {
-        
-        static let createBufferLogTable = """
+    static let createBufferLogTable = """
             CREATE TABLE IF NOT EXISTS buffer (
                 timestamp INTEGER DEFAULT (strftime('%s','now')),
                 data BLOB,
@@ -321,18 +302,17 @@ internal extension AsyncTransport {
                 retryAttempt INTEGER
             );
         """
-        
-        /// Statement compiled to insert payload into db.
-        static let recordPayload = """
+    
+    /// Statement compiled to insert payload into db.
+    static let recordPayload = """
             INSERT INTO buffer
                 (timestamp, data, message, retryAttempt)
             VALUES
                 (?, ?, ?, ?);
         """
-        
-    }
     
 }
+
 
 // MARK: - AsyncTransport.Configuration
 
@@ -378,9 +358,10 @@ extension AsyncTransport {
         
         /// GCD queue for operations.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
-
-        /// Delegate object.
-        public weak var delegate: AsyncTransportDelegate?
+        
+        public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+            builder?(&self)
+        }
         
     }
     
@@ -388,40 +369,74 @@ extension AsyncTransport {
 
 // MARK: - AsyncTransportDelegate
 
-/// The AsyncTransportDelegate is called to inform about events from the transport itself.
 public protocol AsyncTransportDelegate: AnyObject {
     
-    /// Called when an error has occurred. This is a local error.
+    /// This method is mandatory to use the `AsyncTransport`. You should implement
+    /// the behaviour to execute when a new chunk of payloads is ready to be sent
+    /// to whatsover (network, db etc.).
+    /// At the end of the operation you should call the `completion` callback saying to the
+    /// class the result of the operation.
+    /// If an error is reporteach single payload can be resent according to their attempts already made.
     ///
     /// - Parameters:
-    ///   - transport: transport.
-    ///   - error: error
-    func asyncTransport(_ transport: AsyncTransport, errorOccurred error: Error)
-    
-    /// Called when one or more message of a chunk are not sent.
-    ///
-    /// - Parameters:
-    ///   - transport: transport.
-    ///   - retryIDs: events marked for retry attempt (tuple with id of the event, attempt)
-    ///   - discardedEvents: discarded events, will be removed from cache and never sent.
-    ///   - error: error occurred, typically a network related one.
+    ///   - transport: transport instance.
+    ///   - chunk: payloads chunk to send.
+    ///   - completion: completion callback to inform the class about the result of the send operation.
     func asyncTransport(_ transport: AsyncTransport,
-                        willPerformRetriesOnEventIDs retryIDs: [(String, Int)],
-                        discardedEvents: Set<String>,
-                        error: Error)
+                        canSendPayloadsChunk chunk: AsyncTransport.Chunk,
+                        completion: ((Error?) -> Void))
+    
+    /// Received when an error has occurred handling data inside the class.
+    ///
+    /// - Parameters:
+    ///   - transport: transport instance.
+    ///   - error: error occurred.
+    func asyncTransport(_ transport: AsyncTransport,
+                        didFailWithError error: Error)
+    
+    /// This method is called to inform the delegate when a chunk of payloads failed to be
+    /// sent.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - error: error occurred, typically a network related one.
+    ///   - payloads: events marked for retry attempt (tuple with id of the event, attempt)
+    ///   - discardIds: discarded events, will be removed from cache and never sent.
+    func asyncTransport(_ transport: AsyncTransport,
+                        didFailSendingChunkWithError error: Error,
+                        willRetry payloads: [(String, Int)],
+                        willDiscard discardIds: Set<String>)
     
     /// Called when a chunk of data is marked as sent.
     ///
     /// - Parameters:
     ///   - transport: transport.
-    ///   - sentEventIDs: event identifiers sent.
-    func asyncTransport(_ transport: AsyncTransport, sentEventIDs: Set<String>)
+    ///   - sentEventIDs: event identifiers sent successfully.
+    func asyncTransport(_ transport: AsyncTransport,
+                        sentEventIDs: Set<String>)
     
     /// Called when a trim due to buffer size limit reached occour.
     ///
     /// - Parameters:
     ///   - transport: transport.
     ///   - discardedEventsFromBuffer: number of events discarded from the oldest.
-    func asyncTransport(_ transport: AsyncTransport, discardedEventsFromBuffer: Int64)
+    func asyncTransport(_ transport: AsyncTransport,
+                        discardedEventsFromBuffer: Int64)
+    
+}
 
+// MARK: - Optional Delegate Methods
+
+extension AsyncTransportDelegate {
+    
+    public func asyncTransport(_ transport: AsyncTransport, didFailWithError error: Error) {}
+    public func asyncTransport(_ transport: AsyncTransport,
+                        didFailSendingChunkWithError error: Error,
+                        willRetry payloads: [(String, Int)],
+                        willDiscard discardIds: Set<String>) {}
+    public func asyncTransport(_ transport: AsyncTransport,
+                        sentEventIDs: Set<String>) {}
+    public func asyncTransport(_ transport: AsyncTransport,
+                        discardedEventsFromBuffer: Int64) {}
+    
 }

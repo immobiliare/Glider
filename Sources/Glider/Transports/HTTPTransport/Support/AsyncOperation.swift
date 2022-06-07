@@ -13,14 +13,14 @@
 import Foundation
 
 /// This class allows subclasses in order to make an async Operation.
-internal class AsyncOperation: Operation {
+public class AsyncOperation: Operation {
     
     /// Identifier of the operation.
     var identifier: String {
         return self.name ?? String(describing: self)
     }
     
-    override func start() {
+    public override func start() {
         // Apple's docs say not to call super here.
         guard !isCancelled else {
             asyncFinish()
@@ -40,7 +40,7 @@ internal class AsyncOperation: Operation {
         setIsFinishedWithKVO(value: true)
     }
     
-    override var isAsynchronous: Bool {
+    public override var isAsynchronous: Bool {
         return true
     }
     
@@ -51,11 +51,11 @@ internal class AsyncOperation: Operation {
     private var myFinished = false
     private var myExecuting = false
     
-    override var isFinished: Bool {
+    public override var isFinished: Bool {
         return myFinished
     }
     
-    override var isExecuting: Bool {
+    public override var isExecuting: Bool {
         return myExecuting
     }
     
@@ -69,19 +69,6 @@ internal class AsyncOperation: Operation {
         willChangeValue(forKey: "isExecuting")
         myExecuting = value
         didChangeValue(forKey: "isExecuting")
-    }
-    
-}
-
-// MARK: - Result Extension
-
-extension Result where Failure == Error {
-    
-    var error: Error? {
-        switch self {
-        case .failure(let e): return e
-        case .success: return nil
-        }
     }
     
 }

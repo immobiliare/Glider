@@ -27,8 +27,8 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         networkQueue.operationCount
     }
     
-    /// Delegate.
-    public weak var delegate: HTTPTransportDelegate?
+    /// Delegate to manage events and behaviour of the transport layer.
+    public private(set) weak var delegate: HTTPTransportDelegate?
     
     // MARK: - Private Properties
     
@@ -36,17 +36,17 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     private var networkQueue = OperationQueue()
     
     /// Async transporter.
-    private var asyncTransport: AsyncTransport
+    private var asyncTransport: AsyncTransport?
     
     // MARK: - Initialization
     
     /// Initialize a new HTTP Transport for generic HTTP log sends.
     /// - Parameter builder: configuration builder callback.
-    public init(_ builder: ((inout Configuration) -> Void)? = nil) throws {
+    public init(delegate: HTTPTransportDelegate, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        self.delegate = delegate
         self.configuration = try Configuration(builder)
-        self.asyncTransport = configuration.asyncTransport
-        self.asyncTransport.delegate = self
-        self.delegate = configuration.delegate
+        self.asyncTransport = try AsyncTransport(delegate: self,
+                                                 configuration: configuration.asyncTransportConfiguration)
                 
         defer {
             self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentOperationCount
@@ -56,25 +56,32 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        true
+        asyncTransport?.record(event: event) ?? false // forward to async transport
     }
     
     // MARK: - AsyncTransportDelegate
     
-    public func asyncTransport(_ transport: AsyncTransport, errorOccurred error: Error) {
+    public func asyncTransport(_ transport: AsyncTransport,
+                               canSendPayloadsChunk chunk: AsyncTransport.Chunk,
+                               completion: ((Error?) -> Void)) {
         
-    }
-    
-    public func asyncTransport(_ transport: AsyncTransport, willPerformRetriesOnEventIDs retryIDs: [(String, Int)], discardedEvents: Set<String>, error: Error) {
+        // Get the list of URLRequests to execute for each received chunk.
+        guard let chuckURLRequests = delegate?.httpTransport(self, prepareURLRequestsForChunk: chunk) else {
+            completion(GliderError(message: "HTTPTransport's delegate not implement httpTransport(:prepareURLRequestsForChunk:)"))
+            return
+        }
         
-    }
-    
-    public func asyncTransport(_ transport: AsyncTransport, sentEventIDs: Set<String>) {
+        // Encapsulate each request in an async operation
+        let operations: [AsyncURLRequestOperation] = chuckURLRequests.map { urlRequest in
+            let op = AsyncURLRequestOperation(request: urlRequest, transport: self)
+            op.onComplete = { [weak self] result in
+                self?.delegate?.httpTransport(self!, didFinishRequest: urlRequest, withResult: result)
+            }
+            return op
+        }
         
-    }
-    
-    public func asyncTransport(_ transport: AsyncTransport, discardedEventsFromBuffer: Int64) {
-        
+        // Enqueue
+        networkQueue.addOperations(operations, waitUntilFinished: false)
     }
     
 }
@@ -97,10 +104,14 @@ extension HTTPTransport {
         
         /// Async transport used to configure the underlying service.
         /// By default a default `AsyncTransport` class with default settings is used.
-        public var asyncTransport: AsyncTransport
+        public var asyncTransportConfiguration: AsyncTransport.Configuration
         
-        /// Delegate for HTTPTransport messages.
-        public weak var delegate: HTTPTransportDelegate?
+        /// Formatters set.
+        /// NOTE: It will set automatically the underlying AsyncTransport.Configuration.
+        public var formatters: [EventFormatter] {
+            set { asyncTransportConfiguration.formatters = newValue }
+            get { asyncTransportConfiguration.formatters }
+        }
         
         /// GCD Queue.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
@@ -109,7 +120,7 @@ extension HTTPTransport {
         
         /// Initialize a new default `HTTPTransport` instance.
         public init(_ builder: ((inout Configuration) -> Void)?) throws {
-            self.asyncTransport = try AsyncTransport()
+            self.asyncTransportConfiguration = .init()
             self.session = URLSession(configuration: .default)
             builder?(&self)
         }
@@ -117,3 +128,30 @@ extension HTTPTransport {
     }
     
 }
+
+// MARK: - HTTPTransportDelegate
+
+public protocol HTTPTransportDelegate: AnyObject {
+    
+    /// This method is called when a new chunk of payloads can be sent over the network.
+    /// In this method you should transform a chunk of payloads in one or more `URLRequest`s
+    /// to enqueue into the internal network queue manager.
+    ///
+    /// - Parameters:
+    ///   - transport: transport instance.
+    ///   - chunk: chunk of payloads to send.
+    /// - Returns: transformed `[URLRequest]` instances.
+    func httpTransport(_ transport: HTTPTransport,
+                       prepareURLRequestsForChunk chunk: AsyncTransport.Chunk) -> [HTTPTransportRequest]
+    
+    /// Called when a new request is executed.
+    ///
+    /// - Parameters:
+    ///   - transport: transport instance.
+    ///   - request: request executed.
+    ///   - result: result obtained.
+    func httpTransport(_ transport: HTTPTransport,
+                       didFinishRequest request: HTTPTransportRequest, withResult result: AsyncURLRequestOperation.Response)
+    
+}
+
