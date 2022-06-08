@@ -11,12 +11,19 @@
 //
 
 import Foundation
+import Network
 
 import XCTest
 @testable import Glider
 import CloudKit
 
-class WebSocketTransportTests: XCTestCase {
+class WebSocketTransportTests: XCTestCase, WebSocketServerDelegate {
+    
+    
+    private lazy var webSocketServer: WebSocketServer = {
+        let server = WebSocketServer(port: 1010)
+        return server
+    }()
     
     func tests_webSocketTransport() async throws {
         let exp = expectation(description: "tests_throttledTransportBufferFlush")
@@ -27,8 +34,10 @@ class WebSocketTransportTests: XCTestCase {
         ])
         format.structureFormatStyle = .object
     
+        webSocketServer.delegate = self
+        try webSocketServer.start()
         
-        let transport = try WebSocketTransport(url: "wss://socketsbay.com/wss/v2/2/demo/") {
+        let transport = try WebSocketTransport(url: "wss://127.0.0.1:1010") {
             $0.connectAutomatically = true
             $0.formatters = [format]
         }
@@ -39,10 +48,50 @@ class WebSocketTransportTests: XCTestCase {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
-            log.info?.write("ciao")
+            for i in 0..<1 {
+                log.info?.write("ciao \(i)")
+            }
         })
                 
         wait(for: [exp], timeout: 500)
         
+    }
+    
+    override func tearDown() async throws {
+        try await super.tearDown()
+        
+        webSocketServer.stop()
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, didChangeState state: NWListener.State) {
+        
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, didStopConnection connection: WebSocketPeer) {
+        
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, didStopServerWithError error: NWError?) {
+        
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, didOpenConnection client: WebSocketPeer) {
+        print("Open connection!")
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didChangeState state: NWConnection.State) {
+        
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveData data: Data) {
+        print("Receive string: \(data)")
+        print("Resend same data")
+        peer.send(data: data)
+    }
+    
+    func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveString string: String) {
+        print("Receive string: \(string)")
+        print("Sent string uppercased")
+        peer.send(string: string.uppercased())
     }
 }
