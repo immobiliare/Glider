@@ -23,7 +23,7 @@ class WebSocketTransportTests: XCTestCase, WebSocketServerDelegate, WebSocketTra
     private var expClientConnected: XCTestExpectation?
     private var expServerReceive: XCTestExpectation?
     private var receivedEvents = [Event]()
-    private var eventsToGenerate = 10
+    private var eventsToGenerate = 30
     private var serverPort: UInt16 = 1011
 
     func tests_webSocketTransport() async throws {
@@ -47,7 +47,7 @@ class WebSocketTransportTests: XCTestCase, WebSocketServerDelegate, WebSocketTra
         let transport = try WebSocketTransport(url: "ws://localhost:1011", delegate: self) {
             $0.connectAutomatically = true
             $0.formatters = [format]
-            $0.dataType = .jsonEvent(encoder: JSONEncoder())
+            $0.dataType = .event(encoder: JSONEncoder())
         }
                 
         let log = Log {

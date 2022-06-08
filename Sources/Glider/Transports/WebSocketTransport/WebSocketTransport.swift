@@ -13,8 +13,10 @@
 import Foundation
 import Network
 
+/// The `WebSocketTransport`is used to transport message to a websocket compliant server.
+/// Each message is transmitted to the server directly on record.
 @available(iOS, introduced: 13)
-public class WebSocketTransport: Transport, WebSocketClientDelegate, AsyncTransportDelegate {
+public class WebSocketTransport: Transport, WebSocketClientDelegate {
     public typealias Payload = (event: Event, message: SerializableData?)
     
     // MARK: - Public Properties
@@ -57,10 +59,7 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate, AsyncTransp
         self.configuration = Configuration(url: url, builder)
         self.queue = configuration.queue
         self.delegate = delegate
-        
-        self.asyncTransport = try AsyncTransport(delegate: self,
-                                                 configuration: configuration.asyncTransportConfiguration)
-        
+
         self.socket = WebSocketClient(url: configuration.url,
                                       connectAutomatically: false,
                                       options: configuration.options,
@@ -101,35 +100,26 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate, AsyncTransp
         do {
             switch configuration.dataType {
             case .message:
-                guard let message = self.configuration.formatters.format(event: event) else {
-                    return false
-                }
+                let message = self.configuration.formatters.format(event: event)
                 
-                if let messageAsString = message.asString() {
+                if let messageAsString = message?.asString() {
                     socket?.send(string: messageAsString)
-                } else if let messageAsData = message.asData() {
+                } else if let messageAsData = message?.asData() {
                     socket?.send(data: messageAsData)
                 } else {
                     return false
                 }
                 
-            case .jsonEvent(let encoder):
+            case .event(let encoder):
                 let encoded = try encoder.encode(event)
                 socket?.send(data: encoded)
             }
-
+            
             return true
         } catch {
+            delegate?.webSocketTransport(self, didReceiveError: error)
             return false
         }
-    }
-    
-    // MARK: - AsyncTransportDelegate
-    
-    public func asyncTransport(_ transport: AsyncTransport,
-                               canSendPayloadsChunk chunk: AsyncTransport.Chunk,
-                               completion: ((Error?) -> Void)) {
-        
     }
     
     // MARK: - WebSocketClientDelegate
@@ -190,45 +180,8 @@ extension WebSocketTransport {
         /// By default is set to `WebSocket.defaultOptions`.
         public var options: NWProtocolWebSocket.Options = WebSocketClient.defaultOptions
         
-        /// Formatters set.
-        ///
-        /// NOTE:
-        /// This is a derivate properties of the `AsyncTransport.Configuration`,
-        /// it will set automatically the underlying AsyncTransport.Configuration.
-        public var formatters: [EventFormatter] {
-            set { asyncTransportConfiguration.formatters = newValue }
-            get { asyncTransportConfiguration.formatters }
-        }
-        
-        /// Limit cap for stored message.
-        ///
-        /// NOTE:
-        /// This is a derivate properties of the `AsyncTransport.Configuration`,
-        /// it will set automatically the underlying AsyncTransport.Configuration.
-        public var maxEntries: Int {
-            set { asyncTransportConfiguration.maxRetries = newValue }
-            get { asyncTransportConfiguration.maxRetries }
-        }
-
-        /// Size of the chunks (number of payloads) sent at each dispatch event.
-        ///
-        /// NOTE:
-        /// This is a derivate properties of the `AsyncTransport.Configuration`,
-        /// it will set automatically the underlying AsyncTransport.Configuration.
-        public var chunkSize: Int {
-            set { asyncTransportConfiguration.chunksSize = newValue }
-            get { asyncTransportConfiguration.chunksSize }
-        }
-        
-        /// Automatic interval for flushing data in buffer.
-        ///
-        /// NOTE:
-        /// This is a derivate properties of the `AsyncTransport.Configuration`,
-        /// it will set automatically the underlying AsyncTransport.Configuration.
-        public var autoFlushInterval: TimeInterval? {
-            set { asyncTransportConfiguration.autoFlushInterval = newValue }
-            get { asyncTransportConfiguration.autoFlushInterval }
-        }
+        /// Formatters used to transform event in message.
+        public var formatters = [EventFormatter]()
         
         /// Queue used for socket connection.
         /// By default is set to `.background`
@@ -262,10 +215,10 @@ extension WebSocketTransport {
     
     /// Data type to send to websocket endpoint.
     /// - `message`: formatted message is sent, where available.
-    /// - `jsonEvent`: the encoded message is sent.
+    /// - `event`: the encoded message is sent.
     public enum DataType {
         case message
-        case jsonEvent(encoder: JSONEncoder)
+        case event(encoder: JSONEncoder)
     }
     
 }
