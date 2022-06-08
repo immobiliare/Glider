@@ -17,7 +17,7 @@ import XCTest
 @testable import Glider
 import CloudKit
 
-class WebSocketTransportTests: XCTestCase, WebSocketServerDelegate, WebSocketTransportDelegate {
+class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSocketTransportClientDelegate {
     
     private var server: WebSocketServer?
     private var expClientConnected: XCTestExpectation?
@@ -44,7 +44,7 @@ class WebSocketTransportTests: XCTestCase, WebSocketServerDelegate, WebSocketTra
         
         // Prepare transport...
         expClientConnected = expectation(description: "Expect client connection")
-        let transport = try WebSocketTransport(url: "ws://localhost:1011", delegate: self) {
+        let transport = try WebSocketTransportClient(url: "ws://localhost:1011", delegate: self) {
             $0.connectAutomatically = true
             $0.formatters = [format]
             $0.dataType = .event(encoder: JSONEncoder())
@@ -95,39 +95,39 @@ class WebSocketTransportTests: XCTestCase, WebSocketServerDelegate, WebSocketTra
     
     // MARK: - WebSocketTransportDelegate
     
-    func webSocketTransportConnecting(_ transport: WebSocketTransport) {
+    func webSocketTransportConnecting(_ transport: WebSocketTransportClient) {
         print("Connecting to websocket server...")
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, didChangeState newState: NWConnection.State) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, didChangeState newState: NWConnection.State) {
 
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, didConnect url: URL) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, didConnect url: URL) {
         expClientConnected?.fulfill()
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, didDisconnectedWithCode code: NWProtocolWebSocket.CloseCode, reason: String?) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, didDisconnectedWithCode code: NWProtocolWebSocket.CloseCode, reason: String?) {
         
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, didReceiveError error: Error?) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, didReceiveError error: Error?) {
         
     }
     
-    func webSocketTransportDidReceivePoing(_ transport: WebSocketTransport) {
+    func webSocketTransportDidReceivePoing(_ transport: WebSocketTransportClient) {
         
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, didReceiveData data: SerializableData?) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, didReceiveData data: SerializableData?) {
         
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, isViable: Bool) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, isViable: Bool) {
 
     }
     
-    func webSocketTransport(_ transport: WebSocketTransport, didSendPayload payload: WebSocketTransport.Payload, error: Error?) {
+    func webSocketTransport(_ transport: WebSocketTransportClient, didSendPayload payload: WebSocketTransportClient.Payload, error: Error?) {
         
     }
     

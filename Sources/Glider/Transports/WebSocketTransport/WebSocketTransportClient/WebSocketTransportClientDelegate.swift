@@ -13,7 +13,7 @@
 import Foundation
 import Network
 
-public protocol WebSocketTransportDelegate: AnyObject {
+public protocol WebSocketTransportClientDelegate: AnyObject {
     
     // MARK: - Connection Related
     
@@ -21,21 +21,21 @@ public protocol WebSocketTransportDelegate: AnyObject {
     ///
     /// - Parameters:
     ///   - transport: transport instance.
-    func webSocketTransportConnecting(_ transport: WebSocketTransport)
+    func webSocketTransportConnecting(_ transport: WebSocketTransportClient)
     
     /// Message sent when web transport client state did change.
     ///
     /// - Parameters:
     ///   - transport: transport instance.
     ///   - newState: new state.
-    func webSocketTransport(_ transport: WebSocketTransport,
+    func webSocketTransport(_ transport: WebSocketTransportClient,
                             didChangeState newState: NWConnection.State)
 
     ///
     /// - Parameters:
     ///   - transport: transport instance.
     ///   - url: url of the remote side
-    func webSocketTransport(_ transport: WebSocketTransport,
+    func webSocketTransport(_ transport: WebSocketTransportClient,
                             didConnect url: URL)
     
     /// Message sent when client did disconnect.
@@ -44,7 +44,7 @@ public protocol WebSocketTransportDelegate: AnyObject {
     ///   - transport: transport instance.
     ///   - code : disconnection code.
     ///   - reason: readable reason of disconnection.
-    func webSocketTransport(_ transport: WebSocketTransport,
+    func webSocketTransport(_ transport: WebSocketTransportClient,
                             didDisconnectedWithCode code: NWProtocolWebSocket.CloseCode,
                             reason: String?)
     
@@ -53,21 +53,21 @@ public protocol WebSocketTransportDelegate: AnyObject {
     /// - Parameters:
     ///   - transport: transport instance.
     ///   - error: error received.
-    func webSocketTransport(_ transport: WebSocketTransport,
+    func webSocketTransport(_ transport: WebSocketTransportClient,
                             didReceiveError error: Error?)
     
     /// Message received as response from a ping.
     ///
     /// - Parameters:
     ///   - transport: transport instance.
-    func webSocketTransportDidReceivePoing(_ transport: WebSocketTransport)
+    func webSocketTransportDidReceivePoing(_ transport: WebSocketTransportClient)
     
     /// Message triggered when a new data from server has been received.
     ///
     /// - Parameters:
     ///   - transport: trasnport instance.
     ///   - data: data received.
-    func webSocketTransport(_ transport: WebSocketTransport,
+    func webSocketTransport(_ transport: WebSocketTransportClient,
                             didReceiveData data: SerializableData?)
     
     
@@ -76,7 +76,7 @@ public protocol WebSocketTransportDelegate: AnyObject {
     /// - Parameters:
     ///   - transport: trasnport instance.
     ///   - isViable: A `Bool` indicating if the connection is viable or not.
-    func webSocketTransport(_ transport: WebSocketTransport,
+    func webSocketTransport(_ transport: WebSocketTransportClient,
                             isViable: Bool)
 
     // MARK: - Payloads Events
@@ -87,7 +87,7 @@ public protocol WebSocketTransportDelegate: AnyObject {
     ///   - transport: transport instance.
     ///   - payload: payload sent.
     ///   - error: error if sending fails.
-    func webSocketTransport(_ transport: WebSocketTransport,
-                            didSendPayload payload: WebSocketTransport.Payload, error: Error?)
+    func webSocketTransport(_ transport: WebSocketTransportClient,
+                            didSendPayload payload: WebSocketTransportClient.Payload, error: Error?)
     
 }

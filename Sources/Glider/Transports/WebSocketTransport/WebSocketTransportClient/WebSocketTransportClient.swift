@@ -13,10 +13,10 @@
 import Foundation
 import Network
 
-/// The `WebSocketTransport`is used to transport message to a websocket compliant server.
+/// The `WebSocketTransportClient`is used to transport message to a websocket compliant server.
 /// Each message is transmitted to the server directly on record.
 @available(iOS, introduced: 13)
-public class WebSocketTransport: Transport, WebSocketClientDelegate {
+public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     public typealias Payload = (event: Event, message: SerializableData?)
     
     // MARK: - Public Properties
@@ -28,7 +28,7 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate {
     public var queue: DispatchQueue?
     
     /// Delegate.
-    public weak var delegate: WebSocketTransportDelegate?
+    public weak var delegate: WebSocketTransportClientDelegate?
     
     /// WebSocket client.
     public private(set) var socket: WebSocketClient?
@@ -50,7 +50,7 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate {
     ///   - delegate: delegate to receive events.
     ///   - builder: builder configuration function.
     public init(url urlString: String,
-                delegate: WebSocketTransportDelegate? = nil,
+                delegate: WebSocketTransportClientDelegate? = nil,
                 _ builder: ((inout Configuration) -> Void)? = nil) throws {
         guard let url = URL(string: urlString) else {
             throw GliderError(message: "Invalid WebSocket url: \(urlString)")
@@ -163,7 +163,7 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate {
 
 // MARK: - Configuration
 
-extension WebSocketTransport {
+extension WebSocketTransportClient {
     
     public struct Configuration {
         
