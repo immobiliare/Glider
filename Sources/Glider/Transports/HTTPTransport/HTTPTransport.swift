@@ -67,8 +67,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         
         // Get the list of URLRequests to execute for each received chunk.
         guard let chuckURLRequests = delegate?.httpTransport(self, prepareURLRequestsForChunk: chunk) else {
-            completion(GliderError(message: "HTTPTransport's delegate not implement httpTransport(:prepareURLRequestsForChunk:)"))
-            return
+            fatalError("HTTPTransport's delegate not implement httpTransport(:prepareURLRequestsForChunk:)")
         }
         
         // Encapsulate each request in an async operation
@@ -139,9 +138,9 @@ extension HTTPTransport {
         /// NOTE:
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
-        public var flushInterval: TimeInterval? {
-            set { asyncTransportConfiguration.flushInterval = newValue }
-            get { asyncTransportConfiguration.flushInterval }
+        public var autoFlushInterval: TimeInterval? {
+            set { asyncTransportConfiguration.autoFlushInterval = newValue }
+            get { asyncTransportConfiguration.autoFlushInterval }
         }
         
         /// GCD Queue.

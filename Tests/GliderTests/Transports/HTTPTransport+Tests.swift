@@ -25,7 +25,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate {
             $0.formatters = [SysLogFormatter()]
             $0.maxEntries = 100
             $0.chunkSize = 5
-            $0.flushInterval = 5
+            $0.autoFlushInterval = 5
         }
         
         let log = Log {

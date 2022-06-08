@@ -63,7 +63,7 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         asyncTransport = try AsyncTransportTestable(delegate: self, {
             $0.maxEntries = 100
             $0.chunksSize = self.blockSize
-            $0.flushInterval = self.flushInterval
+            $0.autoFlushInterval = self.flushInterval
             $0.formatters = [format]
             $0.bufferStorage = .inMemory
             $0.maxRetries = self.maxRetries

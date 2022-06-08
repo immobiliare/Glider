@@ -149,7 +149,7 @@ public class AsyncTransport: Transport {
     }
     
     private func setupAutoFlushInterval() {
-        guard let flushInterval = configuration.flushInterval else { return }
+        guard let flushInterval = configuration.autoFlushInterval else { return }
         
         self.timer?.invalidate()
         let timer = Timer(timeInterval: flushInterval,
@@ -335,7 +335,7 @@ extension AsyncTransport {
         public var chunksSize: Int = 10
         
         /// Automatic interval for flushing data in buffer.
-        public var flushInterval: TimeInterval?
+        public var autoFlushInterval: TimeInterval?
         
         /// Perform flush if necessary when a new record event is set.
         ///

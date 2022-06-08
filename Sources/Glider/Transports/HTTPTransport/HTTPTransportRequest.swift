@@ -12,7 +12,9 @@
 
 import Foundation
 
-/// An extended request provide a mechanism to retry calls.
+/// Represent a single request for `HTTPTransport` transport layer.
+/// It encapsulates a valid `URLRequest` along with extra configuration
+/// attributes like retry mechanism and error handling.
 public struct HTTPTransportRequest {
     
     /// Typealiases.

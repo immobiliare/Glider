@@ -104,7 +104,7 @@ public class ThrottledTransport: Transport {
     
     /// Initialize the autoflush interval.
     private func setupAutoFlushIntervalIfNeeded() {
-        guard let flushInterval = configuration.flushInterval else { return }
+        guard let flushInterval = configuration.autoFlushInterval else { return }
         
         if #available(iOS 10.0, *) {
             dispatchPrecondition(condition: .onQueue(queue!))
@@ -176,7 +176,7 @@ extension ThrottledTransport {
         /// Auto flush interval, if `nil` no autoflush is made.
         /// If specified this is the interval used to autoflush.
         /// By default is not set, the only constraint is the size of the buffer.
-        public var flushInterval: TimeInterval?
+        public var autoFlushInterval: TimeInterval?
         
         /// It will receive chunk of payloads to register.
         public weak var delegate: ThrottledTransportDelegate?

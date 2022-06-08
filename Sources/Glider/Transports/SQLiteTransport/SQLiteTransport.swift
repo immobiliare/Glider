@@ -85,7 +85,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     @discardableResult
     public func purge(vacuum: Bool = true) throws -> Int64 {
        try queue!.sync {
-           guard let logsLifeTimeInterval = configuration.logsLifeTimeInterval,
+           guard let logsLifeTimeInterval = configuration.lifetimeInterval,
                  let flushMinimumInterval = configuration.purgeMinInterval,
                   Date().timeIntervalSince(lastPurge) >= flushMinimumInterval else {
                 return 0
@@ -356,7 +356,7 @@ extension SQLiteTransport {
         /// to preserve the space. Set as you needs.
         ///
         /// By default is 1h.
-        public var logsLifeTimeInterval: TimeInterval?
+        public var lifetimeInterval: TimeInterval?
         
         /// Flushing old logs can't happens every time we wrote something
         /// on db. So this interval is the minimum time interval to pass
@@ -395,7 +395,7 @@ extension SQLiteTransport {
                     _ builder: ((inout Configuration) -> Void)?) {
             self.databaseLocation = databaseLocation
             self.throttledTransport = ThrottledTransport.init({ _ in })
-            self.purgeMinInterval = (logsLifeTimeInterval != nil ? logsLifeTimeInterval! * 3.0 : nil)
+            self.purgeMinInterval = (lifetimeInterval != nil ? lifetimeInterval! * 3.0 : nil)
             builder?(&self)
         }
         

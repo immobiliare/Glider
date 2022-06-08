@@ -32,7 +32,7 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
         let sqliteTransport = try SQLiteTransport(databaseLocation: .inMemory, {
             $0.throttledTransport = .init({
                 $0.maxEntries = self.maxEntries
-                $0.flushInterval = nil
+                $0.autoFlushInterval = nil
             })
             $0.delegate = self
         })

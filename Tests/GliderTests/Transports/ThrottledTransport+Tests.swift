@@ -51,7 +51,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         
         let transport = ThrottledTransport {
             $0.maxEntries = maxEntries
-            $0.flushInterval = 5
+            $0.autoFlushInterval = 5
             $0.formatters = [format]
             $0.delegate = self
         }
@@ -82,7 +82,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
 
         let transport = ThrottledTransport {
             $0.maxEntries = 100
-            $0.flushInterval = 1
+            $0.autoFlushInterval = 1
             $0.formatters = [format]
             $0.delegate = self
         }
@@ -143,7 +143,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
 
         let transport = ThrottledTransport {
             $0.maxEntries = 100
-            $0.flushInterval = 5
+            $0.autoFlushInterval = 5
             $0.formatters = [format]
             $0.delegate = self
         }
