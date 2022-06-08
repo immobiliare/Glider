@@ -12,7 +12,7 @@
 
 import Foundation
 
-public struct Event: Codable {
+public struct Event: Codable, Equatable {
 
     // MARK: - Public Properties
     
@@ -141,6 +141,10 @@ public struct Event: Codable {
              scope,
              serializationStrategies,
              serializedObjectData, serializedObjectMetadata, isSerialized
+    }
+    
+    public static func == (lhs: Event, rhs: Event) -> Bool {
+        lhs.id == rhs.id
     }
 
 }

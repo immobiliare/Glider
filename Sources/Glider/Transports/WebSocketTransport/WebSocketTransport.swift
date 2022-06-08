@@ -14,7 +14,8 @@ import Foundation
 import Network
 
 @available(iOS, introduced: 13)
-public class WebSocketTransport: Transport, WebSocketClientDelegate {
+public class WebSocketTransport: Transport, WebSocketClientDelegate, AsyncTransportDelegate {
+    public typealias Payload = (event: Event, message: SerializableData?)
     
     // MARK: - Public Properties
     
@@ -24,24 +25,51 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate {
     /// GCD Queue.
     public var queue: DispatchQueue?
     
+    /// Delegate.
+    public weak var delegate: WebSocketTransportDelegate?
+    
     /// WebSocket client.
     public private(set) var socket: WebSocketClient?
     
+    /// Can socket accept data.
+    public private(set) var isViable = false
+    
+    // MARK: - Private Properties
+    
+    /// Underlying async transport.
+    private var asyncTransport: AsyncTransport?
+    
     // MARK: - Initialization
     
-    public init(url urlString: String, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+    /// Initialize a new `WebSocketTransport` instance with a given configuration.
+    ///
+    /// - Parameters:
+    ///   - urlString: url of the remote websocket server.
+    ///   - delegate: delegate to receive events.
+    ///   - builder: builder configuration function.
+    public init(url urlString: String,
+                delegate: WebSocketTransportDelegate? = nil,
+                _ builder: ((inout Configuration) -> Void)? = nil) throws {
         guard let url = URL(string: urlString) else {
             throw GliderError(message: "Invalid WebSocket url: \(urlString)")
         }
         
         self.configuration = Configuration(url: url, builder)
         self.queue = configuration.queue
+        self.delegate = delegate
+        
+        self.asyncTransport = try AsyncTransport(delegate: self,
+                                                 configuration: configuration.asyncTransportConfiguration)
         
         self.socket = WebSocketClient(url: configuration.url,
-                                      connectAutomatically: configuration.connectAutomatically,
+                                      connectAutomatically: false,
                                       options: configuration.options,
                                       connectionQueue: configuration.socketQueue,
                                       delegate: self)
+        
+        if configuration.connectAutomatically {
+            connect()
+        }
     }
     
     // MARK: - Public Functions
@@ -53,6 +81,7 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate {
         }
         
         socket?.connect()
+        delegate?.webSocketTransportConnecting(self)
     }
     
     /// Disconnect websocket.
@@ -95,39 +124,50 @@ public class WebSocketTransport: Transport, WebSocketClientDelegate {
         }
     }
     
+    // MARK: - AsyncTransportDelegate
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               canSendPayloadsChunk chunk: AsyncTransport.Chunk,
+                               completion: ((Error?) -> Void)) {
+        
+    }
+    
+    // MARK: - WebSocketClientDelegate
+    
     public func webSocketDidConnect(connection: WebSocketClient) {
-        print("Connect")
+        delegate?.webSocketTransport(self, didConnect: configuration.url)
     }
     
     public func webSocketDidDisconnect(connection: WebSocketClient, closeCode: NWProtocolWebSocket.CloseCode, reason: Data?) {
-        print("Disconnect: \(closeCode)")
-
+        delegate?.webSocketTransport(self, didDisconnectedWithCode: closeCode, reason: reason?.asString())
     }
     
     public func webSocketViabilityDidChange(connection: WebSocketClient, isViable: Bool) {
-    
+        self.isViable = isViable
+        delegate?.webSocketTransport(self, isViable: isViable)
     }
     
     public func webSocketDidAttemptBetterPathMigration(result: Result<WebSocketClient, NWError>) {
-        
+        if case .failure(let error) = result {
+            delegate?.webSocketTransport(self, didReceiveError: error)
+        }
     }
     
     public func webSocketDidReceiveError(connection: WebSocketClient, error: NWError) {
-        print("Error: \(error)")
+        delegate?.webSocketTransport(self, didReceiveError: error)
     }
     
     public func webSocketDidReceivePong(connection: WebSocketClient) {
-        
+        delegate?.webSocketTransportDidReceivePoing(self)
     }
     
     public func webSocketDidReceiveMessage(connection: WebSocketClient, string: String) {
-        print("Message: \(string)")
+        delegate?.webSocketTransport(self, didReceiveData: string)
     }
     
     public func webSocketDidReceiveMessage(connection: WebSocketClient, data: Data) {
-        print("Data: \(data)")
+        delegate?.webSocketTransport(self, didReceiveData: data)
     }
-    
     
 }
 
