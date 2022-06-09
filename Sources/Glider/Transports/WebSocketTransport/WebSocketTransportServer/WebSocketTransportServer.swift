@@ -116,16 +116,29 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
             return false
         }
         
-        let message = configuration.formatters.format(event: event)
-        if let messageAsString = message?.asString() {
-            server?.send(string: messageAsString)
-        } else if let messageAsData = message?.asData() {
-            server?.send(data: messageAsData)
-        } else {
+        do {
+            switch configuration.dataType {
+            case .message:
+                let message = self.configuration.formatters.format(event: event)
+                
+                if let messageAsString = message?.asString() {
+                    server?.send(string: messageAsString)
+                } else if let messageAsData = message?.asData() {
+                    server?.send(data: messageAsData)
+                } else {
+                    return false
+                }
+                
+            case .event(let encoder):
+                let encoded = try encoder.encode(event)
+                server?.send(data: encoded)
+            }
+            
+            return true
+        } catch {
+            delegate?.webSocketServerTransport(self, didReceiveError: error)
             return false
         }
-        
-        return true
     }
     
     // MARK: - BomjourPublisherDelegate
@@ -137,37 +150,48 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     }
     
     open func bonjourPublisher(_ publisher: BonjourPublisher, didStopWithError error: Error?) {
-        delegate?.webSocketServerTransport(self, didStopBonjour: error)
+        delegate?.webSocketServerTransport(self,
+                                           didStopBonjour: error)
     }
     
     // MARK: - WebSocketServerDelegate
     
     public func webSocketServer(_ server: WebSocketServer, didChangeState state: NWListener.State) {
-        delegate?.webSocketServerTransport(self, didChangeState: state)
+        delegate?.webSocketServerTransport(self,
+                                           didChangeState: state)
     }
     
     public func webSocketServer(_ server: WebSocketServer, didStopConnection connection: WebSocketPeer) {
-        delegate?.webSocketServerTransport(self, didDisconnectPeer: connection)
+        delegate?.webSocketServerTransport(self,
+                                           didDisconnectPeer: connection)
     }
     
     public func webSocketServer(_ server: WebSocketServer, didStopServerWithError error: NWError?) {
-        delegate?.webSocketServerTransport(self, didDisconnect: error)
+        delegate?.webSocketServerTransport(self,
+                                           didDisconnect: error)
     }
     
     public func webSocketServer(_ server: WebSocketServer, didOpenConnection client: WebSocketPeer) {
-        delegate?.webSocketServerTransport(self, didConnectPeer: client)
+        delegate?.webSocketServerTransport(self,
+                                           didConnectPeer: client)
     }
     
     public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didChangeState state: NWConnection.State) {
-        
+        delegate?.webSocketServerTransport(self,
+                                           peer: peer,
+                                           didChangeState: state)
     }
     
     public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveData data: Data) {
-        delegate?.webSocketServerTransport(self, didReceiveData: data, fromPeer: peer)
+        delegate?.webSocketServerTransport(self,
+                                           didReceiveData: data,
+                                           fromPeer: peer)
     }
     
     public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveString string: String) {
-        delegate?.webSocketServerTransport(self, didReceiveString: string, fromPeer: peer)
+        delegate?.webSocketServerTransport(self,
+                                           didReceiveString: string,
+                                           fromPeer: peer)
     }
     
 }
@@ -182,6 +206,10 @@ extension WebSocketTransportServer {
         /// published over the local network via Bonjour services.
         /// This allows local clients to connect.
         public var bonjourConfiguration: BonjourPublisher.Configuration?
+        
+        /// What kind of data send.
+        /// By default is send to `message` to send formatted message when available.
+        public var dataType: WebSocketTransportDataType = .message
         
         /// Port where the socket is listening.
         public var port: UInt16

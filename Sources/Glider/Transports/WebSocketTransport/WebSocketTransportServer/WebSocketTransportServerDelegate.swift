@@ -35,11 +35,23 @@ public protocol WebSocketTransportServerDelegate: AnyObject {
     func webSocketServerTransport(_ transport: WebSocketTransportServer,
                                   didStopBonjour error: Error?)
     
-    
     // MARK: - Transport Related
     
+    /// Message sent when an error has received from transport.
+    ///
+    /// - Parameters:
+    ///   - transport: transport instance.
+    ///   - error: error received.
     func webSocketServerTransport(_ transport: WebSocketTransportServer,
-                                  didChangeState newState: NWListener.State)
+                                  didReceiveError error: Error?)
+    
+    /// Called when server did change state.
+    ///
+    /// - Parameters:
+    ///   - transport: transport instance.
+    ///   - state: state set.
+    func webSocketServerTransport(_ transport: WebSocketTransportServer,
+                                  didChangeState state: NWListener.State)
     
     /// Called when a new peer has connected to the server.
     ///
@@ -48,6 +60,17 @@ public protocol WebSocketTransportServerDelegate: AnyObject {
     ///   - peer: peer connected.
     func webSocketServerTransport(_ transport: WebSocketTransportServer,
                                   didConnectPeer peer: WebSocketPeer)
+    
+    
+    /// Called when a connected peer did change its state.
+    ///
+    /// - Parameters:
+    ///   - transport: transport instance.
+    ///   - peer: peer target.
+    ///   - state: state set.
+    func webSocketServerTransport(_ transport: WebSocketTransportServer,
+                                  peer: WebSocketPeer,
+                                  didChangeState state: NWConnection.State)
     
     /// Called when a connected peer disconnect.
     ///

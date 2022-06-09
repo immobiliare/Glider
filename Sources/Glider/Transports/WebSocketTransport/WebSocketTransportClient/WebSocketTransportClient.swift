@@ -192,7 +192,7 @@ extension WebSocketTransportClient {
         
         /// What kind of data send.
         /// By default is send to `message` to send formatted message when available.
-        public var dataType: DataType = .message
+        public var dataType: WebSocketTransportDataType = .message
         
         // MARK: - Private Properties
         
@@ -213,12 +213,12 @@ extension WebSocketTransportClient {
         
     }
     
-    /// Data type to send to websocket endpoint.
-    /// - `message`: formatted message is sent, where available.
-    /// - `event`: the encoded message is sent.
-    public enum DataType {
-        case message
-        case event(encoder: JSONEncoder)
-    }
-    
+}
+
+/// Data type to send to websocket endpoint.
+/// - `message`: formatted message is sent, where available.
+/// - `event`: the encoded message is sent.
+public enum WebSocketTransportDataType {
+    case message
+    case event(encoder: JSONEncoder)
 }

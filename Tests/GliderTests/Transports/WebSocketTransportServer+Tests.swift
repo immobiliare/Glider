@@ -24,7 +24,7 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
     private var clientA: WebSocketClient?
     private var clientB: WebSocketClient?
     private var port: UInt16 = 1010
-    var countConnectedClients = 0
+    private var countConnectedClients = 0
     
     private var expServerReady: XCTestExpectation?
     private var expClientConnected: XCTestExpectation?
@@ -46,7 +46,6 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
                 $0.truncate = .head(length: 10)
             }),
         ])
-        
         
         expServerReady = expectation(description: "Expecting server ready")
         expClientConnected = expectation(description: "Expecting connected clients")
@@ -121,6 +120,10 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
         if countConnectedClients == 2 {
             expClientConnected?.fulfill()
         }
+    }
+    
+    func webSocketServerTransport(_ transport: WebSocketTransportServer, peer: WebSocketPeer, didChangeState state: NWConnection.State) {
+        
     }
     
     func webSocketServerTransport(_ transport: WebSocketTransportServer, didDisconnectPeer peer: WebSocketPeer) {
