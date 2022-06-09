@@ -29,8 +29,13 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Private Properties
     
-    private let localSocketQueue = OperationQueue()
+    /// Socket queue.
+    private let socketQueue = OperationQueue()
+    
+    /// URLSession to use.
     private var session: URLSession?
+    
+    /// Session delegate.
     private var sessionDelegate: LogstashURLSessionDelegate?
 
     /// Async transporter.
@@ -38,6 +43,13 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Initialization
     
+    /// Initialize a new logstash transport.
+    ///
+    /// - Parameters:
+    ///   - host: hostname.
+    ///   - port: port number.
+    ///   - delegate: delegate for events.
+    ///   - builder: builder to configure extra options.
     public init(host: String, port: Int,
                 delegate: LogstashTransportDelegate? = nil,
                 _ builder: ((inout Configuration) -> Void)? = nil) throws {
@@ -47,20 +59,20 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
         
         self.asyncTransport = try AsyncTransport(delegate: self,
                                                  configuration: configuration.asyncTransportConfiguration)
-        self.sessionDelegate = LogstashURLSessionDelegate(host: host, transport: self)
+        self.sessionDelegate = LogstashURLSessionDelegate(transport: self)
         self.session = URLSession(configuration: .ephemeral,
                                   delegate: self.sessionDelegate,
-                                  delegateQueue: localSocketQueue)
+                                  delegateQueue: socketQueue)
     }
     
     // MARK: - Public Functions
     
     /// Cancel all active tasks, invalidate the session and create the new one.
-    func cancel() {
+    open func reset() {
         session?.invalidateAndCancel()
         session = URLSession(configuration: .ephemeral,
                              delegate: sessionDelegate,
-                             delegateQueue: localSocketQueue)
+                             delegateQueue: socketQueue)
     }
     
     
@@ -217,14 +229,12 @@ extension LogstashTransport {
         
         // MARK: - Private Properties
         
-        private let host: String
-        
+        /// Parent transport.
         fileprivate weak var transport: LogstashTransport?
         
         // MARK: - Initialization
         
-        init(host: String, transport: LogstashTransport?) {
-            self.host = host
+        init(transport: LogstashTransport?) {
             self.transport = transport
             super.init()
         }
@@ -233,18 +243,20 @@ extension LogstashTransport {
                         didReceive challenge: URLAuthenticationChallenge,
                         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
             
-            if  challenge.protectionSpace.host == self.host,
+            if  challenge.protectionSpace.host == transport?.configuration.host,
                 let trust = challenge.protectionSpace.serverTrust {
                 let credential = URLCredential(trust: trust)
                 completionHandler(.useCredential, credential)
             } else {
-                transport?.delegate?.logstashTransport(transport!, didFailTrustingService: self.host)
+                transport?.delegate?.logstashTransport(transport!, didFailTrustingService: transport!.configuration.host)
                 completionHandler(.cancelAuthenticationChallenge, nil)
             }
         }
     }
     
 }
+
+// MARK: - LogstashTransportDelegate
 
 public protocol LogstashTransportDelegate: AnyObject {
     
