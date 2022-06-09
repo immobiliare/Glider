@@ -78,7 +78,7 @@ public protocol EventFormatter {
 
 extension Array where Element == EventFormatter {
     
-    func format(event: Event) -> SerializableData? {
+    public func format(event: Event) -> SerializableData? {
         for formatter in self {
             if let formattedString = formatter.format(event: event) {
                 return formattedString
