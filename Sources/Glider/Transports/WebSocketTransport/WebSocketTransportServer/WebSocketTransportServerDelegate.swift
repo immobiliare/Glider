@@ -38,6 +38,9 @@ public protocol WebSocketTransportServerDelegate: AnyObject {
     
     // MARK: - Transport Related
     
+    func webSocketServerTransport(_ transport: WebSocketTransportServer,
+                                  didChangeState newState: NWListener.State)
+    
     /// Called when a new peer has connected to the server.
     ///
     /// - Parameters:

@@ -143,19 +143,19 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     // MARK: - WebSocketServerDelegate
     
     public func webSocketServer(_ server: WebSocketServer, didChangeState state: NWListener.State) {
-        
+        delegate?.webSocketServerTransport(self, didChangeState: state)
     }
     
     public func webSocketServer(_ server: WebSocketServer, didStopConnection connection: WebSocketPeer) {
-        
+        delegate?.webSocketServerTransport(self, didDisconnectPeer: connection)
     }
     
     public func webSocketServer(_ server: WebSocketServer, didStopServerWithError error: NWError?) {
-        
+        delegate?.webSocketServerTransport(self, didDisconnect: error)
     }
     
     public func webSocketServer(_ server: WebSocketServer, didOpenConnection client: WebSocketPeer) {
-        
+        delegate?.webSocketServerTransport(self, didConnectPeer: client)
     }
     
     public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didChangeState state: NWConnection.State) {
@@ -163,11 +163,11 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     }
     
     public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveData data: Data) {
-        
+        delegate?.webSocketServerTransport(self, didReceiveData: data, fromPeer: peer)
     }
     
     public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveString string: String) {
-        
+        delegate?.webSocketServerTransport(self, didReceiveString: string, fromPeer: peer)
     }
     
 }
