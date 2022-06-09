@@ -1,12 +1,16 @@
 //
-//  File.swift
-//  
+//  Glider
+//  Fast, Lightweight yet powerful logging system for Swift.
 //
-//  Created by Daniele Margutti on 09/06/22.
+//  Created by Daniele Margutti
+//  Email: <hello@danielemargutti.com>
+//  Web: <http://www.danielemargutti.com>
+//
+//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
-// MARK: - BonjourPublishConfiguration
 
 extension BonjourPublisher {
     
