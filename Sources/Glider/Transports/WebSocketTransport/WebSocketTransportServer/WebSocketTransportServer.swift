@@ -16,7 +16,7 @@ import Network
 /// The `WebSocketTransport`is used to transport message to a websocket compliant server.
 /// Each message is transmitted to the server directly on record.
 @available(iOS, introduced: 13)
-public class WebSocketTransportServer: Transport {
+public class WebSocketTransportServer: Transport, WebSocketServerDelegate {
     
     // MARK: - Public Properties
     
@@ -28,30 +28,61 @@ public class WebSocketTransportServer: Transport {
     
     // MARK: - Private Properties
     
+    /// WebSocket Server
+    private var server: WebSocketServer?
+    
     // MARK: - Initialization
+    
+    /// Initialize a new server transport.
+    ///
+    /// - Parameters:
+    ///   - port: port of the server.
+    ///   - builder: builder configuration.
+    public init(port: UInt16, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        self.configuration = Configuration(port: port, builder)
+        self.server = WebSocketServer(port: port,
+                                      parameters: configuration.parameters,
+                                      options: configuration.options,
+                                      delegate: self)
+        
+        if configuration.startImmediately {
+            try server?.start()
+        }
+    }
+    
+    // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
         true
     }
     
+    // MARK: - WebSocketServerDelegate
     
-}
-
-// MARK: - WebSocketTransportServer.Configuration
-
-extension WebSocketTransportServer {
-    
-    public struct Configuration {
-        
-        /// When set the WebSocketTransportServer service will be also
-        /// published over the local network via Bonjour services.
-        /// This allows local clients to connect.
-        public var bonjourPublish: BonjourPublishConfiguration?
-        
+    public func webSocketServer(_ server: WebSocketServer, didChangeState state: NWListener.State) {
         
     }
     
-    public struct BonjourPublishConfiguration {
+    public func webSocketServer(_ server: WebSocketServer, didStopConnection connection: WebSocketPeer) {
+        
+    }
+    
+    public func webSocketServer(_ server: WebSocketServer, didStopServerWithError error: NWError?) {
+        
+    }
+    
+    public func webSocketServer(_ server: WebSocketServer, didOpenConnection client: WebSocketPeer) {
+        
+    }
+    
+    public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didChangeState state: NWConnection.State) {
+        
+    }
+    
+    public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveData data: Data) {
+        
+    }
+    
+    public func webSocketServer(_ server: WebSocketServer, peer: WebSocketPeer, didReceiveString string: String) {
         
     }
     
