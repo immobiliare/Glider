@@ -63,7 +63,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     public func asyncTransport(_ transport: AsyncTransport,
                                canSendPayloadsChunk chunk: AsyncTransport.Chunk,
-                               completion: ((Error?) -> Void)) {
+                               onCompleteSendTask completion: @escaping ((ChunkCompletionResult) -> Void)) {
         
         // Get the list of URLRequests to execute for each received chunk.
         guard let chuckURLRequests = delegate?.httpTransport(self, prepareURLRequestsForChunk: chunk) else {
@@ -74,13 +74,42 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         let operations: [AsyncURLRequestOperation] = chuckURLRequests.map { urlRequest in
             let op = AsyncURLRequestOperation(request: urlRequest, transport: self)
             op.onComplete = { [weak self] result in
+
+                // alert delegate
                 self?.delegate?.httpTransport(self!, didFinishRequest: urlRequest, withResult: result)
+
+                // retry
+                if case .failure(let error) = result {
+                    completion(.chunkFailed(error))
+                }
             }
             return op
         }
         
         // Enqueue
         networkQueue.addOperations(operations, waitUntilFinished: false)
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               didFailWithError error: Error) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               didFinishChunkSending sentEvents: Set<String>,
+                               willRetryEvents unsentEventsToRetry: [String : Error],
+                               discardedIDs: Set<String>) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               sentEventIDs: Set<String>) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               discardedEventsFromBuffer: Int64) {
+        
     }
     
 }

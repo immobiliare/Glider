@@ -95,7 +95,10 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
     
     // MARK: - AsyncTransportDelegate
     
-    func asyncTransport(_ transport: AsyncTransport, canSendPayloadsChunk chunk: AsyncTransport.Chunk, completion: ((Error?) -> Void)) {
+    func asyncTransport(_ transport: AsyncTransport, canSendPayloadsChunk
+                        chunk: AsyncTransport.Chunk, onCompleteSendTask
+                        completion: @escaping ((ChunkCompletionResult) -> Void)) {
+     
         // Validate the size of the block
         let t = transport as! AsyncTransportTestable
         XCTAssert(chunk.count <= t.configuration.chunksSize)
@@ -110,9 +113,10 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         XCTAssertTrue(formattedMsg == "6\ttest…")
         
         if t.id == self.successID {
-            completion(nil)
+            completion(.allSent)
         } else {
-            completion(AsyncError(message: self.errorMessage))
+            let error = GliderError(message: self.errorMessage)
+            completion(.chunkFailed(error))
         }
     }
     
@@ -120,27 +124,25 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         XCTFail(error.localizedDescription) // any logic error inside the internals must fail the test
     }
     
-    public func asyncTransport(_ transport: AsyncTransport,
-                        didFailSendingChunkWithError error: Error,
-                        willRetry payloads: [(String, Int)],
-                        willDiscard discardIds: Set<String>) {
+    func asyncTransport(_ transport: AsyncTransport,
+                        didFinishChunkSending sentEvents: Set<String>,
+                        willRetryEvents unsentEventsToRetry: [String : Error],
+                        discardedIDs: Set<String>) {
         
-        if discardIds.isEmpty == false {
-            print("Will discard \(discardIds.count), too many attempts!")
-            XCTAssertTrue((error as? AsyncError)?.message == self.errorMessage)
+        if discardedIDs.isEmpty == false {
+            print("Will discard \(discardedIDs.count), too many attempts!")
         }
         
-        if payloads.isEmpty  == false {
+        if unsentEventsToRetry.isEmpty  == false {
             countTotalRetries += 1
-            print("Will retry send for:  \(payloads.count) events")
+            print("Will retry send for:  \(unsentEventsToRetry.count) events")
             
-            for retryID in payloads {
-                XCTAssertTrue(retryID.1 <= maxRetries)
-                print("    Added again to buffer \(retryID.0) (attempt= \(retryID.1))")
+            for retryID in unsentEventsToRetry.keys {
+                print("    Added again to buffer \(retryID)")
             }
         }
         
-        writtenIDs.subtract(discardIds)
+        writtenIDs.subtract(discardedIDs)
         if writtenIDs.isEmpty {
             XCTAssertTrue(try transport.countBufferedEvents() == 0)
             exp?.fulfill()
@@ -172,7 +174,7 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         
     }
     
-    
+
 }
 
 fileprivate struct AsyncError: Error {

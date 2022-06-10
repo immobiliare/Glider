@@ -185,33 +185,61 @@ public class AsyncTransport: Transport {
                 return 0 // no pending payloads
             }
             
-            delegate?.asyncTransport(self, canSendPayloadsChunk: chunk, completion: { [weak self] error in
+            delegate?.asyncTransport(self, canSendPayloadsChunk: chunk, onCompleteSendTask: { [weak self] result in
                 guard let self = self else { return }
                 
-                guard let error = error else {
-                    self.delegate?.asyncTransport(self, sentEventIDs: Set(chunk.map({ $0.event.id })))
+                var unsentEventsIDs: Set<String>?
+                switch result {
+                case .chunkFailed:
+                    unsentEventsIDs = Set(chunk.map({ $0.event.id }))
+                case .eventsFailed:
+                    unsentEventsIDs = result.eventIDs
+                default:
+                    break
+                }
+                
+                guard let unsentEventsIDs = unsentEventsIDs, unsentEventsIDs.isEmpty == false else {
+                    let allEventsIDs = Set(chunk.map({ $0.event.id }))
+                    self.delegate?.asyncTransport(self, sentEventIDs: allEventsIDs)
                     return // all sent, nothing to do
                 }
                 
                 // increment attempt, re-insert data into database
-                var retryIDs = [(String, Int)]()
-                var discardedIDs = Set<String>()
+                var sentIDs: Set<String>?
+                var discardedIDs: Set<String>?
+                var failedEventsToRetry: [String: Error]?
+                
+                if self.delegate != nil {
+                    // compile these fields only if delegate has been set
+                    sentIDs = .init()
+                    discardedIDs = .init()
+                    failedEventsToRetry = .init()
+                }
+                
                 for payload in chunk {
-                    if (payload.countAttempts + 1) <= configuration.maxRetries {
-                        if let id = try? self.store(event: payload.event, withMessage: payload.message,
+                    if unsentEventsIDs.contains(payload.event.id) == false { // sent events can be ignored
+                        sentIDs?.insert(payload.event.id)
+                        continue
+                    }
+                    
+                    // Check if unsent events should be marked for retry.
+                    let canRetry = (payload.countAttempts + 1) <= self.configuration.maxRetries
+                    if canRetry { // can retry events send
+                        if let id = try? self.store(event: payload.event,
+                                                    withMessage: payload.message,
                                                     retryAttempt: payload.countAttempts + 1) {
-                            retryIDs.append( (id, payload.countAttempts + 1) )
+                            failedEventsToRetry?[id] = result.errorOccuredToEventID(id) ?? GliderError(message: "Unknown error")
                         }
                     } else {
-                        discardedIDs.insert(payload.event.id)
+                        discardedIDs?.insert(payload.event.id)
                     }
                 }
                 
-                if retryIDs.isEmpty == false || discardedIDs.isEmpty == false  {
-                    self.delegate?.asyncTransport(self,
-                                                  didFailSendingChunkWithError: error,
-                                                  willRetry: retryIDs,
-                                                  willDiscard: discardedIDs)
+                if let delegate = self.delegate {
+                    delegate.asyncTransport(self,
+                                            didFinishChunkSending: sentIDs!,
+                                            willRetryEvents: failedEventsToRetry!,
+                                            discardedIDs: discardedIDs!)
                 }
             })
             
@@ -375,10 +403,11 @@ public protocol AsyncTransportDelegate: AnyObject {
     /// - Parameters:
     ///   - transport: transport instance.
     ///   - chunk: payloads chunk to send.
-    ///   - completion: completion callback to inform the class about the result of the send operation.
+    ///   - completion: call completion callback to inform the class about what events failed to be sent.
+    ///                 key is the `event.id` while value is the error occurred.
     func asyncTransport(_ transport: AsyncTransport,
                         canSendPayloadsChunk chunk: AsyncTransport.Chunk,
-                        completion: ((Error?) -> Void))
+                        onCompleteSendTask completion: @escaping ((ChunkCompletionResult)  -> Void))
     
     /// Received when an error has occurred handling data inside the class.
     ///
@@ -393,13 +422,12 @@ public protocol AsyncTransportDelegate: AnyObject {
     ///
     /// - Parameters:
     ///   - transport: transport.
-    ///   - error: error occurred, typically a network related one.
-    ///   - payloads: events marked for retry attempt (tuple with id of the event, attempt)
-    ///   - discardIds: discarded events, will be removed from cache and never sent.
+    ///   - unsentEventsToRetry: events failed to be sent and marked to retry.
+    ///   - discardedIDs: discarded events, will be removed from cache and never sent.
     func asyncTransport(_ transport: AsyncTransport,
-                        didFailSendingChunkWithError error: Error,
-                        willRetry payloads: [(String, Int)],
-                        willDiscard discardIds: Set<String>)
+                        didFinishChunkSending sentEvents: Set<String>,
+                        willRetryEvents unsentEventsToRetry: [String: Error],
+                        discardedIDs: Set<String>)
     
     /// Called when a chunk of data is marked as sent.
     ///
@@ -419,18 +447,50 @@ public protocol AsyncTransportDelegate: AnyObject {
     
 }
 
-// MARK: - Optional Delegate Methods
+// MARK: - ChunkCompletionResult
 
-extension AsyncTransportDelegate {
+/// Represent the result of asynchronous chunk of payload sent.
+/// - `chunkFailed`: entire chunk is failed (you may sent the chunk entirely with a single call)
+/// - `eventsFailed`: some events failed to be sent, associated with the respective errors
+///                   (you may sent chunk payloads separately in multiple calls)
+/// - `allSent`: all data has been sent successfully.
+public enum ChunkCompletionResult {
+    case chunkFailed(Error)
+    case eventsFailed([String: Error])
+    case allSent
     
-    public func asyncTransport(_ transport: AsyncTransport, didFailWithError error: Error) {}
-    public func asyncTransport(_ transport: AsyncTransport,
-                        didFailSendingChunkWithError error: Error,
-                        willRetry payloads: [(String, Int)],
-                        willDiscard discardIds: Set<String>) {}
-    public func asyncTransport(_ transport: AsyncTransport,
-                        sentEventIDs: Set<String>) {}
-    public func asyncTransport(_ transport: AsyncTransport,
-                        discardedEventsFromBuffer: Int64) {}
+    // MARK: - Internal Properties
     
+    internal var eventIDs: Set<String> {
+        switch self {
+        case .chunkFailed:
+            return []
+        case .eventsFailed(let eventIdsAndErrors):
+            return Set<String>(eventIdsAndErrors.keys)
+        case .allSent:
+            return Set<String>()
+        }
+    }
+    
+    internal var errors: [Error] {
+        switch self {
+        case .chunkFailed(let error):
+            return [error]
+        case .eventsFailed(let eventIdsAndErrors):
+            return Array(eventIdsAndErrors.values)
+        case .allSent:
+            return []
+        }
+    }
+    
+    internal func errorOccuredToEventID(_ id: String) -> Error? {
+        switch self {
+        case .chunkFailed(let error):
+            return error
+        case .eventsFailed(let eventIdsAndErrors):
+            return eventIdsAndErrors[id]
+        case .allSent:
+            return nil
+        }
+    }
 }

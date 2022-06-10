@@ -14,7 +14,7 @@ import Foundation
 import Network
 
 open class LogstashTransport: Transport, AsyncTransportDelegate {
-    public typealias DispatchedChunk = (event: Event, error: Error?)
+    public typealias FailedPayload = (event: Event, error: Error?)
 
     // MARK: - Public Properties
     
@@ -79,8 +79,30 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     // MARK: - Conformance
     
     public func asyncTransport(_ transport: AsyncTransport,
-                               canSendPayloadsChunk chunk: AsyncTransport.Chunk,
-                               completion: ((Error?) -> Void)) {
+                               didFailWithError error: Error) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               didFinishChunkSending sentEvents: Set<String>,
+                               willRetryEvents unsentEventsToRetry: [String : Error],
+                               discardedIDs: Set<String>) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               sentEventIDs: Set<String>) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport,
+                               discardedEventsFromBuffer: Int64) {
+        
+    }
+    
+    public func asyncTransport(_ transport: AsyncTransport, canSendPayloadsChunk
+                               chunk: AsyncTransport.Chunk,
+                               onCompleteSendTask completion: @escaping ((ChunkCompletionResult)  -> Void)) {
         guard let session = session, let queue = queue else {
             return
         }
@@ -91,9 +113,9 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
         }
         
         let dispatchGroup = DispatchGroup()
-        var sendStatus = [DispatchedChunk]()
-        var countFailed = 0
-        var countSucceded = 0
+        var unsentEvents = [String: Error]()
+        var sentIDs = Set<String>()
+        let hasDelegate = delegate != nil
         
         for item in chunk {
             guard let messageData = item.message?.asData() else {
@@ -109,11 +131,10 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
                 }
                 
                 queue.async(group: dispatchGroup) {
-                    sendStatus.append( (item.event, error))
-                    if error != nil {
-                        countFailed += 1
-                    } else {
-                        countSucceded += 1
+                    if let error = error {
+                        unsentEvents[item.event.id] = error
+                    } else if hasDelegate {
+                        sentIDs.insert(item.event.id)
                     }
                 }
             }
@@ -125,10 +146,11 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
             task.closeRead()
             task.closeWrite()
             
+            completion(.eventsFailed(unsentEvents))
+
             self?.delegate?.logstashTransport(self!,
-                                              didFinishSendingChunk: sendStatus,
-                                              countFailed: countFailed,
-                                              countSucceded: countSucceded)
+                                              didFinishSendingChunk: sentIDs,
+                                              failedEvents: unsentEvents)
         }
     }
     
@@ -268,15 +290,15 @@ public protocol LogstashTransportDelegate: AnyObject {
     func logstashTransport(_ transport: LogstashTransport,
                            didFailTrustingService host: String)
     
+
     /// Event triggered when a chunk of data is sent.
     ///
     /// - Parameters:
     ///   - transport: transport instance.
-    ///   - chunk: the result of chunk sending operation, each event with the associated optional error if failed.
-    ///   - countFailed: count failed sent.
-    ///   - countSucceded: count succeded sent.
+    ///   - sentEventsIDs: the identifiers of the events correctly sent.
+    ///   - failedEvents: events failed to be sent, id and associated error.
     func logstashTransport(_ transport: LogstashTransport,
-                           didFinishSendingChunk chunk: [LogstashTransport.DispatchedChunk],
-                           countFailed: Int, countSucceded: Int)
+                           didFinishSendingChunk sentEventsIDs: Set<String>,
+                           failedEvents: [String: Error])
     
 }

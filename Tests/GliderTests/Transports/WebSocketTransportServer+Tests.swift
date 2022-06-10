@@ -115,6 +115,10 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
         
     }
     
+    func webSocketServerTransport(_ transport: WebSocketTransportServer, didReceiveError error: Error?) {
+        
+    }
+    
     func webSocketServerTransport(_ transport: WebSocketTransportServer, didConnectPeer peer: WebSocketPeer) {
         countConnectedClients += 1
         if countConnectedClients == 2 {

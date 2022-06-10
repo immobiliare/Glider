@@ -58,7 +58,15 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate {
     func httpTransport(_ transport: HTTPTransport,
                        didFinishRequest request: HTTPTransportRequest,
                        withResult result: AsyncURLRequestOperation.Response) {
-        print("Did complete: \(request.urlRequest.url): \(result)")
+        
+        let url = request.urlRequest.url!.absoluteString
+        
+        switch result {
+        case .failure(let error):
+            print("Did complete: \(url): error \(error.localizedDescription)")
+        case .success:
+            print("Did complete: \(url): success")
+        }
     }
     
 }
