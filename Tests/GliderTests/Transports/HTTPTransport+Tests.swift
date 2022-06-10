@@ -33,11 +33,11 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate {
             $0.level = .debug
         }
         
-        for i in 0..<50 {
+        for i in 0..<5 {
             log.error?.write("test \(i)")
         }
         
-        wait(for: [exp], timeout: 60)
+        wait(for: [exp], timeout: 80)
     }
     
     func httpTransport(_ transport: HTTPTransport,
