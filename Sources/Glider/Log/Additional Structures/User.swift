@@ -73,9 +73,10 @@ public struct User: Codable {
         try container.encodeIfPresent(self.username, forKey: .email)
         try container.encodeIfPresent(self.ipAddress, forKey: .ipAddress)
         
+        
         if let encodableDict: [String: Data?] = data?.mapValues({ $0.asData() }) {
-            let encodedData = try JSONSerialization.data(withJSONObject: encodableDict, options: .sortedKeys)
-            try container.encodeIfPresent(encodedData, forKey: .data)
+            let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableDict, requiringSecureCoding: false)
+            try container.encode(rawData, forKey: .data)
         }
     }
     
@@ -86,12 +87,9 @@ public struct User: Codable {
         self.username = try container.decodeIfPresent(String.self, forKey: .username)
         self.ipAddress = try container.decodeIfPresent(String.self, forKey: .ipAddress)
         
-        if let data = try container.decodeIfPresent(Data.self, forKey: .data) {
-            let decodedData: [String: SerializableData]? = try JSONSerialization.jsonObject(with: data) as? [String: Data]
-            self.data = decodedData
-        } else {
-            self.data = nil
-        }
+        
+        let rawValues = try container.decode(Data.self, forKey: .data)
+        self.data = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawValues) as? [String: Data] ?? [:]
     }
     
 }
