@@ -15,6 +15,64 @@ import XCTest
 
 final class CoreTests: XCTestCase {
     
+    func test_multipleThreads() throws {
+        let exp1 = expectation(description: "Finish 1")
+        let exp2 = expectation(description: "Finish 2")
+        let exp3 = expectation(description: "Finish 3")
+
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 3
+        
+        let messagesCount = Int.random(in: 0..<200)
+        var receivedMessagesCount = 0
+        
+        let log = Log {
+            $0.level = .debug
+            $0.transports = [
+                ConsoleTransport(),
+                TestTransport(onReceiveEvent: { _ in
+                    receivedMessagesCount += 1
+                })
+            ]
+        }
+                
+        let op1 = BlockOperation(block: {
+            for i in 0..<messagesCount {
+                let level = Level.allCases.randomElement() ?? .debug
+                log[level]?.write("Msg from thread \(Thread.current.description) \(i)")
+            }
+            
+            exp1.fulfill()
+        })
+
+        let op2 = BlockOperation(block: {
+            for i in 0..<messagesCount {
+                let level = Level.allCases.randomElement() ?? .debug
+                log[level]?.write("Msg from thread \(Thread.current.description) \(i)")
+            }
+            
+            exp2.fulfill()
+        })
+
+        let op3 = BlockOperation(block: {
+            for i in 0..<messagesCount {
+                let level = Level.allCases.randomElement() ?? .debug
+                log[level]?.write("Msg from thread \(Thread.current.description) \(i)")
+            }
+            
+            exp3.fulfill()
+        })
+        
+        queue.addOperation(op1)
+        queue.addOperation(op2)
+        queue.addOperation(op3)
+        
+        wait(for: [exp1, exp2, exp3], timeout: 10)
+        queue.waitUntilAllOperationsAreFinished()
+        
+        XCTAssertEqual(receivedMessagesCount, messagesCount * 3)
+    }
+    
     /// Test the log levels hierarchy of severities.
     func test_logLevels() throws {
         XCTAssertTrue(Level.emergency.isMoreSevere(than: .alert))
