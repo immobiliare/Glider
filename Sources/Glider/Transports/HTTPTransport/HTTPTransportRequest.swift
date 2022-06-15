@@ -53,13 +53,8 @@ public struct HTTPTransportRequest {
         guard let error = error else {
             return false
         }
-
-        switch error {
-        case .network(let error):
-            return configuration.retriableErrorTypes.contains(error.code)
-        default:
-            return false
-        }
+        
+        return configuration.shouldRetryRequestHandler?(error) ?? false
     }
     
 }
@@ -77,17 +72,29 @@ extension HTTPTransportRequest {
         /// By default is set to `true` which mean an empty response is not considered an error.
         public var acceptEmptyResponse = true
         
-        /// The error reported below causes a retry of the operation.
-        /// By default all networking related problems are part of the set.
-        public var retriableErrorTypes: [URLError.Code] = [
-            .timedOut,
-            .cannotFindHost,
-            .cannotConnectToHost,
-            .networkConnectionLost,
-            .dnsLookupFailed
-        ]
-        
+        /// This handler allows you to define the rule to control the optional retry for failures.
+        /// By default all networking related errors catch an automatic retry:
+        /// `timedOut`,`cannotFindHost`, `cannotConnectToHost`, `networkConnectionLost`, `dnsLookupFailed`.
+        public var shouldRetryRequestHandler: ((RequestError) -> Bool)?
+            
         public init(_ builder: ((inout Configuration) -> Void)?) {
+            self.shouldRetryRequestHandler = { error in
+                let retriableErrorTypes: [URLError.Code] = [
+                    .timedOut,
+                    .cannotFindHost,
+                    .cannotConnectToHost,
+                    .networkConnectionLost,
+                    .dnsLookupFailed
+                ]
+                
+                switch error {
+                case .network(let error):
+                    return retriableErrorTypes.contains(error.code)
+                default:
+                    return false
+                }
+            }
+            
             builder?(&self)
         }
         

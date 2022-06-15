@@ -20,12 +20,14 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
     
     // MARK: - Private Properties
     
-    private var messagesToSent = 5
+    private var messagesToSent = 1 //5
     private var countReceived = 0
+    private var countErrors = 0
     private var expReceivedMessages: XCTestExpectation?
     private var expServerStart: XCTestExpectation?
     private let port = UInt16(8080)
     private var serverSocket: HTTPServer?
+    private var anErrorTriggered = false
     
     // MARK: - Test
     
@@ -38,6 +40,8 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
         try serverSocket?.start(port: port)
         
         expReceivedMessages = expectation(description: "Expecting received messages")
+        
+        print("Starting http test web server at port \(port)...")
 
         let transport = try HTTPTransport(delegate: self) {
             $0.maxConcurrentRequests = 3
@@ -48,6 +52,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
         }
         
         wait(for: [expServerStart!], timeout: 5)
+        print("Now sending logs to http transport...")
 
         let log = Log {
             $0.transports = [transport]
@@ -59,7 +64,8 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
             log.error?.write("Message \(i)")
         }
         
-        wait(for: [expReceivedMessages!], timeout: 10)
+        print("Waiting for being received...")
+        wait(for: [expReceivedMessages!], timeout: 20)
         
         serverSocket?.stop()
     }
@@ -75,8 +81,16 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
             urlRequest.httpMethod = "POST"
             urlRequest.timeoutInterval = 10
             
+            if anErrorTriggered {
+                XCTAssertEqual(attempt, 1) // check retry
+            }
+            
             return HTTPTransportRequest(urlRequest: urlRequest) {
                 $0.maxRetries = 2
+                $0.shouldRetryRequestHandler = { error in
+                    // always retry the call
+                    return true
+                }
             }
         }
         
@@ -89,12 +103,14 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
         switch result {
         case .failure(let error):
             print("Failed to send data: \(error.localizedDescription)")
+            countErrors += 1
         case .success:
             print("Data sent successfully!")
             countReceived += 1
         }
         
-        if countReceived == messagesToSent {
+        if countReceived == messagesToSent && countErrors == 1 {
+            print("Received \(countReceived)/\(messagesToSent) with errors: \(countErrors) to retry")
             expReceivedMessages!.fulfill()
         }
     }
@@ -113,14 +129,29 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
 
         switch (method, url.path) {
         case ("POST", "/"):
-            // Echo response
-            let data = CFHTTPMessageCopySerializedMessage(request)!.takeRetainedValue() as Data
-            let response = CFHTTPMessageCreateResponse(kCFAllocatorDefault, 200, nil, kCFHTTPVersion1_1).takeRetainedValue()
-            CFHTTPMessageSetHeaderFieldValue(response, "Content-Type" as CFString, "application/json" as CFString)
-            CFHTTPMessageSetBody(response, data as CFData)
-            assert(CFHTTPMessageIsHeaderComplete(response))
-            // let data = CFHTTPMessageCopySerializedMessage(response)!.takeRetainedValue() as Data
-            fileHandle.write(data)
+            
+            if anErrorTriggered == false {
+                anErrorTriggered = true
+                
+                // Fallback error
+                let response = CFHTTPMessageCreateResponse(kCFAllocatorDefault, 405, nil, kCFHTTPVersion1_1).takeRetainedValue()
+                CFHTTPMessageSetHeaderFieldValue(response, "Content-Type" as CFString, "text/plain" as CFString)
+                CFHTTPMessageSetBody(response, "405 Method Not Allowed".data(using: .ascii)! as CFData)
+                assert(CFHTTPMessageIsHeaderComplete(response))
+                let data = CFHTTPMessageCopySerializedMessage(response)!.takeRetainedValue() as Data
+
+                
+                fileHandle.write(data)
+            } else {
+                // Echo response
+                let data = CFHTTPMessageCopySerializedMessage(request)!.takeRetainedValue() as Data
+                let response = CFHTTPMessageCreateResponse(kCFAllocatorDefault, 200, nil, kCFHTTPVersion1_1).takeRetainedValue()
+                CFHTTPMessageSetHeaderFieldValue(response, "Content-Type" as CFString, "application/json" as CFString)
+                CFHTTPMessageSetBody(response, data as CFData)
+                assert(CFHTTPMessageIsHeaderComplete(response))
+                
+                fileHandle.write(data)
+            }
             completion()
         default:
             // Fallback error
@@ -129,6 +160,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
             CFHTTPMessageSetBody(response, "405 Method Not Allowed".data(using: .ascii)! as CFData)
             assert(CFHTTPMessageIsHeaderComplete(response))
             let data = CFHTTPMessageCopySerializedMessage(response)!.takeRetainedValue() as Data
+            
             fileHandle.write(data)
             completion()
         }
