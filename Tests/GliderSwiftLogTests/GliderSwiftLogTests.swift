@@ -37,11 +37,11 @@ final class GliderSwiftLogTests: XCTestCase {
             // Validate the tags
             if event.level == .debug {
                 XCTAssertEqual(event.message, "DEBUG message")
-                XCTAssertTrue(event.extra?.values["extra_2"] as? String == "v1")
-                XCTAssertTrue(event.extra?.values["global_extra"] as? String == "global")
+                XCTAssertTrue(event.allExtra?.values["extra_2"] as? String == "v1")
+                XCTAssertTrue(event.allExtra?.values["global_extra"] as? String == "global")
             } else {
                 XCTAssertEqual(event.message, "ERROR message")
-                XCTAssertTrue(event.extra?.values["global_extra"] as? String == "local")
+                XCTAssertTrue(event.allExtra?.values["global_extra"] as? String == "local")
             }
             XCTAssertTrue(event.tags?["logger"] as? String == "swiftlog")
         }
@@ -62,9 +62,9 @@ final class GliderSwiftLogTests: XCTestCase {
         
         // Create swift-log instance.
         let swiftLog = Logger(label: "com.example.yourapp.swiftlog")
-     //   swiftLog.trace("TRACE message", metadata: ["extra_1" : "v1"])  // Will be ignored.
+        swiftLog.trace("TRACE message", metadata: ["extra_1" : "v1"])  // Will be ignored.
         swiftLog.debug("DEBUG message", metadata: ["extra_2" : "v1"])  // Will be logged.
-   //     swiftLog.error("ERROR message", metadata: ["extra_scope" : "local"])  // Will be logged.
+        swiftLog.error("ERROR message", metadata: ["global_extra" : "local"])  // Will be logged.
     }
     
 }
