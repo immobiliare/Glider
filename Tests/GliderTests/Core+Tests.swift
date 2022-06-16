@@ -524,6 +524,9 @@ fileprivate class TestTransport: Transport {
 
     private var onReceiveEvent: OnReceiveEvent?
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     init(onReceiveEvent: @escaping OnReceiveEvent) {
         self.onReceiveEvent = onReceiveEvent
     }

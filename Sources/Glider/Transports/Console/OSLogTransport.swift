@@ -24,6 +24,9 @@ public class OSLogTransport: Transport {
     /// Configuration.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     // The `OSLog` used to perform logging.
     public let log: OSLog
     
@@ -55,6 +58,8 @@ public class OSLogTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, watchOS 3.0, *) else {
             // things should never get this far; failable initializers should prevent this condition
             print("os.log module not supported on this platform")

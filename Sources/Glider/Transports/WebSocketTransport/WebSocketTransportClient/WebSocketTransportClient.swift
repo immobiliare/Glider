@@ -24,6 +24,9 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     /// Configuration set.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// GCD Queue.
     public var queue: DispatchQueue?
     
@@ -97,6 +100,8 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         do {
             switch configuration.dataType {
             case .message:

@@ -26,6 +26,9 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     /// Configuration.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Delegate for events.
     public weak var delegate: WebSocketTransportServerDelegate?
     
@@ -112,6 +115,8 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         guard server?.isStarted ?? false else {
             return false
         }

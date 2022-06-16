@@ -35,6 +35,9 @@ public class StdStreamsTransport: Transport {
     /// Configuration settings.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     // MARK: - Private Properties
     
     /// POSIX stream for standard out messages.
@@ -58,6 +61,8 @@ public class StdStreamsTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         if event.level.isMoreSevere(than: .info) {
             return stderrTransport.record(event: event)
         } else {

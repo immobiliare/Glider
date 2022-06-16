@@ -35,4 +35,7 @@ public protocol Transport {
     /// `LogTransporter` instance.
     var queue: DispatchQueue? { get }
     
+    /// Is the transport enabled. When disabled transport ignore all incoming events to record.
+    var isEnabled: Bool { get set }
+    
 }

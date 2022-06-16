@@ -30,6 +30,9 @@ public class SizeRotationFileTransport: Transport {
     /// endpoints.
     public var queue: DispatchQueue?
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Configuration used.
     public let configuration: Configuration
     
@@ -75,6 +78,8 @@ public class SizeRotationFileTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         do {
             try rotateFileIfNeeded()
             return currentFileTransport?.record(event: event) ?? false

@@ -20,6 +20,9 @@ public class ConsoleTransport: Transport {
     /// GCD queue.
     public var queue: DispatchQueue? = nil
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Configuration.
     public let configuration: Configuration
     
@@ -35,6 +38,8 @@ public class ConsoleTransport: Transport {
     // MARK: - Public Functions
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         guard let message = configuration.formatters.format(event: event)?.asString(),
               message.isEmpty == false else {
             return false

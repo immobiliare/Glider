@@ -37,6 +37,9 @@ public class FileTransport: Transport {
     /// endpoints.
     public var queue: DispatchQueue?
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Configuration settings.
     public let configuration: Configuration
     
@@ -95,6 +98,8 @@ public class FileTransport: Transport {
     // MARK: - Public Functions
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         guard let message = configuration.formatters.format(event: event)?.asData(),
               message.isEmpty == false else {
             return false

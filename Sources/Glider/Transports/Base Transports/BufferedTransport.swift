@@ -26,6 +26,9 @@ public class BufferedTransport<BufferItem>: Transport {
     /// Configuration.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Dispatch queue where the record happens.
     public let queue: DispatchQueue?
     
@@ -49,6 +52,8 @@ public class BufferedTransport<BufferItem>: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         guard let message = configuration.formatters.format(event: event) else {
             return false
         }

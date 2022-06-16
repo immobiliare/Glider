@@ -31,6 +31,9 @@ public class AsyncTransport: Transport {
     /// Configuration used.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Behaviour.
     public private(set) weak var delegate: AsyncTransportDelegate?
     
@@ -80,6 +83,8 @@ public class AsyncTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         queue!.async { [weak self] in
             guard let self = self else { return }
             

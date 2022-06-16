@@ -19,6 +19,9 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     /// GCD queue.
     public var queue: DispatchQueue?
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Configuration used to prepare the transport.
     public let configuration: Configuration
     
@@ -56,7 +59,9 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        asyncTransport?.record(event: event) ?? false // forward to async transport
+        guard isEnabled else { return false }
+        
+        return asyncTransport?.record(event: event) ?? false // forward to async transport
     }
     
     // MARK: - AsyncTransportDelegate

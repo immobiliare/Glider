@@ -24,6 +24,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     /// SQLiteTransport configuration.
     public let configuration: Configuration
+    
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
 
     /// Pending payloads contained into the buffer.
     public var pendingPayloads: [ThrottledTransport.Payload] {
@@ -183,7 +186,9 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        throttledTransport?.record(event: event) ?? false
+        guard isEnabled else { return false }
+        
+        return throttledTransport?.record(event: event) ?? false
     }
     
     // MARK: - Private Functions

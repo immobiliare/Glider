@@ -24,6 +24,9 @@ public class POSIXStreamTransport: Transport {
     /// Dispatch queue.
     public var queue: DispatchQueue?
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     // MARK: - Initialization
     
     /// Initialize a new `POSIXStreamTransport` instance.
@@ -66,6 +69,8 @@ public class POSIXStreamTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         guard let message = configuration.formatters.format(event: event)?.asString(),
               message.isEmpty == false else {
             return false

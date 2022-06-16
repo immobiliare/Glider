@@ -24,6 +24,9 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     /// Configuration used.
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Delegate class.
     public weak var delegate: LogstashTransportDelegate?
     
@@ -155,7 +158,9 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     }
     
     public func record(event: Event) -> Bool {
-        asyncTransport?.record(event: event) ?? false
+        guard isEnabled else { return false }
+        
+        return asyncTransport?.record(event: event) ?? false
     }
     
 }

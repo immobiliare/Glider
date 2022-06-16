@@ -29,6 +29,9 @@ public class ThrottledTransport: Transport {
     /// Configuration
     public let configuration: Configuration
     
+    /// Transport is enabled.
+    public var isEnabled: Bool = true
+    
     /// Delegate for events.
     public var delegate: ThrottledTransportDelegate?
     
@@ -88,6 +91,8 @@ public class ThrottledTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
+        guard isEnabled else { return false }
+        
         queue!.async { [weak self] in
             guard let self = self else { return }
             
