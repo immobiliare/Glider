@@ -12,9 +12,9 @@
 
 import XCTest
 @testable import Glider
-@testable import GliderELK
+@testable import GliderLoggly
 
-final class GliderELKTests: XCTestCase {
+final class GliderLogglyTests: XCTestCase {
     
     func test_gliderTests() throws {
        

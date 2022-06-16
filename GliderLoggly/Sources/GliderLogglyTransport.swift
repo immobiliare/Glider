@@ -13,6 +13,17 @@
 import Foundation
 import Glider
 
-public class GliderLogglyTransport: HTTPTransport {
+public class GliderLogglyTransport: Transport {
+    
+    // MARK: - Public Properties
+    
+    /// Delegate
+    public weak var delegate: GliderLogglyTransportDelegate?
+    
+    /// Authentication token.
+    /// See <https://documentation.solarwinds.com/en/success_center/loggly/content/admin/customer-token-authentication-token.htm>
+    public let token: String
+    
+    
     
 }

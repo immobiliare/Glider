@@ -1,6 +1,6 @@
 import XCTest
+@testable import Glider
 @testable import GliderSentry
-import Glider
 
 final class GliderSentryTests: XCTestCase {
    
