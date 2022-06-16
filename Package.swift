@@ -48,6 +48,13 @@ let package = Package(
             ],
             path:"GliderSentry/Sources"
         ),
+        .target(
+            name: "GliderLoggly",
+            dependencies: [
+                "Glider"
+            ],
+            path:"GliderLoggly/Sources"
+        ),
         
         // TESTS
         .testTarget(
@@ -80,6 +87,14 @@ let package = Package(
                 "GliderSentry"
             ],
             path: "Tests/GliderSentryTests"
+        ),
+        .testTarget(
+            name: "GliderLogglyTests",
+            dependencies: [
+                "Glider",
+                "GliderLoggly"
+            ],
+            path: "Tests/GliderLogglyTests"
         )
     ]
 )

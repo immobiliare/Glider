@@ -30,6 +30,7 @@ extension Glider.Level {
         case .notice: return .info
         case .info: return .info
         case .debug: return .debug
+        case .trace: return .debug
         }
     }
     
@@ -46,7 +47,6 @@ extension Glider.Event {
         sentryEvent.eventId = SentryId(uuidString: id)
         sentryEvent.message = SentryMessage(formatted: message?.asString() ?? "")
         sentryEvent.timestamp = timestamp
-        sentryEvent.description = "descrizione"
         
         if let fingerprint = fingerprint {
             sentryEvent.fingerprint = [fingerprint]

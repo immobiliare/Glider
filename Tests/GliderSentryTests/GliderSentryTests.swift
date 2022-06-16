@@ -13,9 +13,9 @@ final class GliderSentryTests: XCTestCase {
             .message()
         ])
         
-        let sentry = SentryTransport {
+        let sentry = GliderSentryTransport {
             $0.sdkConfiguration = .init()
-            $0.sdkConfiguration?.dsn = "https://9c3d979175e048518569a93eda03ab58@sentry.pepita.io/38"
+            $0.sdkConfiguration?.dsn = "<REPLACE WITH DSN>"
             $0.sdkConfiguration?.debug = true
             $0.formatters = [ff]
         }
