@@ -10,10 +10,12 @@ let package = Package(
     ],
     products: [
         .library(name: "Glider", targets: ["Glider"]),
-        .library(name: "GliderSwiftLog", targets: ["GliderSwiftLog"])
+        .library(name: "GliderSwiftLog", targets: ["GliderSwiftLog"]),
+        .library(name: "GliderELK", targets: ["GliderELK"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
+        .package(url: "https://github.com/swift-server/async-http-client.git", .upToNextMinor(from: "1.5.0"))
     ],
     targets: [
         .target(
@@ -27,6 +29,14 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log")
             ], 
             path:"GliderSwiftLog/Sources"
+        ),
+        .target(
+            name: "GliderELK",
+            dependencies: [
+                "Glider",
+                .product(name: "AsyncHTTPClient", package: "async-http-client")
+            ],
+            path:"GliderELK/Sources"
         ),
         .testTarget(
             name: "GliderTests",
@@ -42,6 +52,14 @@ let package = Package(
                 "GliderSwiftLog"
             ],
             path: "Tests/GliderSwiftLogTests"
+        ),
+        .testTarget(
+            name: "GliderELKTests",
+            dependencies: [
+                "Glider",
+                "GliderELK"
+            ],
+            path: "Tests/GliderELKTests"
         )
     ]
 )
