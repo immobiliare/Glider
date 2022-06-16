@@ -14,6 +14,8 @@ import Foundation
 
 public protocol TransportFilter {
     
+    // MARK: - Public Functions
+    
     /// Called to determine whether the given `Log.Payload` should be recorded.
     /// - Parameter payload: The payload  to be evaluated by the filter.
     func shouldAccept(_ event: Event) -> Bool

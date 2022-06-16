@@ -153,6 +153,7 @@ internal extension SysLogPayload {
         /// - Parameter level: level.
         init(logLevel level: Level) {
             switch level {
+            case .trace: self = .debug
             case .debug: self = .debug
             case .info: self = .debug
             case .notice: self = .notice

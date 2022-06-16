@@ -192,6 +192,7 @@ extension OSLogTransport {
                 return translator(event)
             case .`default`:
                 switch event.level {
+                case .trace: return .debug
                 case .debug: return .debug
                 case .info: return .info
                 case .notice: return .info
@@ -203,6 +204,7 @@ extension OSLogTransport {
                 }
             case .strict:
                 switch event.level {
+                case .trace: return .debug
                 case .debug: return .debug
                 case .info: return .info
                 case .notice: return .info
@@ -214,6 +216,7 @@ extension OSLogTransport {
                 }
             case .relaxed:
                 switch event.level {
+                case .trace: return .debug
                 case .debug: return .debug
                 case .info: return .debug
                 case .notice: return .info

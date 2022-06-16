@@ -373,6 +373,7 @@ extension Level {
 
     internal var emoji: String {
         switch self {
+        case .trace:        return "▫️"
         case .debug:        return "▫️"
         case .info:         return "▪️"
         case .notice:       return "🔷"
@@ -394,6 +395,7 @@ extension Level {
         case .notice:    return "NTCE"
         case .info:      return "INFO"
         case .debug:     return "DEBG"
+        case .trace:     return "TRCE"
         }
     }
     

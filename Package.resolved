@@ -2,12 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "Sentry",
-        "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
-          "branch": "master",
-          "revision": "31f75f31afe1d8c6d51ad179b7cee5854c62ccfd",
-          "version": null
+          "branch": null,
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
         }
       }
     ]

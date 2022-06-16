@@ -16,13 +16,7 @@ import Foundation
 /// can have one or more underlying transport services.
 public protocol Transport {
     
-    /// Called by the channel to register a new payload to the given recorder.
-    /// The implementation is up to the recorder itself, maybe a rotating file, a database
-    /// or a remote webservice.
-    ///
-    /// - Returns: Bool
-    @discardableResult
-    func record(event: Event) -> Bool
+    // MARK: - Public Properties
     
     /// Queue used to receive the event.
     /// A serial queue is typically used, such as when the underlying
@@ -37,5 +31,15 @@ public protocol Transport {
     
     /// Is the transport enabled. When disabled transport ignore all incoming events to record.
     var isEnabled: Bool { get set }
+    
+    // MARK: - Public Functions
+    
+    /// Called by the channel to register a new payload to the given recorder.
+    /// The implementation is up to the recorder itself, maybe a rotating file, a database
+    /// or a remote webservice.
+    ///
+    /// - Returns: Bool
+    @discardableResult
+    func record(event: Event) -> Bool
     
 }

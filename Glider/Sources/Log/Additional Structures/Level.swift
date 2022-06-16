@@ -14,7 +14,9 @@ import Foundation
 import os.log
 
 /// This enum represent the different log levels defined by `syslog`
-/// (standardized by RFC-5424 <https://tools.ietf.org/html/rfc5424>).
+/// (standardized by RFC-5424 <https://tools.ietf.org/html/rfc5424> also used by swift-log;
+/// discussion can be found <https://forums.swift.org/t/logging-levels-for-swifts-server-side-logging-apis-and-new-os-log-apis/20365>.
+/// 
 /// The levels also have a numerical code which is standardized by syslog and is listed below.
 ///
 /// - `emergency`:  Application/system is unusable.
@@ -32,6 +34,7 @@ import os.log
 ///                 These can be discarded by the logging system, especially if there are resource constraints.
 /// - `debug`:      Messages meant to be useful only during development.
 ///                 This is meant to be disabled in shipping code.
+/// - `trace`:      Trace messages.
 public enum Level: Int, Comparable, CaseIterable,
                    CustomStringConvertible, Codable {
     case emergency = 0
@@ -42,6 +45,7 @@ public enum Level: Int, Comparable, CaseIterable,
     case notice
     case info
     case debug
+    case trace
     
     public var description: String {
         switch self {
@@ -53,6 +57,7 @@ public enum Level: Int, Comparable, CaseIterable,
         case .notice:       return "notice"
         case .info:         return "info"
         case .debug:        return "debug"
+        case .trace:        return "trace"
         }
     }
     
@@ -95,6 +100,7 @@ extension Level {
         case .notice:       return .info
         case .info:         return .info
         case .debug:        return .debug
+        case .trace:        return .debug
         }
     }
     

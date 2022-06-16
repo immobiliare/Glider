@@ -9,25 +9,39 @@ let package = Package(
         .iOS(.v13), .macOS(.v12), .watchOS(.v5), .tvOS(.v13)
     ],
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
-            name: "Glider",
-            targets: ["Glider"])
+        .library(name: "Glider", targets: ["Glider"]),
+        .library(name: "GliderSwiftLog", targets: ["GliderSwiftLog"])
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/getsentry/sentry-cocoa.git", branch: "master")
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "Glider",
+            name: "Glider", 
+            path: "Glider/Sources"
+        ),
+        .target(
+            name: "GliderSwiftLog", 
             dependencies: [
-                .product(name: "Sentry", package: "sentry-cocoa")
-            ]),
+                "Glider",
+                .product(name: "Logging", package: "swift-log")
+            ], 
+            path:"GliderSwiftLog/Sources"
+        ),
         .testTarget(
             name: "GliderTests",
-            dependencies: ["Glider"]),
+            dependencies: [
+                "Glider"
+            ],
+            path: "Tests/GliderTests"
+        ),
+        .testTarget(
+            name: "GliderSwiftLogTests",
+            dependencies: [
+                "Glider",
+                "GliderSwiftLog"
+            ],
+            path: "Tests/GliderSwiftLogTests"
+        )
     ]
 )
