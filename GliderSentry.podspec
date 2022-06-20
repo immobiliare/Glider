@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
-  s.name         = "GliderLogger"
+  s.name         = "GliderSentry"
   s.version      = "0.9.1"
-  s.summary      = "Lightweight yet powerful logging library. It's the Winston.js for Swift!"
+  s.summary      = "Sentry Transport service for Glider Logger"
   s.homepage     = "https://github.com/malcommac/Glider.git"
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.author             = { "Daniele Margutti" => "hello@danielemargutti.com" }
@@ -15,5 +15,8 @@ Pod::Spec.new do |s|
   s.framework = 'UIKit'
 
   s.module_name = "Glider"
-  s.source_files = 'Sources/Glider/**/*'
+  s.source_files = 'GliderSentry/Sources/**/*'
+  s.dependency 'Glider', "#{s.version.to_s}"
+  s.dependency 'Sentry', "7.17.0"
+
 end

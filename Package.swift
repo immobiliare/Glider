@@ -11,12 +11,13 @@ let package = Package(
     products: [
         .library(name: "Glider", targets: ["Glider"]),
         .library(name: "GliderSwiftLog", targets: ["GliderSwiftLog"]),
-        .library(name: "GliderELK", targets: ["GliderELK"])
+        .library(name: "GliderELK", targets: ["GliderELK"]),
+        .library(name: "GliderSentry", targets: ["GliderSentry"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
         .package(url: "https://github.com/swift-server/async-http-client.git", .upToNextMinor(from: "1.5.0")),
-        .package(url: "https://github.com/getsentry/sentry-cocoa.git", branch: "master")
+        .package(url: "https://github.com/getsentry/sentry-cocoa.git", .upToNextMinor(from: "7.17.0"))
     ],
     targets: [
         // TARGETS
@@ -48,14 +49,7 @@ let package = Package(
             ],
             path:"GliderSentry/Sources"
         ),
-        .target(
-            name: "GliderLoggly",
-            dependencies: [
-                "Glider"
-            ],
-            path:"GliderLoggly/Sources"
-        ),
-        
+
         // TESTS
         .testTarget(
             name: "GliderTests",
@@ -87,14 +81,6 @@ let package = Package(
                 "GliderSentry"
             ],
             path: "Tests/GliderSentryTests"
-        ),
-        .testTarget(
-            name: "GliderLogglyTests",
-            dependencies: [
-                "Glider",
-                "GliderLoggly"
-            ],
-            path: "Tests/GliderLogglyTests"
         )
     ]
 )
