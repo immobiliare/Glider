@@ -69,6 +69,19 @@ extension Log {
         
         // MARK: - Initialization
         
+        /// Initialize a new configuration with configuration callback.
+        ///
+        /// - Parameter builder: builder callback.
+        public init(_ builder: ((inout Configuration) -> Void)) {
+            #if DEBUG
+            self.isSynchronous = true
+            #else
+            self.isSynchronous = false
+            #endif
+            
+            builder(&self)
+        }
+        
         /// Initialize a new configuration.
         public init() {
             #if DEBUG

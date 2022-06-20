@@ -101,8 +101,7 @@ public class Log: Equatable {
     public init(_ builder: ((inout Configuration) -> Void)) {
         self.channelsQueue = DispatchQueue(label: "com.log.channels.\(uuid.uuidString)")
         
-        var config = Configuration()
-        builder(&config)
+        let config = Configuration(builder)
         
         self.transporter = TransportManager(configuration: config)
         self.isEnabled = config.isEnabled
