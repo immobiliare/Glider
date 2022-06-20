@@ -15,5 +15,5 @@ Pod::Spec.new do |s|
   s.framework = 'UIKit'
 
   s.module_name = "Glider"
-  s.source_files = 'Sources/Glider/**/*'
+  s.source_files = 'Glider/Sources/**/*'
 end
