@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.swift_versions = ['5.0', '5.1', '5.3', '5.4', '5.5']
   s.framework = 'UIKit'
 
-  s.module_name = "Glider"
+  s.module_name = "GliderSentry"
   s.source_files = 'GliderSentry/Sources/**/*'
   s.dependency 'GliderLogger', "#{s.version.to_s}"
   s.dependency 'Sentry', "7.17.0"
