@@ -55,6 +55,9 @@ public class Log: Equatable {
         channels[level.rawValue]
     }
     
+    /// `trace` channel receive messages for tracing purposes.
+    public var trace: Channel? { channels[Level.trace.rawValue] }
+    
     /// `debug` channel receive messages meant to be useful
     /// only during development.
     public var debug: Channel? { channels[Level.debug.rawValue] }
