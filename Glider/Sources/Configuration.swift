@@ -20,10 +20,10 @@ extension Log {
         // MARK: - Log Initial Configuration
         
         /// Subsystem of the log.
-        public var subsystem: LogUUID = ""
+        public var subsystem: LoggerIdentifiable = ""
         
         /// Category identiifer of the log.
-        public var category: LogUUID = ""
+        public var category: LoggerIdentifiable = ""
         
         // Minimum severity level for this logger.
         // Messages sent to a logger with a level lower than this will be automatically
@@ -97,7 +97,18 @@ extension Log {
 
 // MARK: - Extras
 
-public protocol LogUUID: CustomStringConvertible { }
+public protocol LoggerIdentifiable {
+    
+    /// Unique identifier of the log.
+    var id: String { get }
+    
+}
 
-extension String: LogUUID {}
+extension String: LoggerIdentifiable {
+    
+    public var id: String {
+        self
+    }
+    
+}
 

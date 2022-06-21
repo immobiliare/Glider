@@ -486,20 +486,20 @@ final class CoreTests: XCTestCase {
 
 // MARK: - Helper Structures
 
-fileprivate enum LogSubsystem: String, LogUUID {
+fileprivate enum LogSubsystem: String, LoggerIdentifiable {
     case coreApplication = "com.myapp.core"
     case externalFramework = "com.myapp.externalframework"
     
-    var description: String {
+    var id: String {
         rawValue
     }
 }
 
-fileprivate enum LogCategory: String, LogUUID {
+fileprivate enum LogCategory: String, LoggerIdentifiable {
     case network = "com.myapp.networking"
     case storage = "com.myapp.storage"
     
-    var description: String {
+    var id: String {
         rawValue
     }
 }

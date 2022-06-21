@@ -78,8 +78,8 @@ public class Channel {
         
         // Generate the event and decorate it with the current scope and runtime attributes
         event.level = self.level
-        event.subsystem = log.subsystem.description
-        event.category = log.category.description
+        event.subsystem = log.subsystem.id
+        event.category = log.category.id
         event.scope.attach(function: function, filePath: filePath, fileLine: fileLine)
         
         log.transporter.write(&event)
@@ -142,8 +142,8 @@ public class Channel {
         write(event: {
             $0.message = message
             $0.object = object
-            $0.extra = extra
-            $0.tags = tags
+            $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)
+            $0.tags = (self.log?.tags != nil ? Dictionary.merge(baseDictionary: self.log!.tags, additionalData: tags) : tags)
         }, function: function, filePath: filePath, fileLine: fileLine)
     }
     

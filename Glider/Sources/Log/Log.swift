@@ -24,13 +24,13 @@ public class Log: Equatable {
     ///
     /// For example you may use "com.myapp.storage" for a logger
     /// in your separate storage framework package.
-    public let subsystem: LogUUID
+    public let subsystem: LoggerIdentifiable
     
     /// You can use category to further distinguish a logger inside the same
     /// subsystem.
     /// For example you may use "messageStorage" or "usersStorage" to
     /// separate two logger in the same "com.myapp.storage"'s subsystem.
-    public let category: LogUUID
+    public let category: LoggerIdentifiable
     
     /// Current level of severity of the log instance.
     /// Messages below set level are ignored automatically.
@@ -39,6 +39,14 @@ public class Log: Equatable {
     /// Is logging enabled. When logging is disabled any message
     /// sent to any channels is discarded automatically and not evaluated.
     public var isEnabled: Bool = true
+    
+    /// Tags are key/value string pairs.
+    /// Values are merged with the current scope and events specific tags.
+    public var tags = Tags()
+    
+    /// Arbitrary additional information that will be sent with the event.
+    /// Values are merged with the current scope and events specific tags.
+    public var extra = Metadata()
     
     // MARK: - Channels
     
