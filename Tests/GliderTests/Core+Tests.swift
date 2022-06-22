@@ -123,7 +123,7 @@ final class CoreTests: XCTestCase {
                 $0.level = logLevel
             }
             
-            log[writeLevel]?.write(event: {
+            log[writeLevel]?.write({
                 if shouldPass == false {
                     XCTFail("Event building should never happend")
                 } else {
@@ -236,7 +236,7 @@ final class CoreTests: XCTestCase {
         
         for i in 0..<events.count {
             let level: Level = (i == 0 ? .debug : .info)
-            log[level]?.write(event: &events[i])
+            log[level]?.write(&events[i])
         }
         
         XCTAssertTrue(countReceivedEvents == 24, "Filter does not work as expected, total filtered values are wrong")
@@ -252,7 +252,7 @@ final class CoreTests: XCTestCase {
         }
         
         let event1 = log.debug?.write("Literal msg")
-        let event2 = log.debug?.write(event: {
+        let event2 = log.debug?.write({
             $0.message = "Computed msg with event"
         })
         let event3 = log.debug?.write({
@@ -326,8 +326,8 @@ final class CoreTests: XCTestCase {
         // Attach to event custom extra and tags values, some of them will override existing
         // keys inside the scope's extra and tags.
         var event = Event("test message", extra: eventExtra, tags: tagsExtra)
-        let proposedEvent = log.debug?.write(event: &event)
-        let proposedEvent2 = log.debug?.write(event: {
+        let proposedEvent = log.debug?.write(&event)
+        let proposedEvent2 = log.debug?.write({
             $0.message = "test message"
             $0.tags = tagsExtra
             $0.extra = eventExtra
@@ -375,7 +375,7 @@ final class CoreTests: XCTestCase {
             $0.transports = [ transport ]
         }
         
-        log.info?.write(event: {
+        log.info?.write({
             $0.object = image
         })
         
@@ -427,7 +427,7 @@ final class CoreTests: XCTestCase {
             $0.transports = [ transport ]
         }
                 
-        log.info?.write(event: {
+        log.info?.write({
             $0.object = company
         })
         
@@ -475,7 +475,7 @@ final class CoreTests: XCTestCase {
         
         let people = People(name: "Mark", age: 11, avatar: URL(string: "http://mywebsite.com/users/avatars/user12.jpg"))
         
-        log.info?.write(event: {
+        log.info?.write({
             $0.object = people
         })
         

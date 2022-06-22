@@ -40,7 +40,7 @@ final class TableFormattersTest: XCTestCase {
             $0.level = .debug
         }
         
-        log.info?.write(event: {
+        log.info?.write({
             $0.message = "Just a simple text message"
             $0.extra = [
                 "MixPanel": "enabled",

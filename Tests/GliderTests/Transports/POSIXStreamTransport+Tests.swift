@@ -42,7 +42,7 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
             $0.transports = [stdTransport]
         }
         
-        log.info?.write(event: {
+        log.info?.write({
             $0.message = "Message"
         })
           
@@ -56,7 +56,7 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
         stdListener?.start(withDelegate: self)
         expStdListener = expectation(description: "Expect data for stderror")
         
-        log.error?.write(event: {
+        log.error?.write({
             $0.message = "Message"
         })
 

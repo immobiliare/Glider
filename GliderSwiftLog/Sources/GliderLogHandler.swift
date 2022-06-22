@@ -88,7 +88,7 @@ public struct GliderSwiftLogHandler: LogHandler {
     public func log(level: Logger.Level, message: Logger.Message,
                     metadata: Logger.Metadata?,
                     source: String, file: String, function: String, line: UInt) {
-        logger[level.asGlider()]?.write(event: {
+        logger[level.asGlider()]?.write({
             $0.message = "\(message)"
             $0.tags = [
                 "label": self.label,

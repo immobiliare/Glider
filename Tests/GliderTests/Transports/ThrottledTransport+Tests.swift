@@ -62,7 +62,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
                 
         for i in 0..<numberOfEvents {
-            log.info?.write(event: {
+            log.info?.write({
                 $0.message = "test message \(i)!"
             })
         }
@@ -111,7 +111,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
                 
         emitTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true, block: { _ in
-            log.info?.write(event: {
+            log.info?.write({
                 $0.message = "test message \(sentMessages)!"
             })
             
@@ -174,7 +174,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
         
         for i in 0..<99 {
-            log.info?.write(event: {
+            log.info?.write({
                 $0.message = "test message \(i)!"
             })
         }
@@ -182,7 +182,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             transport.flush()
             
-            log.info?.write(event: {
+            log.info?.write({
                 $0.message = "final"
             })
         }

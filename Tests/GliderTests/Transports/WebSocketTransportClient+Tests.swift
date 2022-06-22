@@ -75,7 +75,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
         for event in generatedEvents {
             var e = event
             print("  Sending event \(e.id)...")
-            log.info?.write(event: &e)
+            log.info?.write(&e)
         }
                 
         wait(for: [expServerReceive!], timeout: 20)

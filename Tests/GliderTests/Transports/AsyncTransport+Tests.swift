@@ -78,7 +78,7 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         }
         
         for i in 0..<totalEventsToSent {
-            if let event = log.info?.write(event: {
+            if let event = log.info?.write({
                 $0.message = "test message \(i)!"
                 $0.extra = ["index": "\(i)"]
             }) {

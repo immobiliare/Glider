@@ -45,7 +45,7 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
         for i in 0..<payloadsToWrite {
             let level: Level = Level.allCases.randomElement() ?? .info
 
-            log[level]?.write(event: {
+            log[level]?.write({
                 $0.message = "test message \(i)!"
                 $0.tags = ["tag1": "value1", "tag2": "value2"]
                 $0.extra = ["extrakey": "value"]

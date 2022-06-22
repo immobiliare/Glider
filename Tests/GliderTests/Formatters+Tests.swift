@@ -279,7 +279,7 @@ final class FormattersTest: XCTestCase {
             $0.transports = [fileTransport]
         }
                 
-        log.info?.write(event: {
+        log.info?.write({
             $0.message = "test message one"
             $0.extra = ["key1": "val1","key2": "val2", "key3": "val3"]
             $0.tags = ["tag1":"v1"]
@@ -331,12 +331,12 @@ final class FormattersTest: XCTestCase {
             $0.transports = [fileTransport]
         }
                 
-        log.info?.write(event: {
+        log.info?.write({
             $0.message = "test message one"
             $0.extra = ["key1": "val1","key2": "val2", "key3": "val3"]
         })
         
-        log.error?.write(event: {
+        log.error?.write({
             $0.message = "another message"
             $0.tags = ["tag1": "valtag1", "tag2": "valtag2"]
         })

@@ -45,7 +45,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(event eventBuilder: @escaping (inout Event) -> Void,
+    public func write(_ eventBuilder: @escaping (inout Event) -> Void,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         
         guard let log = log, log.isEnabled else {
@@ -55,7 +55,7 @@ public class Channel {
         // Generate the event and decorate it with the current scope and runtime attributes
         var event = Event()
         eventBuilder(&event)
-        return write(event: &event, function: function, filePath: filePath, fileLine: fileLine)
+        return write(&event, function: function, filePath: filePath, fileLine: fileLine)
     }
     
     /// Write a new event to the current channel.
@@ -70,7 +70,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(event: inout Event,
+    public func write(_ event: inout Event,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         guard let log = log, log.isEnabled else {
             return nil
@@ -116,7 +116,7 @@ public class Channel {
             return nil
         }
 
-        return write(event: {
+        return write({
             $0.object = object
             $0.message = stringBuilder()
         }, function: function, filePath: filePath, fileLine: fileLine)
@@ -139,7 +139,7 @@ public class Channel {
                       extra: Metadata? = nil,
                       tags: Tags? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
-        write(event: {
+        write({
             $0.message = message
             $0.object = object
             $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)

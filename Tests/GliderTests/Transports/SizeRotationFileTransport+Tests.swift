@@ -52,7 +52,7 @@ final class SizeRotationTransportTests: XCTestCase, SizeRotationFileTransportDel
         }
         
         for i in 0..<10000 {
-            log.info?.write(event: {
+            log.info?.write({
                 $0.message = "test message \(i)!"
                 $0.extra = ["index": "\(i)"]
             })
