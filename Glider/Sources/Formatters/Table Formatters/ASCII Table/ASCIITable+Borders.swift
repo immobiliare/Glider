@@ -13,15 +13,26 @@
 
 import Foundation
 
-extension Table.Column {
+extension ASCIITable.Column {
     
-    public static func configureBorders(in columns: [Table.Column], style: Table.BorderStyle, horizontalMargin: String = " ") -> [Table.Column] {
+    // MARK: - Public Functions
+    
+    /// Configure borders of the table.
+    ///
+    /// - Parameters:
+    ///   - columns: columns to set.
+    ///   - style: style to set.
+    ///   - horizontalMargin: margin in horizontal.
+    /// - Returns: [Table.Column]
+    public static func configureBorders(in columns: [ASCIITable.Column], style: ASCIITable.BorderStyle, horizontalMargin: String = " ") -> [ASCIITable.Column] {
         var cols = columns
         self.configureBorders(in: &cols, uniformStyle: style, horizontalMargin: horizontalMargin)
         return cols
     }
     
-    private static func configureBorders(in columns: inout [Table.Column], uniformStyle style: Table.BorderStyle, horizontalMargin: String = " ") {
+    // MARK: - Private Functions
+    
+    private static func configureBorders(in columns: inout [ASCIITable.Column], uniformStyle style: ASCIITable.BorderStyle, horizontalMargin: String = " ") {
         guard !columns.isEmpty else { return }
         let multipleColumns = columns.count > 1
         columns[0].leadingMargin = "\(style.vertical)\(horizontalMargin)"
@@ -86,7 +97,9 @@ extension Table.Column {
     
 }
 
-extension Table {
+// MARK: - Table.BorderStyle
+
+extension ASCIITable {
     
     public enum BorderStyle {
         case double

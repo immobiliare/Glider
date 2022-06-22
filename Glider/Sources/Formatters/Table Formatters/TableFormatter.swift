@@ -75,16 +75,17 @@ public class TableFormatter: EventFormatter {
     
     // MARK: - Private Functions
     
-    open func formatTable(forEvent event: Event) -> Table {
-        
-        let columnIdentifier = Table.Column { col in
+    /// Create the table with values.
+    ///
+    /// - Parameter event: event target.
+    /// - Returns: `ASCIITable`
+    open func formatTable(forEvent event: Event) -> ASCIITable {
+        let columnIdentifier = ASCIITable.Column { col in
             col.footer = .init({ footer in
                 footer.border = .boxDraw.heavyHorizontal
             })
             col.header = .init(title: self.columnHeaderTitles.info, { header in
                 header.fillCharacter = " "
-                header.topBorder = .boxDraw.heavyHorizontal
-                header.trailingMargin = " \(Character.boxDraw.heavyVertical)"
                 header.verticalPadding = .init({ padding in
                     padding.top = 0
                     padding.bottom = 0
@@ -92,20 +93,15 @@ public class TableFormatter: EventFormatter {
             })
             col.maxWidth = self.maxColumnWidths.info
             col.horizontalAlignment = .leading
-            col.leadingMargin = "\(Character.boxDraw.heavyVertical) "
-            col.trailingMargin = " \(Character.boxDraw.heavyVertical)"
         }
         
         
-        let columnValues = Table.Column { col in
+        let columnValues = ASCIITable.Column { col in
             col.footer = .init({ footer in
                 footer.border = .boxDraw.heavyHorizontal
             })
             col.header = .init(title: self.columnHeaderTitles.values, { header in
                 header.fillCharacter = " "
-                header.leadingMargin = "\(Character.boxDraw.heavyVertical) "
-                header.topBorder = .boxDraw.heavyHorizontal
-                header.trailingMargin = " \(Character.boxDraw.heavyVertical)"
                 header.verticalPadding = .init({ padding in
                     padding.top = 0
                     padding.bottom = 0
@@ -113,17 +109,19 @@ public class TableFormatter: EventFormatter {
             })
             col.maxWidth = self.maxColumnWidths.values
             col.horizontalAlignment = .leading
-            col.leadingMargin = "\(Character.boxDraw.heavyVertical) "
-            col.trailingMargin = " \(Character.boxDraw.heavyVertical)"
         }
         
-        let cols = Table.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
+        let cols = ASCIITable.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
         let contents = valuesForEvent(event: event)
         
-        let table: Table = Table(columns: cols, content: contents)
+        let table: ASCIITable = ASCIITable(columns: cols, content: contents)
         return table
     }
     
+    /// Content of the table for event.
+    ///
+    /// - Parameter event: event.
+    /// - Returns: `[String]`
     open func valuesForEvent(event: Event) -> [String] {
         var contents = [String]()
         
@@ -135,7 +133,7 @@ public class TableFormatter: EventFormatter {
             
             switch value {
             case let arrayValue as [String]:
-                // Split each key in a custom row of the table
+                // Split each value in a custom row of the table along with its keys
                 guard let keys = field.field.keysToRetrive, keys.count == arrayValue.count else {
                     break
                 }
@@ -145,7 +143,7 @@ public class TableFormatter: EventFormatter {
                 }
                 
             case let dictionaryValue as [String: Any]:
-                // Split each key in a dictionary in a separate row
+                // Split each <key,value> in a dictionary in a separate row
                 for key in dictionaryValue.keys {
                     let value = dictionaryValue[key]
                     guard let value = value as? SerializableData else {
@@ -188,40 +186,39 @@ public class TableFormatter: EventFormatter {
     
 }
 
-extension FieldsFormatter.FieldIdentifier {
-    
-    fileprivate var tableTitle: String? {
-        switch self {
-        case .message: return "Message"
-        case .callSite: return "Call site"
-        case .callingThread: return "Thread"
-        case .category: return "Category"
-        case .eventUUID: return "UUID"
-        case .subsystem: return "Subsystem"
-        case .timestamp: return "Timestamp"
-        case .level: return "Level"
-        case .stackFrame: return "Stack Frame"
-        case .processName: return "Process"
-        case .processID: return "Process ID"
-        case .userId: return "User ID"
-        case .userEmail: return "User Email"
-        case .username: return "User Name"
-        case .ipAddress: return "IP"
-        case .userData: return "User Data"
-        case .fingerprint: return "Fingerprint"
-        case .objectMetadata: return "Obj Metadata"
-        case .object: return "Obj"
-        case .delimiter: return nil
-        case .literal(let title): return title
-        case .tags: return "Tags"
-        case .extra: return "Extra"
-        case .custom: return nil
-        }
-    }
-    
-}
+// MARK: - FieldsFormatter.FieldIdentifier
 
 extension FieldsFormatter.FieldIdentifier {
+    
+    /// Table's ID title.
+    fileprivate var tableTitle: String? {
+        switch self {
+        case .message:          return "Message"
+        case .callSite:         return "Call site"
+        case .callingThread:    return "Thread"
+        case .category:         return "Category"
+        case .eventUUID:        return "UUID"
+        case .subsystem:        return "Subsystem"
+        case .timestamp:        return "Timestamp"
+        case .level:            return "Level"
+        case .stackFrame:       return "Stack Frame"
+        case .processName:      return "Process"
+        case .processID:        return "Process ID"
+        case .userId:           return "User ID"
+        case .userEmail:        return "User Email"
+        case .username:         return "User Name"
+        case .ipAddress:        return "IP"
+        case .userData:         return "User Data"
+        case .fingerprint:      return "Fingerprint"
+        case .objectMetadata:   return "Obj Metadata"
+        case .object:           return "Obj"
+        case .delimiter:        return nil
+        case .literal(let t):   return t
+        case .tags:             return "Tags"
+        case .extra:            return "Extra"
+        case .custom:           return nil
+        }
+    }
     
     fileprivate var keysToRetrive: [String]? {
         switch self {
@@ -233,33 +230,4 @@ extension FieldsFormatter.FieldIdentifier {
         }
     }
     
-}
-
-protocol OptionalProtocol {
-    func isSome() -> Bool
-    func unwrap() -> Any
-}
-
-extension Optional : OptionalProtocol {
-    func isSome() -> Bool {
-        switch self {
-        case .none: return false
-        case .some: return true
-        }
-    }
-
-    func unwrap() -> Any {
-        switch self {
-        case .none: preconditionFailure("trying to unwrap nil")
-        case .some(let unwrapped): return unwrapped
-        }
-    }
-}
-
-func unwrapUsingProtocol<T>(_ any: T) -> Any
-{
-    guard let optional = any as? OptionalProtocol, optional.isSome() else {
-        return any
-    }
-    return optional.unwrap()
 }

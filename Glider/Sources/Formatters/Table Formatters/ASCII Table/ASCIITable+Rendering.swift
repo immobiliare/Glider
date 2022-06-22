@@ -13,7 +13,7 @@
 
 import Foundation
 
-extension Table: TerminalDisplay {
+extension ASCIITable: TerminalDisplay {
     
     /// Return the formatted terminal ready table.
     public var stringValue: String {

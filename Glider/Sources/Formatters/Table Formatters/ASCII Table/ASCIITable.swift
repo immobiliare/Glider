@@ -13,13 +13,25 @@
 
 import Foundation
 
-// MARK: - Table
+// MARK: - ASCIITable
 
-public struct Table {
+public struct ASCIITable {
     
+    // MARK: - Public Properties
+    
+    /// Columns to set.
     public var columns: [Column]
+    
+    /// Content of the rows.
     public var content: [TerminalDisplay]
 
+    // MARK: - Initialize
+    
+    /// Initialize a new table.
+    ///
+    /// - Parameters:
+    ///   - columns: columns to set.
+    ///   - content: content to set.
     public init(columns: [Column], content: [TerminalDisplay]) {
         self.columns = columns
         self.content = content
@@ -27,11 +39,14 @@ public struct Table {
     
 }
 
-// MARK: - Column
+// MARK: - ASCIITable.Column
 
-extension Table {
+extension ASCIITable {
     
     public struct Column {
+        
+        // MARK: - Public Properties
+        
         public var fillCharacter: Character = " "
         public var footer: Footer? = nil
         public var header: Header? = nil
@@ -42,6 +57,8 @@ extension Table {
         public var verticalAlignment: VerticalAlignment = .middle
         public var verticalPadding: VerticalPadding = .zero
         public var maxWidth: Int? = nil
+        
+        // MARK: - Initialization
         
         public init(_ builder: ((inout Column) -> Void)? = nil) {
             builder?(&self)
@@ -57,7 +74,7 @@ extension Table {
 
 // MARK: - Column Header
 
-extension Table.Column {
+extension ASCIITable.Column {
     
     public struct Header {
         public var bottomBorder: Character? = nil
@@ -87,7 +104,7 @@ extension Table.Column {
 
 // MARK: - Column Footer
 
-extension Table.Column {
+extension ASCIITable.Column {
     
     public struct Footer {
         public var border: Character? = nil
@@ -111,7 +128,7 @@ extension Table.Column {
 
 // MARK: - Column Corners
 
-extension Table.Column {
+extension ASCIITable.Column {
     
     public struct Corners {
         public var topLeading: Character? = nil
@@ -131,7 +148,7 @@ extension Table.Column {
 
 // MARK: - Horizontal Alignment
 
-extension Table.Column {
+extension ASCIITable.Column {
     
     public enum HorizontalAlignment {
         case leading
@@ -164,7 +181,7 @@ extension Table.Column {
 
 // MARK: - Vertical Alignment
 
-extension Table.Column {
+extension ASCIITable.Column {
     
     public enum VerticalAlignment {
         case top
