@@ -173,6 +173,9 @@ internal extension Event {
         case .fingerprint:
             return fingerprint ?? scope.fingerprint
             
+        case .customValue(let function):
+            return function(self)
+            
         }
     }
     

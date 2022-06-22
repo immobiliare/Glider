@@ -111,6 +111,10 @@ extension FieldsFormatter {
             return self.init(.custom(formatter), configure)
         }
         
+        public static func customValue(_ callback: @escaping ((Event?) -> (key: String, value: String)), _ configure: Configure? = nil) -> Field {
+            return self.init(.customValue(callback), configure)
+        }
+        
         public static func category( _ configure: Configure? = nil) -> Field {
             self.init(.category, configure)
         }
@@ -218,6 +222,7 @@ extension FieldsFormatter {
         case tags([String]?)
         case extra([String]?)
         case custom(EventFormatter)
+        case customValue((Event?) -> (key: String, value: String)?)
         
         internal var defaultLabel: String? {
             switch self {
@@ -242,6 +247,7 @@ extension FieldsFormatter {
             case .objectMetadata: return "objectMetadata"
             case .tags: return "tags"
             case .extra: return "extra"
+            case .customValue(let function): return function(nil)?.key
             default: return nil
             }
         }

@@ -67,10 +67,13 @@ public class TableFormatter: EventFormatter {
     // MARK: - Compliance
     
     public func format(event: Event) -> SerializableData? {
-        let message = messageFormatter.format(event: event)
-        let table = formatTable(forEvent: event).stringValue
-        let composed = ((message?.asString() ?? "") + separator + table)
-        return composed
+        var message = messageFormatter.format(event: event)?.asString() ?? ""
+        
+        if let table = formatTable(forEvent: event) {
+            message += separator + table.stringValue
+        }
+
+        return message
     }
     
     // MARK: - Private Functions
@@ -79,7 +82,13 @@ public class TableFormatter: EventFormatter {
     ///
     /// - Parameter event: event target.
     /// - Returns: `ASCIITable`
-    open func formatTable(forEvent event: Event) -> ASCIITable {
+    open func formatTable(forEvent event: Event) -> ASCIITable? {
+        let rows = valuesForEvent(event: event)
+
+        guard !tableFields.isEmpty, !rows.isEmpty else {
+            return nil
+        }
+        
         let columnIdentifier = ASCIITable.Column { col in
             col.footer = .init({ footer in
                 footer.border = .boxDraw.heavyHorizontal
@@ -111,11 +120,8 @@ public class TableFormatter: EventFormatter {
             col.horizontalAlignment = .leading
         }
         
-        let cols = ASCIITable.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
-        let contents = valuesForEvent(event: event)
-        
-        let table: ASCIITable = ASCIITable(columns: cols, content: contents)
-        return table
+        let columns = ASCIITable.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
+        return ASCIITable(columns: columns, content: rows)
     }
     
     /// Content of the table for event.
@@ -153,6 +159,10 @@ public class TableFormatter: EventFormatter {
                     contents.append(key)
                     contents.append(postProcessValue(value.asString() ?? "", forField: field))
                 }
+                
+            case let customKeyValue as (key: String, value: String):
+                contents.append(customKeyValue.key)
+                contents.append(postProcessValue(customKeyValue.value, forField: field))
                 
             default:
                 // Just report the row with value
@@ -217,6 +227,7 @@ extension FieldsFormatter.FieldIdentifier {
         case .tags:             return "Tags"
         case .extra:            return "Extra"
         case .custom:           return nil
+        case .customValue(let f): return f(nil)?.key
         }
     }
     

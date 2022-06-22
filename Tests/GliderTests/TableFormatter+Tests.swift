@@ -25,10 +25,13 @@ final class TableFormattersTest: XCTestCase {
                 .message()
             ],
             tableFields: [
-                .subsystem(),
-                .level(style: .simple),
-                .callSite(),
-                .extra(keys: ["MixPanel", "Logged"])
+               // .subsystem(),
+               // .level(style: .simple),
+               // .callSite(),
+               // .extra(keys: ["MixPanel", "Logged"])
+                .customValue({ _ in
+                    return ("Chiave", "Valore")
+                })
             ])]
         }
         let log = Log {
