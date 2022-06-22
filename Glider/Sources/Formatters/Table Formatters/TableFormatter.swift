@@ -66,7 +66,7 @@ public class TableFormatter: EventFormatter {
     
     // MARK: - Compliance
     
-    public func format(event: Event) -> SerializableData? {
+    open func format(event: Event) -> SerializableData? {
         var message = messageFormatter.format(event: event)?.asString() ?? ""
         
         if let table = formatTable(forEvent: event) {
@@ -74,6 +74,23 @@ public class TableFormatter: EventFormatter {
         }
 
         return message
+    }
+    
+    /// Default formatter `TableFormatter`.
+    /// - Returns: `TableFormatter`
+    open class func `default`() -> TableFormatter {
+        TableFormatter(
+            messageFields: [
+                .timestamp(style: .iso8601),
+                .delimiter(style: .spacedPipe),
+                .message()
+            ],
+            tableFields: [
+                .subsystem(),
+                .level(style: .simple),
+                .callSite()
+            ]
+        )
     }
     
     // MARK: - Private Functions
@@ -150,7 +167,7 @@ public class TableFormatter: EventFormatter {
                 
             case let dictionaryValue as [String: Any]:
                 // Split each <key,value> in a dictionary in a separate row
-                for key in dictionaryValue.keys {
+                for key in dictionaryValue.keys.sorted() {
                     let value = dictionaryValue[key]
                     guard let value = value as? SerializableData else {
                         continue

@@ -17,33 +17,65 @@ import XCTest
 
 final class TableFormattersTest: XCTestCase {
     
+    /// The following test check if the `TableFormatter` return valid values
+    /// when printed to the console.
     func test_tableFormattersTests() async throws {
-        let console = ConsoleTransport {
-            $0.formatters = [TableFormatter(messageFields: [
+        let tableFormatter = TableFormatter(
+            messageFields: [
                 .timestamp(style: .iso8601),
                 .delimiter(style: .spacedPipe),
                 .message()
             ],
             tableFields: [
-               // .subsystem(),
-               // .level(style: .simple),
-               // .callSite(),
-               // .extra(keys: ["MixPanel", "Logged"])
-                .customValue({ _ in
-                    return ("Chiave", "Valore")
-                })
-            ])]
+                .subsystem(),
+                .level(style: .simple),
+                .callSite(),
+                .extra(keys: ["MagicNumber", "AdSearch"]),
+                .customValue({ event in
+                    return ("MyKey", event?.id ?? "-")
+            })
+        ])
+        
+        let consoleTransport = ConsoleTransport {
+            $0.formatters = [tableFormatter]
         }
+        
+        let testTransport = TestTransport { event in
+            let msg = tableFormatter.format(event: event)!.asString()!
+            print(msg)
+            
+            XCTAssertTrue(msg.contains("| Just a simple text message\n"))
+
+            XCTAssertTrue(msg.contains("""
+            ┌─────────────┬──────────────────────────────────────┐
+            │ ID          │ VALUE                                │
+            ├─────────────┼──────────────────────────────────────┤
+            │ Subsystem   │ MyApp.Network                        │
+            │ Level       │ info
+            """))
+            
+            XCTAssertTrue(msg.contains("""
+            │ AdSearch    │ 122                                  │
+            │ MagicNumber │ enabled                              │
+            """))
+            
+            XCTAssertTrue(msg.contains("""
+            └─────────────┴──────────────────────────────────────┘
+            """))
+            
+        }
+        
         let log = Log {
-            $0.subsystem = "Indomio.Network"
-            $0.transports = [console]
+            $0.subsystem = "MyApp.Network"
+            $0.category = "NetworkingService"
+            $0.transports = [consoleTransport, testTransport]
             $0.level = .debug
         }
         
         log.info?.write({
             $0.message = "Just a simple text message"
             $0.extra = [
-                "MixPanel": "enabled",
+                "MagicNumber": "enabled",
                 "Logged": true,
                 "AdSearch": "122"
             ]

@@ -519,7 +519,7 @@ fileprivate class CallbackFilter: TransportFilter {
     
 }
 
-fileprivate class TestTransport: Transport {
+public class TestTransport: Transport {
     typealias OnReceiveEvent = ((Event) -> Void)
 
     private var onReceiveEvent: OnReceiveEvent?
@@ -531,11 +531,11 @@ fileprivate class TestTransport: Transport {
         self.onReceiveEvent = onReceiveEvent
     }
     
-    func record(event: Event) -> Bool {
+    public func record(event: Event) -> Bool {
         onReceiveEvent?(event)
         return true
     }
     
-    var queue: DispatchQueue? = DispatchQueue(label: "com.test.transport", qos: .background)
+    public var queue: DispatchQueue? = DispatchQueue(label: "com.test.transport", qos: .background)
     
 }
