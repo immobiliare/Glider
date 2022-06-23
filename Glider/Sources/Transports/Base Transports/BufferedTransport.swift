@@ -38,15 +38,22 @@ public class BufferedTransport<BufferItem>: Transport {
     
     // MARK: - Initialization
     
+    /// Initialize with configuration.
+    ///
+    /// - Parameter config: configuration.
+    public init(configuration config: Configuration) {
+        self.configuration = config
+        self.queue = configuration.queue
+    }
+    
     /// Initializer a new `BufferedTransport`.
     ///
     /// - Parameters:
     ///   - bufferedItemBuilder: The function used to create a `BufferItem` given a `Event` instance.
     ///   - builder: builder function to setup additional settings.
-    public init(bufferedItemBuilder: @escaping BufferItemBuilder,
+    public convenience init(bufferedItemBuilder: @escaping BufferItemBuilder,
                 _ builder: ((inout Configuration) -> Void)) {
-        self.configuration = Configuration(bufferedItemBuilder: bufferedItemBuilder, builder)
-        self.queue = configuration.queue
+        self.init(configuration: Configuration(bufferedItemBuilder: bufferedItemBuilder, builder))
     }
     
     // MARK: - Conformance

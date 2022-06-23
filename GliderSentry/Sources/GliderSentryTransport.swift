@@ -29,14 +29,22 @@ open class GliderSentryTransport: Transport {
     
     // MARK: - Initialization
     
-    /// Initialize a new Sentry transport service.
-    /// - Parameter builder: builder pattern.
-    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
-        self.configuration = Configuration(builder)
-    
+    /// Initialize a new configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) {
+        self.configuration = configuration
+        
         if let sdkConfiguration = configuration.sdkConfiguration {
             SentrySDK.start(options: sdkConfiguration)
         }
+    }
+    
+    /// Initialize a new Sentry transport service.
+    ///
+    /// - Parameter builder: builder pattern.
+    public convenience init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.init(configuration: Configuration(builder))
     }
     
     // MARK: - Conformance

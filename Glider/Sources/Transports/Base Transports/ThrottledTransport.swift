@@ -59,12 +59,11 @@ public class ThrottledTransport: Transport {
         
     // MARK: - Initialization
     
-    /// Initialize `ThrottledTransport` with given configuration.
+    /// Initialize with configuration.
     ///
-    /// - Parameter builder: configuration callback.
-    public init(_ builder: ((inout Configuration) -> Void)) {
-        self.configuration = Configuration(builder)
-        
+    /// - Parameter config: configuration.
+    public init(configuration config: Configuration) {
+        self.configuration = config
         self.buffer.reserveCapacity(configuration.maxEntries) // Reserve capacity to optimize storage in memory.
         self.delegate = configuration.delegate
         
@@ -72,6 +71,13 @@ public class ThrottledTransport: Transport {
         queue!.sync { [weak self] in
             self?.setupAutoFlushIntervalIfNeeded()
         }
+    }
+    
+    /// Initialize `ThrottledTransport` with given configuration.
+    ///
+    /// - Parameter builder: configuration callback.
+    public convenience init(_ builder: ((inout Configuration) -> Void)) {
+        self.init(configuration: Configuration(builder))
     }
     
     /// Perform manual flush.

@@ -48,14 +48,21 @@ public class StdStreamsTransport: Transport {
     
     // MARK: - Initialization
     
-    /// Initialize a new `StdStreamsTransport`.
+    /// Initialize with configuration.
     ///
-    /// - Parameter builder: builder configuration
-    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
-        self.configuration = Configuration(builder)
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) {
+        self.configuration = configuration
                 
         self.stdoutTransport = POSIXStreamTransport.stdOut(formatters: configuration.formatters, queue: configuration.queue)
         self.stderrTransport = POSIXStreamTransport.stdErr(formatters: configuration.formatters, queue: configuration.queue)
+    }
+    
+    /// Initialize a new `StdStreamsTransport`.
+    ///
+    /// - Parameter builder: builder configuration
+    public convenience init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.init(configuration: Configuration(builder))
     }
 
     // MARK: - Conformance

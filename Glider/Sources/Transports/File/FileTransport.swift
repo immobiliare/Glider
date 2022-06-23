@@ -69,6 +69,22 @@ public class FileTransport: Transport {
     
     // MARK: - Initialization
     
+    /// Initialize with configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) throws {
+        self.configuration = configuration
+        
+        let fileHandler = fopen(configuration.fileURL.path, "a")
+        guard fileHandler != nil else {
+            throw GliderError(message: "Failed to open handle for file writing at path: \(configuration.fileURL.path)")
+        }
+     
+        self.queue = configuration.queue
+        self.handler = fileHandler
+        self.newLinesData = configuration.newlines.data(using: .utf8)
+    }
+    
     /// Initialize a new `FileTransport` instance to use the given file path
     /// and event formatters. This will fail if `filePath` could not
     /// be opened for writing.
@@ -76,17 +92,8 @@ public class FileTransport: Transport {
     /// - Parameters:
     ///   - fileURL: file URL for writing logs.
     ///   - builder: builder to configure additional settings.
-    public init(fileURL: URL, _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        self.configuration = Configuration(fileURL: fileURL, builder)
-        
-        let fileHandler = fopen(fileURL.path, "a")
-        guard fileHandler != nil else {
-            throw GliderError(message: "Failed to open handle for file writing at path: \(fileURL.path)")
-        }
-     
-        self.queue = configuration.queue
-        self.handler = fileHandler
-        self.newLinesData = configuration.newlines.data(using: .utf8)
+    public convenience init(fileURL: URL, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(fileURL: fileURL, builder))
     }
     
     deinit {

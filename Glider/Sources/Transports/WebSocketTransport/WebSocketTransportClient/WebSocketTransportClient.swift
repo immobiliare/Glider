@@ -46,20 +46,13 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     
     // MARK: - Initialization
     
-    /// Initialize a new `WebSocketTransport` instance with a given configuration.
+    /// Initialize with a given configuration.
     ///
     /// - Parameters:
-    ///   - urlString: url of the remote websocket server.
-    ///   - delegate: delegate to receive events.
-    ///   - builder: builder configuration function.
-    public init(url urlString: String,
-                delegate: WebSocketTransportClientDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        guard let url = URL(string: urlString) else {
-            throw GliderError(message: "Invalid WebSocket url: \(urlString)")
-        }
-        
-        self.configuration = Configuration(url: url, builder)
+    ///   - configuration: configuration.
+    ///   - delegate: delegate.
+    public init(configuration: Configuration, delegate: WebSocketTransportClientDelegate? = nil) throws {
+        self.configuration = configuration
         self.queue = configuration.queue
         self.delegate = delegate
 
@@ -72,6 +65,23 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
         if configuration.connectAutomatically {
             connect()
         }
+    }
+    
+    /// Initialize a new `WebSocketTransport` instance with a given configuration.
+    ///
+    /// - Parameters:
+    ///   - urlString: url of the remote websocket server.
+    ///   - delegate: delegate to receive events.
+    ///   - builder: builder configuration function.
+    public convenience init(url urlString: String,
+                delegate: WebSocketTransportClientDelegate? = nil,
+                _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        
+        guard let url = URL(string: urlString) else {
+            throw GliderError(message: "Invalid WebSocket url: \(urlString)")
+        }
+        
+        try self.init(configuration: Configuration(url: url, builder))
     }
     
     // MARK: - Public Functions

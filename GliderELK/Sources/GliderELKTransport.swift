@@ -58,9 +58,11 @@ public class GliderELKTransport: Transport {
     
     // MARK: - Initialization
     
-    public init(hostname: String, port: Int, _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        self.configuration = try Configuration(hostname: hostname, port: port, builder)
-        
+    /// Initialize with a given configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) throws {
+        self.configuration = configuration
         self.httpClient = HTTPClient(
             eventLoopGroupProvider: .shared(configuration.eventLoopGroup),
             configuration: HTTPClient.Configuration(),
@@ -70,7 +72,16 @@ public class GliderELKTransport: Transport {
         self.byteBuffer = ByteBufferAllocator().buffer(capacity: configuration.logStorageSize)
         self.totalByteBufferSize = byteBuffer.capacity
         self.uploadTask = scheduleUploadTask(initialDelay: configuration.uploadInterval)
-        
+    }
+    
+    /// Initialize with a given configuration.
+    ///
+    /// - Parameters:
+    ///   - hostname: hostname.
+    ///   - port: port number.
+    ///   - builder: builder function.
+    public convenience init(hostname: String, port: Int, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(hostname: hostname, port: port, builder))
     }
     
     // MARK: - Conformance

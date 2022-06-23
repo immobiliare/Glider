@@ -35,6 +35,19 @@ public class OSLogTransport: Transport {
     
     // MARK: - Initialization
     
+    /// Initialize with configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init?(configuration: Configuration) throws {
+        guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, watchOS 3.0, *) else {
+            throw GliderError(message: "OSLog is not supported in this platform")
+        }
+        
+        self.configuration = configuration
+        self.log = OSLog(subsystem: configuration.subsystem, category: configuration.category)
+        self.queue = configuration.queue
+    }
+    
     /// Initialize a new `OSLogTransport`.
     ///
     /// NOTE: The initializer may fail  when OSLog is not supported.
@@ -45,14 +58,8 @@ public class OSLogTransport: Transport {
     ///   - subsystem: The name of the subsystem performing the logging.
     ///                Defaults to the empty string (`""`) if not specified.
     ///   - queue : The GCD queue that should be used for logging actions related to the receiver.
-    public init?(_ builder: ((inout Configuration) -> Void)? = nil) throws {
-        guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, watchOS 3.0, *) else {
-            throw GliderError(message: "OSLog is not supported in this platform")
-        }
-        
-        self.configuration = Configuration(builder)
-        self.log = OSLog(subsystem: configuration.subsystem, category: configuration.category)
-        self.queue = configuration.queue
+    public convenience init?(_ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(builder))
     }
     
     // MARK: - Conformance

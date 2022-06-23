@@ -46,17 +46,11 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Initialization
     
-    /// Initialize a new logstash transport.
+    /// Initialize with configuration.
     ///
-    /// - Parameters:
-    ///   - host: hostname.
-    ///   - port: port number.
-    ///   - delegate: delegate for events.
-    ///   - builder: builder to configure extra options.
-    public init(host: String, port: Int,
-                delegate: LogstashTransportDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        self.configuration = Configuration(host: host, port: port, builder)
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration, delegate: LogstashTransportDelegate? = nil) throws {
+        self.configuration = configuration
         self.delegate = delegate
         self.queue = configuration.queue
         
@@ -66,6 +60,19 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
         self.session = URLSession(configuration: .ephemeral,
                                   delegate: self.sessionDelegate,
                                   delegateQueue: socketQueue)
+    }
+    
+    /// Initialize a new logstash transport.
+    ///
+    /// - Parameters:
+    ///   - host: hostname.
+    ///   - port: port number.
+    ///   - delegate: delegate for events.
+    ///   - builder: builder to configure extra options.
+    public convenience init(host: String, port: Int,
+                delegate: LogstashTransportDelegate? = nil,
+                _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(host: host, port: port, builder), delegate: delegate)
     }
     
     // MARK: - Public Functions

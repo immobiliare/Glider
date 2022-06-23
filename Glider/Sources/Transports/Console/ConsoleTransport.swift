@@ -28,11 +28,18 @@ public class ConsoleTransport: Transport {
     
     // MARK: - Initialization
     
+    /// Initialize with configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) {
+        self.configuration = configuration
+    }
+    
     /// Initialize new console transport.
     ///
     /// - Parameter builder: builder to setup additional configurations.
-    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
-        self.configuration = Configuration(builder)
+    public convenience init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.init(configuration: Configuration(builder))
     }
     
     // MARK: - Public Functions

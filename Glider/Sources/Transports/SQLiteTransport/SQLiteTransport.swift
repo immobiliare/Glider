@@ -52,12 +52,15 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     // MARK: - Initialization
     
-    public init(databaseLocation: SQLiteDb.Location, _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        self.configuration = Configuration(databaseLocation: databaseLocation, builder)
+    /// Initialize a new SQLite Transport with configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) throws {
+        self.configuration = configuration
+        
+        let fileExists = configuration.databaseLocation.fileExists
 
-        let fileExists = databaseLocation.fileExists
-
-        self.db = try SQLiteDb(databaseLocation, options: configuration.databaseOptions)
+        self.db = try SQLiteDb(configuration.databaseLocation, options: configuration.databaseOptions)
         self.databaseVersion = configuration.databaseVersion
         self.delegate = configuration.delegate
         self.queue = configuration.queue
@@ -66,12 +69,21 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
             try prepareDatabaseStructure()
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.delegate?.sqliteTransport(self, openedDatabaseAtURL: databaseLocation, isFileExist: fileExists)
+                self.delegate?.sqliteTransport(self, openedDatabaseAtURL: configuration.databaseLocation, isFileExist: fileExists)
             }
         }
         
         self.throttledTransport = configuration.throttledTransport
         self.configuration.throttledTransport.delegate = self // must watch throttled transport delegate
+    }
+    
+    /// Initialize a new SQLite transport with given location and builder function.
+    ///
+    /// - Parameters:
+    ///   - databaseLocation: database location.
+    ///   - builder: builder callback.
+    public convenience init(databaseLocation: SQLiteDb.Location, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(databaseLocation: databaseLocation, builder))
     }
     
     /// Flush remaining pendng payloads.

@@ -53,17 +53,15 @@ public class SizeRotationFileTransport: Transport {
 
     // MARK: - Initialization
     
-    /// Initialize a new `SizeRotationFileTransport` instance with given configuration.
+    /// Initialize with configuration.
     ///
-    /// - Parameters:
-    ///   - directoryURL: directory url. If not available it will be created automatically.
-    ///   - builder: builder function to setup additional settings.
-    public init(directoryURL: URL, _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        self.configuration = Configuration(directoryURL: directoryURL, builder)
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) throws {
+        self.configuration = configuration
         
         var isDirectory = ObjCBool(false)
-        if fManager.fileExists(atPath: directoryURL.path, isDirectory: &isDirectory) == false {
-            try fManager.createDirectory(at: directoryURL, withIntermediateDirectories: false)
+        if fManager.fileExists(atPath: configuration.directoryURL.path, isDirectory: &isDirectory) == false {
+            try fManager.createDirectory(at: configuration.directoryURL, withIntermediateDirectories: false)
         }
         
         self.queue = configuration.queue
@@ -73,6 +71,15 @@ public class SizeRotationFileTransport: Transport {
             $0.formatters = self.configuration.formatters
         })
         self.currentFileTransport?.newlines = configuration.newLines
+    }
+    
+    /// Initialize a new `SizeRotationFileTransport` instance with given configuration.
+    ///
+    /// - Parameters:
+    ///   - directoryURL: directory url. If not available it will be created automatically.
+    ///   - builder: builder function to setup additional settings.
+    public convenience init(directoryURL: URL, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(directoryURL: directoryURL, builder))
     }
     
     // MARK: - Conformance

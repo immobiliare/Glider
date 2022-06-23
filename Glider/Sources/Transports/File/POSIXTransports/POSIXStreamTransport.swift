@@ -29,12 +29,19 @@ public class POSIXStreamTransport: Transport {
     
     // MARK: - Initialization
     
+    /// Initialize with configuration.
+    ///
+    /// - Parameter configuration: configuration.
+    public init(configuration: Configuration) {
+        self.configuration = configuration
+        self.queue = configuration.queue
+    }
+    
     /// Initialize a new `POSIXStreamTransport` instance.
     ///
     /// - Parameter builder: builder configuration settings.
-    public init(_ builder: ((inout Configuration) -> Void)? = nil) {
-        self.configuration = Configuration(builder)
-        self.queue = configuration.queue
+    public convenience init(_ builder: ((inout Configuration) -> Void)? = nil) {
+        self.init(configuration: Configuration(builder))
     }
     
     /// Create a `stdout` transport formatter.

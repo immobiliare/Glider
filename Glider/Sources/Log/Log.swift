@@ -109,16 +109,25 @@ public class Log: Equatable {
     
     // MARK: - Initialization
     
-    public init(_ builder: ((inout Configuration) -> Void)) {
+    /// Initialize with configuration.
+    ///
+    /// - Parameter config: configuration.
+    public init(configuration config: Configuration) {
         self.channelsQueue = DispatchQueue(label: "com.log.channels.\(uuid.uuidString)")
-        
-        let config = Configuration(builder)
-        
+
         self.transporter = TransportManager(configuration: config)
         self.isEnabled = config.isEnabled
         self.category = config.category
         self.subsystem = config.subsystem
         setLevel(config.level)
+    }
+    
+    /// Initialize with configuration builder callback.
+    ///
+    /// - Parameter builder: builder.
+    public convenience init(_ builder: ((inout Configuration) -> Void)) {
+        let config = Configuration(builder)
+        self.init(configuration: config)
     }
     
     // MARK: - Public Functions

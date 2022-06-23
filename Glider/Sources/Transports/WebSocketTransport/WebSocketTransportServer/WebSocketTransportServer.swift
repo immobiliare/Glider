@@ -42,16 +42,15 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     
     // MARK: - Initialization
     
-    /// Initialize a new server transport.
+    /// Initialize with a given configuration.
     ///
     /// - Parameters:
-    ///   - port: port of the server.
-    ///   - builder: builder configuration.
-    public init(port: UInt16, delegate: WebSocketTransportServerDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        self.configuration = Configuration(port: port, builder)
+    ///   - configuration: configuration.
+    ///   - delegate: delegate.
+    public init(configuration: Configuration, delegate: WebSocketTransportServerDelegate? = nil) throws {
+        self.configuration = configuration
         self.delegate = delegate
-        self.server = WebSocketServer(port: port,
+        self.server = WebSocketServer(port: configuration.port,
                                       parameters: configuration.parameters,
                                       options: configuration.options,
                                       delegate: self)
@@ -68,6 +67,16 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
         if configuration.startImmediately {
             try start()
         }
+    }
+    
+    /// Initialize a new server transport.
+    ///
+    /// - Parameters:
+    ///   - port: port of the server.
+    ///   - builder: builder configuration.
+    public convenience init(port: UInt16, delegate: WebSocketTransportServerDelegate? = nil,
+                _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(port: port, builder))
     }
     
     // MARK: - Public Functions

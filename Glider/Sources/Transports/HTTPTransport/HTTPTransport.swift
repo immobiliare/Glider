@@ -43,17 +43,21 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Initialization
     
-    /// Initialize a new HTTP Transport for generic HTTP log sends.
-    /// - Parameter builder: configuration builder callback.
-    public init(delegate: HTTPTransportDelegate, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+    public init(delegate: HTTPTransportDelegate, configuration: Configuration) throws {
         self.delegate = delegate
-        self.configuration = try Configuration(builder)
+        self.configuration = configuration
         self.asyncTransport = try AsyncTransport(delegate: self,
                                                  configuration: configuration.asyncTransportConfiguration)
                 
         defer {
             self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentRequests
         }
+    }
+    
+    /// Initialize a new HTTP Transport for generic HTTP log sends.
+    /// - Parameter builder: configuration builder callback.
+    public convenience init(delegate: HTTPTransportDelegate, _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(delegate: delegate, configuration: Configuration(builder))
     }
     
     // MARK: - Conformance
