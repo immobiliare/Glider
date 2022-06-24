@@ -94,7 +94,7 @@ public struct Event: Codable, Equatable {
                 extra: Metadata? = nil,
                 tags: Tags? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
-                
+        
         self.id = UUID().uuidString
         self.message = message
         self.object = object

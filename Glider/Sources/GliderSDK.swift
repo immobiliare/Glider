@@ -25,6 +25,10 @@ public class GliderSDK {
     /// Identifier of the package
     public static let identifier = "com.glider-logger"
     
+    /// Locale used when formatting strings for log.
+    /// By default is set to `current`.
+    public var locale: Locale = .current
+    
     public var scope: Scope = Scope()
     
     /// Defines how contexts relevant to an event dispatch are captured.
