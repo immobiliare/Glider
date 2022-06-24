@@ -61,7 +61,7 @@ extension ASCIITable: TerminalDisplay {
             let column = self.columns[columnIndex]
 
             let text = content.stringValue
-            let lines = text.wrap(columns: column.maxWidth).split(separator: "\n")
+            let lines = String.split(string: text, byCount: column.maxWidth).split(separator: "\n")
             contentLines.append(lines)
             let oldRowHeight = columnIndex == 0 ? 0 : rowHeights[rowIndex]
             let newRowHeight = max(oldRowHeight, lines.count + column.verticalPadding.total)
@@ -209,46 +209,56 @@ extension ASCIITable: TerminalDisplay {
 // MARK: - String Extension
 
 extension String {
-    
-    /// Wrap the string content to a given width.
-    ///
-    /// - Parameter columns: column width, when `nil` self is returned.
-    /// - Returns: `String`
-    fileprivate func wrap(columns: Int?) -> String {
-        guard let columns = columns else {
-            return self
+ 
+    static func split(string: String, byCount n: Int?, breakableCharacters: [Character] = [" "]) -> String {
+        guard let n = n else {
+            return string
         }
-        
-        let scanner = Scanner(string: self)
-        var result = ""
-        var currentLineLength = 0
-        
-        var word: String?
-        
-        while true {
-            word = scanner.scanUpToCharacters(from: NSMutableCharacterSet.whitespaceAndNewline() as CharacterSet)
-            guard let word = word else {
-                break
+
+        precondition(n > 0)
+        guard !string.isEmpty && string.count > n else { return string }
+
+        var string = string
+        var startIndex = string.startIndex
+
+        repeat {
+            // Break a string into lines.
+            var endIndex = string[string.index(after: startIndex)...].firstIndex(of: "\n") ?? string.endIndex
+            if string.distance(from: startIndex, to: endIndex) > n {
+                let wrappedLine = String.split(line: string[startIndex..<endIndex], byCount: n, breakableCharacters: breakableCharacters)
+                string.replaceSubrange(startIndex..<endIndex, with: wrappedLine)
+                endIndex = string.index(startIndex, offsetBy: wrappedLine.count)
             }
-            
-            let wordLength = word.count
-            
-            if currentLineLength != 0 && currentLineLength + wordLength + 1 > columns {
-                // too long for current line, wrap
-                result += "\n"
-                currentLineLength = 0
-            }
-            
-            // append the word
-            if currentLineLength != 0 {
-                result += " "
-                currentLineLength += 1
-            }
-            result += word as String
-            currentLineLength += wordLength
-        }
-        
-        return result
+
+            startIndex = endIndex
+        } while startIndex < string.endIndex
+        return string
     }
     
+    
+    private static func split(line: Substring, byCount n: Int, breakableCharacters: [Character]) -> String {
+        var line = String(line)
+        var lineStartIndex = line.startIndex
+
+        while line.distance(from: lineStartIndex, to: line.endIndex) > n {
+            let maxLineEndIndex = line.index(lineStartIndex, offsetBy: n)
+
+            if breakableCharacters.contains(line[maxLineEndIndex]) {
+                // If line terminates at a breakable character, replace that character with a newline
+                line.replaceSubrange(maxLineEndIndex...maxLineEndIndex, with: "\n")
+                lineStartIndex = line.index(after: maxLineEndIndex)
+            } else if let index = line[lineStartIndex..<maxLineEndIndex].lastIndex(where: { breakableCharacters.contains($0) }) {
+                // Otherwise, find a breakable character that is between lineStartIndex and maxLineEndIndex
+                line.replaceSubrange(index...index, with: "\n")
+                lineStartIndex = index
+            } else {
+                // Finally, forcible break a word
+                line.insert("\n", at: maxLineEndIndex)
+                lineStartIndex = maxLineEndIndex
+            }
+        }
+
+        return line
+    }
+
 }

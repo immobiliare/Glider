@@ -16,7 +16,7 @@ import XCTest
 @testable import Glider
 
 final class TableFormattersTest: XCTestCase {
-    
+
     /// The following test check if the `TableFormatter` return valid values
     /// when printed to the console.
     func test_tableFormattersTests() async throws {
