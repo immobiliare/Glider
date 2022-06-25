@@ -76,7 +76,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     ///   - builder: builder configuration.
     public convenience init(port: UInt16, delegate: WebSocketTransportServerDelegate? = nil,
                 _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        try self.init(configuration: Configuration(port: port, builder))
+        try self.init(configuration: Configuration(port: port, builder), delegate: delegate)
     }
     
     // MARK: - Public Functions

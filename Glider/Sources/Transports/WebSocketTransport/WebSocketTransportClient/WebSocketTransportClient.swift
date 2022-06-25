@@ -81,7 +81,7 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
             throw GliderError(message: "Invalid WebSocket url: \(urlString)")
         }
         
-        try self.init(configuration: Configuration(url: url, builder))
+        try self.init(configuration: Configuration(url: url, builder), delegate: delegate)
     }
     
     // MARK: - Public Functions
