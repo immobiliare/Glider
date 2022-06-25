@@ -132,7 +132,9 @@ extension LogInterpolation {
                                                                format: LogIntegerFormatting = .`default`,
                                                                pad: String.PaddingStyle? = nil,
                                                                privacy: LogPrivacy = .private) {
-        storage.append(.signedInt({ Int64(number()) }, format: format, pad: pad, privacy: privacy))
+        storage.append(.signedInt({
+            Int64(number())
+        }, format: format, pad: pad, privacy: privacy))
     }
 
     /// Defines interpolation for expressions of type `UInt`
@@ -140,7 +142,9 @@ extension LogInterpolation {
                                                                  format: LogIntegerFormatting = .`default`,
                                                                  pad: String.PaddingStyle? = nil,
                                                                  privacy: LogPrivacy = .private) {
-        storage.append(.unsignedInt({ UInt64(number()) }, format: format, pad: pad, privacy: privacy))
+        storage.append(.unsignedInt({
+            UInt64(number())
+        }, format: format, pad: pad, privacy: privacy))
     }
     
 }

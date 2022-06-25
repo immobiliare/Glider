@@ -123,7 +123,7 @@ internal extension Event {
             return String(ProcessIdentification.shared.processID)
             
         case .message:
-            return message
+            return message.description
             
         case .object:
             return serializedObjectData

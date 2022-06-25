@@ -112,7 +112,11 @@ public class Channel {
                       tags: Tags? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         
-        write({
+        guard let log = log, log.isEnabled else {
+            return nil
+        }
+        
+        return write({
             $0.message = message()
             $0.object = object
             $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)
