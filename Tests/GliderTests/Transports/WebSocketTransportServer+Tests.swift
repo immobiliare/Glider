@@ -75,7 +75,7 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
         expMessagesReceivedB = expectation(description: "Expecting messages received from client B")
 
         let log = Log {
-            $0.level = .trace
+            $0.level = .debug
             $0.transports = [transport]
         }
         
@@ -83,7 +83,7 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
             let messageText = "message \(i)"
             expectedMessages.append(messageText)
             
-            log.info?.write(msg: .init(stringLiteral: messageText))
+            log.info?.write(messageText)
         }
         
         wait(for: [expMessagesReceivedA!, expMessagesReceivedB!], timeout: 10)

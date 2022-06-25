@@ -20,7 +20,6 @@ import CloudKit
 class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSocketTransportClientDelegate {
     
     private var server: WebSocketServer?
-    private var expClientConnected: XCTestExpectation?
     private var expServerReceive: XCTestExpectation?
     private var receivedEvents = [Event]()
     private var eventsToGenerate = 30
@@ -41,9 +40,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
             }),
         ])
         format.structureFormatStyle = .object
-        
-        // Prepare transport...
-        expClientConnected = expectation(description: "Expect client connection")
+
         let transport = try WebSocketTransportClient(url: "ws://localhost:1011", delegate: self) {
             $0.connectAutomatically = true
             $0.formatters = [format]
@@ -65,9 +62,6 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
             let e = Event(message: "Message \(i)", object: image)
             generatedEvents.append(e)
         }
-        
-        print("Waiting for client connection to server...")
-        wait(for: [expClientConnected!], timeout: 10)
         
         expServerReceive = expectation(description: "Expecting events to be received from server...")
 
@@ -104,7 +98,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
     }
     
     func webSocketTransport(_ transport: WebSocketTransportClient, didConnect url: URL) {
-        expClientConnected?.fulfill()
+
     }
     
     func webSocketTransport(_ transport: WebSocketTransportClient, didDisconnectedWithCode code: NWProtocolWebSocket.CloseCode, reason: String?) {
