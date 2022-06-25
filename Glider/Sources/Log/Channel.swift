@@ -106,45 +106,19 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(msg message: @autoclosure @escaping () -> Log.Message,
+    public func write(msg message: @autoclosure @escaping () -> Event.Message,
                       object: SerializableObject? = nil,
                       extra: Metadata? = nil,
                       tags: Tags? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
         
         write({
-            $0.message = message().description
-            $0.object = object
-            $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)
-            $0.tags = (self.log?.tags != nil ? Dictionary.merge(baseDictionary: self.log!.tags, additionalData: tags) : tags)
-        }, function: function, filePath: filePath, fileLine: fileLine)
-        //write(msg: message().description, object: object, extra: extra, tags: tags, function: function, filePath: filePath, fileLine: fileLine)
-    }
-    
-    /// Write a simple message literal into the channel.
-    ///
-    /// - Parameters:
-    ///   - message: message literal to write.
-    ///   - object: object you can send for automatic serialization.
-    ///   - extra: extra data to associate.
-    ///   - tags: extra indexable tags to associate.
-    ///   - function: function name of the caller (filled automastically)
-    ///   - filePath: file path of the caller (filled automatically)
-    ///   - fileLine: file line of the caller (filled automatically)
-    /// - Returns: Event
-   /* @discardableResult
-    public func write(msg message: @autoclosure @escaping () -> String,
-                      object: SerializableObject? = nil,
-                      extra: Metadata? = nil,
-                      tags: Tags? = nil,
-                      function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
-        write({
             $0.message = message()
             $0.object = object
             $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)
             $0.tags = (self.log?.tags != nil ? Dictionary.merge(baseDictionary: self.log!.tags, additionalData: tags) : tags)
         }, function: function, filePath: filePath, fileLine: fileLine)
-    }*/
+    }
     
 }
 

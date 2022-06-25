@@ -1,17 +1,33 @@
 //
-//  File.swift
-//  
+//  Glider
+//  Fast, Lightweight yet powerful logging system for Swift.
 //
-//  Created by Daniele Margutti on 25/06/22.
+//  Created by Daniele Margutti
+//  Email: <hello@danielemargutti.com>
+//  Web: <http://www.danielemargutti.com>
+//
+//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
 
-extension Log {
+extension Event {
     
-    public struct Message: ExpressibleByStringInterpolation, ExpressibleByStringLiteral, CustomStringConvertible {
+    /// Represent the message of a log.
+    /// We have used a custom object instead of plain `String` to supports custom object interpolations
+    /// via `StringInterpolationProtocol` (we have choosed to not implement interpolation methods directly
+    /// on `String` object in order to avoid confusion).
+    /// When coded the message itself it's just a literal and loose the composed values.
+    public struct Message: ExpressibleByStringInterpolation, ExpressibleByStringLiteral, CustomStringConvertible, Codable {
+        
+        // MARK: - Public Properties
+        
+        /// Store the interpolation objects.
         public var interpolation: LogInterpolation
 
+        // MARK: - Initializzation
+        
         public init(stringLiteral value: String) {
             interpolation = LogInterpolation(literal: value)
         }
@@ -19,7 +35,10 @@ extension Log {
         public init(stringInterpolation: LogInterpolation) {
             interpolation = stringInterpolation
         }
-
+        
+        // MARK: - Public Properties
+        
+        /// Return the composed message.
         public var description: String {
             var message = ""
             

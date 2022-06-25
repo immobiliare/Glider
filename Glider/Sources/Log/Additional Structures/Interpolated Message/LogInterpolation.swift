@@ -66,6 +66,12 @@ public struct LogInterpolation: StringInterpolationProtocol {
 
 extension LogInterpolation {
     
+    public mutating func appendInterpolation(_ value: @autoclosure @escaping () -> SerializableData?,
+                                             pad: String.PaddingStyle? = nil,
+                                             privacy: LogPrivacy = .private) {
+        storage.append(.literal(value()?.asString() ?? ""))
+    }
+    
     /// Defines interpolation for expressions of type `String`
     public mutating func appendInterpolation(_ argumentString: @autoclosure @escaping () -> String,
                                              pad: String.PaddingStyle? = nil,

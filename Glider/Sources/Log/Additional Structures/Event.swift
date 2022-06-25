@@ -21,7 +21,7 @@ public struct Event: Codable, Equatable {
     public private(set) var id: String
     
     /// Message to record.
-    public var message: String
+    public var message: Message
     
     /// Object to serialize.
     public var object: SerializableObject?
@@ -90,13 +90,13 @@ public struct Event: Codable, Equatable {
     ///   - extra: additional informations that will be sent with the event.
     ///   - tags: additional indexable informations.
     ///   - scope: scope associated with the event; if not set the global scope is used.
-    public init(message: Log.Message, object: SerializableObject? = nil,
+    public init(message: Message, object: SerializableObject? = nil,
                 extra: Metadata? = nil,
                 tags: Tags? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
         
         self.id = UUID().uuidString
-        self.message = message.description
+        self.message = message
         self.object = object
         self.scope = scope
         self.extra = extra

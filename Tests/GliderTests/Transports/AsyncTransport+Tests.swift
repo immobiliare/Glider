@@ -107,7 +107,7 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
         let anyPayload = chunk.randomElement()
         XCTAssertTrue(self.writtenIDs.contains(anyPayload!.event.id))
         XCTAssertTrue(anyPayload?.event.allExtra?.keys.contains("index") ?? false)
-        XCTAssertTrue(anyPayload?.event.message.contains("test message ") ?? false)
+        XCTAssertTrue(anyPayload?.event.message.description.contains("test message ") ?? false)
 
         let formattedMsg = anyPayload?.message?.asString()
         XCTAssertTrue(formattedMsg == "6\ttest…")

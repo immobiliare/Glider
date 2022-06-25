@@ -221,7 +221,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         try payloadStmt?.bind(param: 3, event.level.rawValue)
         try payloadStmt?.bind(param: 4, event.category?.description)
         try payloadStmt?.bind(param: 5, event.subsystem?.description)
-        try payloadStmt?.bind(param: 6, payload.1?.asString() ?? event.message)
+        try payloadStmt?.bind(param: 6, payload.1?.asString() ?? event.message.description)
         try payloadStmt?.bind(param: 7, event.scope.function)
         try payloadStmt?.bind(param: 8, event.scope.fileName)
         try payloadStmt?.bind(param: 9, event.scope.fileLine)

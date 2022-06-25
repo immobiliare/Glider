@@ -128,7 +128,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         
         let allMessages = receivedEventsBlock.reduce([Event](), +)
         for i in 0..<allMessages.count {
-            XCTAssertTrue(allMessages[i].message == "test message \(i)!")
+            XCTAssertTrue(allMessages[i].message.description == "test message \(i)!")
         }
     }
 
@@ -190,8 +190,8 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         wait(for: [exp], timeout: 60)
         
         XCTAssertTrue(totalEvents.count == 100)
-        XCTAssertTrue(totalEvents.last?.message == "final")
-        XCTAssertTrue(totalEvents.first?.message == "test message 0!")
+        XCTAssertTrue(totalEvents.last?.message.description == "final")
+        XCTAssertTrue(totalEvents.first?.message.description == "test message 0!")
     }
 
 }

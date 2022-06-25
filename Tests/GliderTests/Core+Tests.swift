@@ -178,8 +178,8 @@ final class CoreTests: XCTestCase {
             return "Hello, it's \(date)"
         }())
         
-        XCTAssertEqual(event1?.message, "Hello", "Literal message is not filled correctly")
-        XCTAssertEqual(event2?.message, "Hello, it's 1970-01-01T00:00:00Z", "Computed message literal is not correct")
+        XCTAssertEqual(event1?.message.description, "Hello", "Literal message is not filled correctly")
+        XCTAssertEqual(event2?.message.description, "Hello, it's 1970-01-01T00:00:00Z", "Computed message literal is not correct")
     }
     
     /// The following test check if event filters are working correctly to ignore
@@ -211,7 +211,7 @@ final class CoreTests: XCTestCase {
             let valueAssociated = eventReceived.extra?["idx"] as! Int
             XCTAssertTrue(valueAssociated.isMultiple(of: 2), "Odd filter does not work as expected")
             XCTAssertTrue(valueAssociated < 50, "Max value filter does not work as expected")
-            XCTAssertEqual("Message #\(valueAssociated)", eventReceived.message, "Message received is wrong")
+            XCTAssertEqual("Message #\(valueAssociated)", eventReceived.message.description, "Message received is wrong")
             XCTAssertEqual(eventReceived.level, .info, "Expected value is not received")
             
             if let prevReceivedValue = prevReceivedValue {

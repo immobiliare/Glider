@@ -50,7 +50,7 @@ final class BufferedTransportTests: XCTestCase {
         
         XCTAssertTrue(bufferedTransport.buffer.count == bufferLimit)
         XCTAssertNotNil(bufferedTransport.buffer.first)
-        XCTAssertTrue(bufferedTransport.buffer.first?.event.message == "test message \(10)!")
+        XCTAssertTrue(bufferedTransport.buffer.first?.event.message.description == "test message \(10)!")
     }
     
 }
