@@ -34,7 +34,7 @@ final class FileTransportTests: XCTestCase {
             $0.formatters = [format]
         }
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [fileTransport]
         }
         

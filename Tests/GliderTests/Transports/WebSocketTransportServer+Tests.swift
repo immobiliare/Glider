@@ -75,7 +75,7 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
         expMessagesReceivedB = expectation(description: "Expecting messages received from client B")
 
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [transport]
         }
         

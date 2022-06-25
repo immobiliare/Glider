@@ -37,7 +37,7 @@ final class BufferedTransportTests: XCTestCase {
         })
 
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [bufferedTransport]
         }
         

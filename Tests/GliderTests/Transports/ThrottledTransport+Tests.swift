@@ -57,7 +57,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
                 
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [transport]
         }
                 
@@ -88,7 +88,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
 
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [transport]
         }
 
@@ -132,7 +132,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
     }
 
-    func test_throttledManualFlusj() async throws {
+    func test_throttledManualFlush() async throws {
         let exp = expectation(description: "end of sent")
         
         let format = FieldsFormatter(fields: [
@@ -149,7 +149,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
 
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [transport]
         }
         

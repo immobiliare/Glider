@@ -38,7 +38,7 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
         expStdListener = expectation(description: "Expect data for stdout")
                         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [stdTransport]
         }
         

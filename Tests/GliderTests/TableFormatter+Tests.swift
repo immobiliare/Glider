@@ -69,7 +69,7 @@ final class TableFormattersTest: XCTestCase {
             $0.subsystem = "MyApp.Network"
             $0.category = "NetworkingService"
             $0.transports = [consoleTransport, testTransport]
-            $0.level = .debug
+            $0.level = .trace
         }
         
         log.info?.write({

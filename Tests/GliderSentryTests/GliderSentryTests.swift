@@ -21,7 +21,7 @@ final class GliderSentryTests: XCTestCase {
         }
         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [sentry]
         }
         

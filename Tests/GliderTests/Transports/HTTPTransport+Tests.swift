@@ -56,7 +56,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
 
         let log = Log {
             $0.transports = [transport]
-            $0.level = .debug
+            $0.level = .trace
         }
         
         // Send some logs

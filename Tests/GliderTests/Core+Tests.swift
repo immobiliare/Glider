@@ -147,7 +147,7 @@ final class CoreTests: XCTestCase {
         GliderSDK.shared.contextsCaptureOptions = .all
         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
         }
         
         let sentEvent = log.debug?.write {
@@ -167,7 +167,7 @@ final class CoreTests: XCTestCase {
     /// is dispatched correctly to the underlying transporters.
     func test_writeLiteralsAndComputedMessages() throws {
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
         }
         
         let refDate = Date(timeIntervalSince1970: 0)
@@ -248,7 +248,7 @@ final class CoreTests: XCTestCase {
         let log = Log {
             $0.subsystem = LogSubsystem.coreApplication
             $0.category = LogCategory.network
-            $0.level = .debug
+            $0.level = .trace
         }
         
         let event1 = log.debug?.write(msg: "Literal msg")
@@ -273,7 +273,7 @@ final class CoreTests: XCTestCase {
     /// The following test check if captured context attributes are correctly managed based upon active options.
     func test_contextCapturingOptions() throws {
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
         }
 
         // Test if context is not captured when turned off the option
@@ -298,7 +298,7 @@ final class CoreTests: XCTestCase {
     /// between the event's specific values and the scope's value.
     func test_eventExtraAndTagsMergeWithScope() throws {
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
         }
         
         // Setup some global tags and extra values
@@ -371,7 +371,7 @@ final class CoreTests: XCTestCase {
         }
         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [ transport ]
         }
         
@@ -423,7 +423,7 @@ final class CoreTests: XCTestCase {
         }
         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [ transport ]
         }
                 
@@ -469,7 +469,7 @@ final class CoreTests: XCTestCase {
         }
         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [ transport ]
         }
         

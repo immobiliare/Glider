@@ -47,7 +47,7 @@ final class GliderSwiftLogTests: XCTestCase {
         }
         
         let gliderLog = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [
                 testTransport
             ]
