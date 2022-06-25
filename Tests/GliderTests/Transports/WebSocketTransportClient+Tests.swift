@@ -62,7 +62,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
             let size = CGSize(width: CGFloat(Float.random(in: 0..<4000)), height: CGFloat(Float.random(in: 0..<4000)))
             let image = UIImage.getImageWithColor(color: color, size: size)
             
-            let e = Event("Message \(i)", object: image)
+            let e = Event(message: "Message \(i)", object: image)
             generatedEvents.append(e)
         }
         
@@ -75,7 +75,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
         for event in generatedEvents {
             var e = event
             print("  Sending event \(e.id)...")
-            log.info?.write(&e)
+            log.info?.write(event: &e)
         }
                 
         wait(for: [expServerReceive!], timeout: 20)

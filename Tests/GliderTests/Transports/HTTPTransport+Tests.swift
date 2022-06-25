@@ -61,7 +61,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
         
         // Send some logs
         for i in 0..<messagesToSent {
-            log.error?.write("Message \(i)")
+            log.error?.write(msg: "Message \(i)")
         }
         
         print("Waiting for being received...")

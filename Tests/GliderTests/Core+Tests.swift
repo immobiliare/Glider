@@ -189,7 +189,7 @@ final class CoreTests: XCTestCase {
         // Create a list of events with an extra index information; each event
         // has a progressive number from 0 to 100.
         var events = (0..<100).map {
-            Event("Message #\($0!)", extra: ["idx": $0])
+            Event(message: "Message #\($0)", extra: ["idx": $0])
         }
 
         // We'll add two filters:
@@ -236,7 +236,7 @@ final class CoreTests: XCTestCase {
         
         for i in 0..<events.count {
             let level: Level = (i == 0 ? .debug : .info)
-            log[level]?.write(&events[i])
+            log[level]?.write(event: &events[i])
         }
         
         XCTAssertTrue(countReceivedEvents == 24, "Filter does not work as expected, total filtered values are wrong")
@@ -325,8 +325,8 @@ final class CoreTests: XCTestCase {
         
         // Attach to event custom extra and tags values, some of them will override existing
         // keys inside the scope's extra and tags.
-        var event = Event("test message", extra: eventExtra, tags: tagsExtra)
-        let proposedEvent = log.debug?.write(&event)
+        var event = Event(message: "test message", extra: eventExtra, tags: tagsExtra)
+        let proposedEvent = log.debug?.write(event: &event)
         let proposedEvent2 = log.debug?.write({
             $0.message = "test message"
             $0.tags = tagsExtra

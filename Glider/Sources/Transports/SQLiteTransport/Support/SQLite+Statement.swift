@@ -583,7 +583,12 @@ extension SQLiteDb {
             if !isOpen {
                 isOpen = true
                 
-                SQLiteDb.logger?.info?.write(msg: self.sql)
+                // NOTE: 
+                // `ExpressibleByStringLiteral` means to give we a shorthand
+                // to invoke `init(stringLiteral value: String)` by a string literal expression.
+                // Since string is not a literal, it cannot trigger this shorthand.
+                // We have to call the initialiser explicitly.
+                SQLiteDb.logger?.info?.write(msg: .init(stringLiteral: self.sql))
             }
             
             lastResult = sqlite3_step(stmt)

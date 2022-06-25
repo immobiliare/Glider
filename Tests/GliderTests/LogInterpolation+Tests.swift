@@ -23,7 +23,7 @@ final class LogInterpolationTests: XCTestCase {
     func testRedactionOnDebug() async throws {
         GliderSDK.shared.reset()
         
-        let user = LogInterpolationUser(name: "Mark", surname: "Howens", email: "mark.howens@gmail.com", creditCardCVV: 4566)
+      let user = LogInterpolationUser(name: "Mark", surname: "Howens", email: "mark.howens@gmail.com", creditCardCVV: 4566)
 
         let expectedMessages: [String] = [
         //    "Hello \(user.fullName), your email is mark.howens@gmail.com",
@@ -45,7 +45,7 @@ final class LogInterpolationTests: XCTestCase {
         
         GliderSDK.shared.disablePrivacyRedaction = false
                 
-        //log.alert?.write(msg: "Email set to \(user.email, privacy: .partiallyHide)")
+        log.alert?.write(msg: "Email set to \(user.email, privacy: .private)")
       //  log.alert?.write("CVV is \(user.creditCardCVV ?? 0, privacy: .private)")
        // log.alert?.write(msg: "CVV is \(user.creditCardCVV ?? 0, privacy: .private)")
     }

@@ -31,7 +31,7 @@ final class FormattersTest: XCTestCase {
         
         for i in 0..<100 {
             let level: Level = Level.allCases.randomElement() ?? .info
-            log[level]?.write("Event message \(i)", extra: ["extra1": "val"], tags: ["tag1": "val1"])
+            log[level]?.write(msg: "Event message \(i)", extra: ["extra1": "val"], tags: ["tag1": "val1"])
         }
         
     }
@@ -49,7 +49,7 @@ final class FormattersTest: XCTestCase {
             $0.transports = [fileTransport]
         }
         
-        log.error?.write("Event message", extra: ["extra1": "val"], tags: ["tag1": "val1"])
+        log.error?.write(msg: "Event message", extra: ["extra1": "val"], tags: ["tag1": "val1"])
     }
     
     /// Test the MsgPack formatter.
@@ -67,7 +67,7 @@ final class FormattersTest: XCTestCase {
         }
         
         let object = UserTest(name: "Mark", surname: "Snow", age: 33)
-        log.error?.write("Event message", object: object, extra: ["extra1": "val"], tags: ["tag1": "val1"])
+        log.error?.write(msg: "Event message", object: object, extra: ["extra1": "val"], tags: ["tag1": "val1"])
         
         guard let writtenData = try? Data(contentsOf: fileURL) else {
             XCTFail()
@@ -118,7 +118,7 @@ final class FormattersTest: XCTestCase {
         GliderSDK.shared.scope.extra = ["globalExtra": "valueExtra"]
 
         let object = UserTest(name: "Mark", surname: "Snow", age: 33)
-        log.error?.write("Event message", object: object, extra: ["extra1": "val"], tags: ["tag1": "val1"])
+        log.error?.write(msg: "Event message", object: object, extra: ["extra1": "val"], tags: ["tag1": "val1"])
         
         let readJSON = try JSONSerialization.jsonObject(with: Data(contentsOf: fileURL), options: .fragmentsAllowed) as? [String: Any]
         let readObj = try JSONDecoder().decode(UserTest.self, from: (readJSON!["object"] as! String).data(using: .utf8)!)
@@ -170,7 +170,7 @@ final class FormattersTest: XCTestCase {
         let size = CGSize(width: 100, height: 50)
         let image = UIImage.imageWithSize(size: size, color: .red)
         
-        log.error?.write("Some image here", object: image, extra: ["key1": "val1"], tags: ["mytag": "myvalue"])
+        log.error?.write(msg: "Some image here", object: image, extra: ["key1": "val1"], tags: ["mytag": "myvalue"])
         
         let readJSON = try JSONSerialization.jsonObject(with: Data(contentsOf: fileURL), options: .fragmentsAllowed) as? [String: Any?]
         
@@ -212,7 +212,7 @@ final class FormattersTest: XCTestCase {
         }
         
         for i in 0..<100 {
-            log.error?.write("Event message \(i)", extra: ["e1": "\(i)"], tags: ["t1": "v1"])
+            log.error?.write(msg: "Event message \(i)", extra: ["e1": "\(i)"], tags: ["t1": "v1"])
         }
         
         let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").filter({
@@ -242,7 +242,7 @@ final class FormattersTest: XCTestCase {
         }
         
         for i in 0..<100 {
-            log.error?.write("Event message \(i)")
+            log.error?.write(msg: "Event message \(i)")
         }
         
         let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").filter({

@@ -105,22 +105,21 @@ public class Channel {
     ///   - filePath: file path of the caller (filled automatically)
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
-    /*@discardableResult
-    public func write(msg stringBuilder: @escaping () -> LogInteporatedMessage,
+    @discardableResult
+    public func write(msg message: @autoclosure @escaping () -> Log.Message,
                       object: SerializableObject? = nil,
                       extra: Metadata? = nil,
                       tags: Tags? = nil,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
-        // NOTE: this additional check is to avoid unnecessary string evaluation, it's not redudant in write() for event
-        guard let log = log, log.isEnabled  else {
-            return nil
-        }
-
-        return write({
+        
+        write({
+            $0.message = message().description
             $0.object = object
-            $0.message = stringBuilder().description
+            $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)
+            $0.tags = (self.log?.tags != nil ? Dictionary.merge(baseDictionary: self.log!.tags, additionalData: tags) : tags)
         }, function: function, filePath: filePath, fileLine: fileLine)
-    }*/
+        //write(msg: message().description, object: object, extra: extra, tags: tags, function: function, filePath: filePath, fileLine: fileLine)
+    }
     
     /// Write a simple message literal into the channel.
     ///
@@ -133,20 +132,6 @@ public class Channel {
     ///   - filePath: file path of the caller (filled automatically)
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
-    @discardableResult
-    public func write(msg message: @autoclosure @escaping () -> LogInteporatedMsg,
-                      object: SerializableObject? = nil,
-                      extra: Metadata? = nil,
-                      tags: Tags? = nil,
-                      function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
-        write({
-            $0.message = message().description
-            $0.object = object
-            $0.extra = (self.log?.extra != nil ? self.log!.extra.merge(with: extra) : extra)
-            $0.tags = (self.log?.tags != nil ? Dictionary.merge(baseDictionary: self.log!.tags, additionalData: tags) : tags)
-        }, function: function, filePath: filePath, fileLine: fileLine)
-    }
-    
    /* @discardableResult
     public func write(msg message: @autoclosure @escaping () -> String,
                       object: SerializableObject? = nil,
@@ -160,7 +145,6 @@ public class Channel {
             $0.tags = (self.log?.tags != nil ? Dictionary.merge(baseDictionary: self.log!.tags, additionalData: tags) : tags)
         }, function: function, filePath: filePath, fileLine: fileLine)
     }*/
-    
     
 }
 

@@ -83,7 +83,7 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
             let messageText = "message \(i)"
             expectedMessages.append(messageText)
             
-            log.info?.write(messageText)
+            log.info?.write(msg: .init(stringLiteral: messageText))
         }
         
         wait(for: [expMessagesReceivedA!, expMessagesReceivedB!], timeout: 10)

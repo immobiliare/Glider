@@ -14,8 +14,7 @@ import Foundation
 import CoreGraphics
 
 @frozen
-public struct LogInteporatedMsg: StringInterpolationProtocol, CustomStringConvertible, Codable,
-                                     ExpressibleByStringInterpolation, ExpressibleByStringLiteral {
+public struct LogInterpolation: StringInterpolationProtocol {
 
     @usableFromInline
     enum Value {
@@ -44,112 +43,28 @@ public struct LogInteporatedMsg: StringInterpolationProtocol, CustomStringConver
     
     // MARK: - Initialization
     
-    public init() {
-        
+    public init(literal: String? = nil) {
+        if let literal = literal {
+            appendLiteral(literal)
+        }
     }
     
-    // MARK: - `ExpressibleByStringInterpolation`
-    
-    public init(stringInterpolation: DefaultStringInterpolation) {
-        self.storage.append(.literal(stringInterpolation.description))
-    }
-    
+    /// Appends a literal segment to the interpolation.
     public mutating func appendLiteral(_ literal: String) {
         storage.append(.literal(literal))
     }
-    
+
     // MARK: - StringInterpolationProtocol
     
     public init(literalCapacity: Int, interpolationCount: Int) {
         
     }
     
-    // MARK: - `ExpressibleByStringLiteral`
-
-    public init(stringLiteral value: String) {
-        self.appendLiteral(value)
-    }
-    
-    // MARK: - `CustomStringConvertible`
-    
-    public var description: String {
-        var message = ""
-        
-        for value in storage {
-            switch value {
-            case .literal(let value):
-                message.append(value)
-
-            case .string(let value, let pad, let privacy):
-                message.append(value().padded(pad).privacy(privacy))
-
-            case .convertible(let value, let pad, let privacy):
-                message.append(value().description.padded(pad).privacy(privacy))
-
-            case .meta(let value, let pad, let privacy):
-                message.append(String(describing: value()).padded(pad).privacy(privacy))
-
-            case .object(let value, let privacy):
-                message.append(String(describing: value()).privacy(privacy))
-
-            case .float(let value, let format, let pad, let privacy):
-                message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
-                
-            case .double(let value, let format, let pad, let privacy):
-                message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
-
-            case .cgfloat(let value, let format, let pad, let privacy):
-                message.append(value().format(format).padded(pad).privacy(privacy))
-                
-            case .cgsize(let value, let format, let pad, let privacy):
-                message.append(value().format(format).padded(pad).privacy(privacy))
-
-            case .signedInt(let value, let format, let pad, let privacy):
-                switch format {
-                case let .decimal(minDigits, explicitPositiveSign):
-                    message.append(String(format: "\(explicitPositiveSign ? "+" : "")%0\(minDigits)ld", value()).padded(pad).privacy(privacy))
-                }
-                
-            case .unsignedInt(let value, let format, let pad,  let privacy):
-                switch format {
-                case let .decimal(minDigits, explicitPositiveSign):
-                    message.append(String(format: "\(explicitPositiveSign ? "+" : "")%0\(minDigits)ld", value()).padded(pad).privacy(privacy))
-                }
-                
-            case .bool(let value, let format, let privacy):
-                message.append(value().format(format).privacy(privacy))
-                
-            case .date(let value, let format, let privacy):
-                message.append(value().format(format).privacy(privacy))
-                
-            }
-        }
-        
-        return message
-    }
-    
-    // MARK: - Codable
-    
-    enum CodingKeys: String, CodingKey {
-        case text
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(self.description, forKey: .text)
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let text = try container.decode(String.self, forKey: .text)
-        storage.append(.literal(text))
-    }
-    
 }
 
 // MARK: - `String`, `CustomConvertibleString`
 
-extension LogInteporatedMsg {
+extension LogInterpolation {
     
     /// Defines interpolation for expressions of type `String`
     public mutating func appendInterpolation(_ argumentString: @autoclosure @escaping () -> String,
@@ -170,7 +85,7 @@ extension LogInteporatedMsg {
 
 // MARK: - `Date`
 
-extension LogInteporatedMsg {
+extension LogInterpolation {
     
     
     /// Defines interpolation for expressions of type `Date`
@@ -184,7 +99,7 @@ extension LogInteporatedMsg {
 
 // MARK: - `Any.Type`, `NSObject`
 
-extension LogInteporatedMsg {
+extension LogInterpolation {
     
     /// Defines interpolation for meta-types.
     public mutating func appendInterpolation(_ value: @autoclosure @escaping () -> Any.Type,
@@ -203,7 +118,8 @@ extension LogInteporatedMsg {
 
 // MARK: - `Int`, `UInt`
 
-extension LogInteporatedMsg {
+extension LogInterpolation {
+    
     
     /// Defines interpolation for expressions of type `Int`
     public mutating func appendInterpolation<T: SignedInteger>(_ number: @autoclosure @escaping () -> T,
@@ -225,7 +141,7 @@ extension LogInteporatedMsg {
 
 // MARK: - `Float`, `CGFloat` and `Double`
 
-extension LogInteporatedMsg {
+extension LogInterpolation {
     
     /// Defines interpolation for expressions of type `Float`
     public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> Float,
@@ -255,7 +171,7 @@ extension LogInteporatedMsg {
 
 // MARK: - `Bool`
 
-extension LogInteporatedMsg {
+extension LogInterpolation {
     
     /// Defines interpolation for expressions of type `Bool`
     public mutating func appendInterpolation(_ boolean: @autoclosure @escaping () -> Bool,

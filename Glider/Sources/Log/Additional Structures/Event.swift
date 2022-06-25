@@ -90,7 +90,7 @@ public struct Event: Codable, Equatable {
     ///   - extra: additional informations that will be sent with the event.
     ///   - tags: additional indexable informations.
     ///   - scope: scope associated with the event; if not set the global scope is used.
-    public init(_ message: LogInteporatedMsg, object: SerializableObject? = nil,
+    public init(message: Log.Message, object: SerializableObject? = nil,
                 extra: Metadata? = nil,
                 tags: Tags? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
@@ -108,7 +108,7 @@ public struct Event: Codable, Equatable {
     
     /// Initialize a new empty event.
     internal init() {
-        self.init("", object: nil, extra: nil, tags: nil)
+        self.init(message: "", object: nil, extra: nil, tags: nil)
     }
     
     // MARK: - Internal Functions
