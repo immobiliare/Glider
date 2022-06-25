@@ -23,11 +23,11 @@ final class CoreTests: XCTestCase {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = 3
         
-        let messagesCount = Int.random(in: 0..<200)
+        let messagesCount = 100
         var receivedMessagesCount = 0
         
         let log = Log {
-            $0.level = .debug
+            $0.level = .trace
             $0.transports = [
                 ConsoleTransport(),
                 TestTransport(onReceiveEvent: { _ in
@@ -39,7 +39,7 @@ final class CoreTests: XCTestCase {
         let op1 = BlockOperation(block: {
             for i in 0..<messagesCount {
                 let level = Level.allCases.randomElement() ?? .debug
-                log[level]?.write(msg: "Msg from thread \(Thread.current.description) \(i)")
+                log[level]?.write(msg: "Msg from thread 1: \(i)")
             }
             
             exp1.fulfill()
@@ -48,7 +48,7 @@ final class CoreTests: XCTestCase {
         let op2 = BlockOperation(block: {
             for i in 0..<messagesCount {
                 let level = Level.allCases.randomElement() ?? .debug
-                log[level]?.write(msg: "Msg from thread \(Thread.current.description) \(i)")
+                log[level]?.write(msg: "Msg from thread 2: \(i)")
             }
             
             exp2.fulfill()
@@ -57,7 +57,7 @@ final class CoreTests: XCTestCase {
         let op3 = BlockOperation(block: {
             for i in 0..<messagesCount {
                 let level = Level.allCases.randomElement() ?? .debug
-                log[level]?.write(msg: "Msg from thread \(Thread.current.description) \(i)")
+                log[level]?.write(msg: "Msg from thread 3: \(i)")
             }
             
             exp3.fulfill()
@@ -69,7 +69,7 @@ final class CoreTests: XCTestCase {
         
         wait(for: [exp1, exp2, exp3], timeout: 10)
         queue.waitUntilAllOperationsAreFinished()
-        
+                
         XCTAssertEqual(receivedMessagesCount, messagesCount * 3)
     }
     
