@@ -12,7 +12,7 @@
 
 import Foundation
 
-// MARK: - LogBoolFormatting
+// MARK: - Bool
 
 public enum LogBoolFormatting {
     case answer
@@ -20,17 +20,33 @@ public enum LogBoolFormatting {
     case numeric
 }
 
+// MARK: - Int
+
+public enum LogIntegerFormatting {
+    case decimal(minDigits: Int, explicitPositiveSign: Bool)
+    
+    public static let `default`: LogIntegerFormatting = .decimal(minDigits: 0, explicitPositiveSign: false)
+}
+
+// MARK: - Double
+
 public enum LogDoubleFormatting {
     case fixed(precision: Int, explicitPositiveSign: Bool)
     case formatter(formatter: Formatter)
     case measure(unit: Unit, options: MeasurementFormatter.UnitOptions, style: Formatter.UnitStyle = .short)
     case bytes(style: ByteCountFormatter.CountStyle)
+    
+    public static let `default`: LogDoubleFormatting = .fixed(precision: 6, explicitPositiveSign: false)
 }
+
+// MARK: - Date
 
 public enum LogDateFormatting {
     case iso8601
     case custom(_ format: String)
 }
+
+// MARK: - CoreGraphics
 
 public enum LogCGModelsFormatting {
     case withPrecision(_ precision: Int)
@@ -54,6 +70,7 @@ public struct LogPrivacy: Equatable {
     public enum Mask: Equatable {
         case hash
         case none
+        case partiallyHide
     }
 
     /// Is private privacy flag set.
@@ -76,6 +93,11 @@ public struct LogPrivacy: Equatable {
         LogPrivacy(isPrivate: true, mask: nil)
     }
     
+    /// Private mask is set.
+    public static var `partiallyHide`: LogPrivacy {
+        LogPrivacy(isPrivate: true, mask: .partiallyHide)
+    }
+    
     /// Private with mask set.
     ///
     /// - Parameter mask: set mask.
@@ -83,10 +105,6 @@ public struct LogPrivacy: Equatable {
     public static func `private`(mask: Mask) -> LogPrivacy {
         LogPrivacy(isPrivate: true, mask: mask)
     }
-
-    #if DEBUG
-    internal static var disableRedaction: Bool = true
-    #endif
 
     internal static let redacted = "<redacted>"
     

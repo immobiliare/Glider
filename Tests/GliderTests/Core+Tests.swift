@@ -39,7 +39,7 @@ final class CoreTests: XCTestCase {
         let op1 = BlockOperation(block: {
             for i in 0..<messagesCount {
                 let level = Level.allCases.randomElement() ?? .debug
-                log[level]?.write("Msg from thread \(Thread.current.description) \(i)")
+                log[level]?.write(msg: "Msg from thread \(Thread.current.description) \(i)")
             }
             
             exp1.fulfill()
@@ -48,7 +48,7 @@ final class CoreTests: XCTestCase {
         let op2 = BlockOperation(block: {
             for i in 0..<messagesCount {
                 let level = Level.allCases.randomElement() ?? .debug
-                log[level]?.write("Msg from thread \(Thread.current.description) \(i)")
+                log[level]?.write(msg: "Msg from thread \(Thread.current.description) \(i)")
             }
             
             exp2.fulfill()
@@ -57,7 +57,7 @@ final class CoreTests: XCTestCase {
         let op3 = BlockOperation(block: {
             for i in 0..<messagesCount {
                 let level = Level.allCases.randomElement() ?? .debug
-                log[level]?.write("Msg from thread \(Thread.current.description) \(i)")
+                log[level]?.write(msg: "Msg from thread \(Thread.current.description) \(i)")
             }
             
             exp3.fulfill()
@@ -172,11 +172,11 @@ final class CoreTests: XCTestCase {
         
         let refDate = Date(timeIntervalSince1970: 0)
         
-        let event1 = log.debug?.write("Hello")
-        let event2 = log.debug?.write({
+        let event1 = log.debug?.write(msg: "Hello")
+        let event2 = log.debug?.write(msg: {
             let date = ISO8601DateFormatter().string(from: refDate)
             return "Hello, it's \(date)"
-        })
+        }())
         
         XCTAssertEqual(event1?.message, "Hello", "Literal message is not filled correctly")
         XCTAssertEqual(event2?.message, "Hello, it's 1970-01-01T00:00:00Z", "Computed message literal is not correct")
@@ -251,13 +251,13 @@ final class CoreTests: XCTestCase {
             $0.level = .debug
         }
         
-        let event1 = log.debug?.write("Literal msg")
+        let event1 = log.debug?.write(msg: "Literal msg")
         let event2 = log.debug?.write({
             $0.message = "Computed msg with event"
         })
-        let event3 = log.debug?.write({
+        let event3 = log.debug?.write(msg: {
             "Computed msg with string"
-        })
+        }())
         
         [event1, event2, event3].forEach { event in
             guard let event = event else {
@@ -278,18 +278,18 @@ final class CoreTests: XCTestCase {
 
         // Test if context is not captured when turned off the option
         GliderSDK.shared.contextsCaptureOptions = .none
-        let noContextEvent = log.debug?.write("")
+        let noContextEvent = log.debug?.write(msg: "")
         XCTAssertNil(noContextEvent?.scope.context, "Context should be not captured in this mode")
         
         // Test if context is captured correctly when turned on
         GliderSDK.shared.contextsCaptureOptions = [.os]
-        let onlyOSContextEvent = log.debug?.write("")
+        let onlyOSContextEvent = log.debug?.write(msg: "")
         XCTAssertNotNil(onlyOSContextEvent?.scope.context?.os, "OS related context attributes must be present")
         XCTAssertNil(onlyOSContextEvent?.scope.context?.device, "Device related context attributes must not be present")
         
         // Test if context is captured correctly when all flags are turned on
         GliderSDK.shared.contextsCaptureOptions = .all
-        let allContextsCapturedEvent = log.debug?.write("")
+        let allContextsCapturedEvent = log.debug?.write(msg: "")
         XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.os, "OS related context attributes must be present")
         XCTAssertNotNil(allContextsCapturedEvent?.scope.context?.device, "Device related context attributes must be present")
     }

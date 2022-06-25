@@ -29,6 +29,15 @@ public class GliderSDK {
     /// By default is set to `current`.
     public var locale: Locale = .current
     
+    /// Set to `true` to disable the privacy support in log message
+    /// interpolation (ie. sending `"\(user.email, privacy: .private)"`.
+    /// By default is set to `true` on `#DEBUG` builds and `false` otherwise.
+    ///
+    /// You can however override this value at startup in order to test
+    /// how redaction works while debugging.
+    public var disablePrivacyRedaction = false
+    
+    /// Current scope.
     public var scope: Scope = Scope()
     
     /// Defines how contexts relevant to an event dispatch are captured.
@@ -40,9 +49,24 @@ public class GliderSDK {
     // MARK: - Initialization
     
     private init() {
-        
+       reset()
     }
     
+    // MARK: - Public Function
+    
+    /// Reset the state of settings including the generation of a new scope.
+    public func reset() {
+        #if DEBUG
+        self.disablePrivacyRedaction = true
+        #else
+        self.disablePrivacyRedaction = false
+        #endif
+        
+        self.scope = Scope()
+        self.contextsCaptureOptions = .none
+        self.contextsCaptureFrequency = .default
+        self.locale = .current
+    }
 }
 
 // MARK: - Glider Error

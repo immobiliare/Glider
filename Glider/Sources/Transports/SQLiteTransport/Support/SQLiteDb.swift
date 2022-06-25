@@ -256,7 +256,7 @@ public class SQLiteDb {
     /// Execute SQL statement.
     /// - Parameter sql: SQL statement string.
     public func exec(_ sql: String) throws {
-        SQLiteDb.logger?.info?.write("Executing: \(sql)")
+        SQLiteDb.logger?.info?.write(msg: "Executing: \(sql)")
         
         try check(sqlite3_exec(handle, sql, nil, nil, nil))
     }
@@ -296,7 +296,7 @@ public class SQLiteDb {
         try SQLiteDb.check(rc,handle: lhandle)
         self.handle = lhandle
         
-        SQLiteDb.logger?.debug?.write("Opened database: \(location.description)")
+        SQLiteDb.logger?.debug?.write(msg: "Opened database: \(location.description)")
     }
     
     /// Close a database connection.
@@ -308,7 +308,7 @@ public class SQLiteDb {
         sqlite3_close(handle)
         handle = nil
         
-        SQLiteDb.logger?.debug?.write("Closed database")
+        SQLiteDb.logger?.debug?.write(msg: "Closed database")
     }
     
     deinit {
@@ -326,7 +326,7 @@ public class SQLiteDb {
                 reason = "Unknown reason"
             }
             
-            logger?.error?.write("Check failed: \(reason) with code \(rc)")
+            logger?.error?.write(msg: "Check failed: \(reason) with code \(rc)")
             throw DatabaseError(reason: reason, code: rc)
         }
     }

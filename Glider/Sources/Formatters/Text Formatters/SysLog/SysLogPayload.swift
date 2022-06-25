@@ -50,7 +50,7 @@ internal struct SysLogPayload {
     ///
     /// - Parameter payload: payload.
     init(event: Event, hostname: String, extraFields: [FieldsFormatter.Field]) {
-        self.message = event.message.inlineSafeValue
+        self.message = event.message.description.inlineSafeValue
         self.metadata = MessageMetadata(date: event.timestamp, hostname: hostname)
         self.structured = StructuredPart(event.stringRepresentableValueForFormattedFields(extraFields))
     }

@@ -25,7 +25,7 @@ final class GliderSentryTests: XCTestCase {
             $0.transports = [sentry]
         }
         
-        log.info?.write("test message")
+        log.info?.write(msg: "test message")
         
         wait(for: [exp], timeout: 60)
         

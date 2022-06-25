@@ -13,56 +13,7 @@
 import Foundation
 import CoreGraphics
 
-extension String.StringInterpolation {
-    
-    /// Defines interpolation for expressions of type `String`
-    public mutating func appendInterpolation(_ value: String,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        appendLiteral(value.privacy(privacy).padded(pad))
-    }
- 
-    /// Defines interpolation for expressions of type `Bool`
-    public mutating func appendInterpolation(_ value: Bool,
-                                             format: LogBoolFormatting? = nil,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        appendLiteral(value.format(format).privacy(privacy).padded(pad))
-    }
-    
-    /// Defines interpolation for expressions of type `Double`
-    public mutating func appendInterpolation(_ value: Double,
-                                             format: LogDoubleFormatting? = nil,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        appendLiteral(value.format(format).privacy(privacy).padded(pad))
-    }
-    
-    /// Defines interpolation for expressions of type `Date`
-    public mutating func appendInterpolation(_ value: Date,
-                                             format: LogDateFormatting? = nil,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        appendLiteral(value.format(format).privacy(privacy).padded(pad))
-    }
-    
-    /// Defines interpolation for expressions of type `[Any]`
-    public mutating func appendInterpolation(_ value: CGSize,
-                                             format: LogCGModelsFormatting? = nil,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        appendLiteral(value.format(format).privacy(privacy).padded(pad))
-    }
-   
-    /// Defines interpolation for expressions of type `[Any]`
-    public mutating func appendInterpolation(_ value: CGFloat,
-                                             format: LogCGModelsFormatting? = nil,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        appendLiteral(value.format(format).privacy(privacy).padded(pad))
-    }
-    
-}
+// MARK: - Formats
 
 extension String {
     
@@ -70,9 +21,13 @@ extension String {
     ///
     /// - Parameter privacy: privacy scope.
     /// - Returns: String
-    internal func privacy(_ privacy: LogPrivacy) -> String {
-        #if DEBUG
-        if LogPrivacy.disableRedaction {
+    internal func privacy(_ privacy: LogPrivacy?) -> String {
+        guard let privacy = privacy else {
+            return self
+        }
+
+       #if DEBUG
+        if GliderSDK.shared.disablePrivacyRedaction {
             return String(describing: self)
         }
         #endif
@@ -82,6 +37,12 @@ extension String {
             return String(describing: self)
         case .private(mask: .hash):
             return "\(String(describing: self).hash)"
+        case .private(mask: .partiallyHide):
+            var hiddenString = self
+            let charsToHide = Int(Double(hiddenString.count) * 0.35)
+            let endIndex = index(hiddenString.startIndex, offsetBy: charsToHide)
+            hiddenString.replaceSubrange(...endIndex, with: String(repeating: "*", count: charsToHide))
+            return hiddenString
         default:
             return LogPrivacy.redacted
         }
@@ -110,29 +71,29 @@ extension Bool {
 
 extension Double {
     
-    internal func format(_ format: LogDoubleFormatting?) -> String {
+    internal static func format(value: NSNumber, _ format: LogDoubleFormatting?) -> String {
         guard let format = format else {
             return String(describing: self)
         }
         
         switch format {
         case .fixed(let precision, let explicitPositiveSign):
-            return  String(format: "\(explicitPositiveSign ? "+" : "")%.0\(precision)f", self)
+            return  String(format: "\(explicitPositiveSign ? "+" : "")%.0\(precision)f", value)
             
         case .formatter(let formatter):
-            return formatter.string(for: NSNumber(value: self)) ?? ""
+            return formatter.string(for: value) ?? ""
             
         case .measure(let unit, let options, let style):
             let formatter = MeasurementFormatter()
             formatter.unitOptions = options
             formatter.unitStyle = style
             formatter.locale = GliderSDK.shared.locale
-            return formatter.string(from: .init(value: self, unit: unit))
+            return formatter.string(from: .init(value: value.doubleValue, unit: unit))
             
         case .bytes(let style):
             let formatter = ByteCountFormatter()
             formatter.countStyle = style
-            return formatter.string(from: .init(value: self, unit: .bytes))
+            return formatter.string(from: .init(value: value.doubleValue, unit: .bytes))
             
         }
     }

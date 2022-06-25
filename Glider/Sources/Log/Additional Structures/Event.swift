@@ -90,13 +90,13 @@ public struct Event: Codable, Equatable {
     ///   - extra: additional informations that will be sent with the event.
     ///   - tags: additional indexable informations.
     ///   - scope: scope associated with the event; if not set the global scope is used.
-    public init(_ message: String, object: SerializableObject? = nil,
+    public init(_ message: LogInteporatedMsg, object: SerializableObject? = nil,
                 extra: Metadata? = nil,
                 tags: Tags? = nil,
                 scope: Scope = GliderSDK.shared.scope) {
         
         self.id = UUID().uuidString
-        self.message = message
+        self.message = message.description
         self.object = object
         self.scope = scope
         self.extra = extra

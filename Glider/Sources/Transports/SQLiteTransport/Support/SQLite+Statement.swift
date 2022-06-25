@@ -46,7 +46,7 @@ extension SQLiteDb {
             try database.check(sqlite3_prepare_v2(database.handle, sql, -1, &stmt, nil))
             self.stmt = stmt!
             
-            SQLiteDb.logger?.info?.write("Prepare: \(sql)")
+            SQLiteDb.logger?.info?.write(msg: "Prepare: \(sql)")
         }
         
         deinit {
@@ -583,7 +583,7 @@ extension SQLiteDb {
             if !isOpen {
                 isOpen = true
                 
-                SQLiteDb.logger?.info?.write(sql)
+                SQLiteDb.logger?.info?.write(msg: self.sql)
             }
             
             lastResult = sqlite3_step(stmt)
