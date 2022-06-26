@@ -60,6 +60,65 @@ public struct LogInterpolation: StringInterpolationProtocol {
         
     }
     
+    // MARK: - Internal Functions
+    
+    internal func content() -> String {
+        var message = ""
+        
+        for value in storage {
+            switch value {
+            case .literal(let value):
+                message.append(value)
+
+            case .string(let value, let pad, let privacy):
+                message.append(value().padded(pad).privacy(privacy))
+
+            case .convertible(let value, let pad, let privacy):
+                message.append(value().description.padded(pad).privacy(privacy))
+
+            case .meta(let value, let pad, let privacy):
+                message.append(String(describing: value()).padded(pad).privacy(privacy))
+
+            case .object(let value, let privacy):
+                message.append(String(describing: value()).privacy(privacy))
+
+            case .float(let value, let format, let pad, let privacy):
+                message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
+                
+            case .double(let value, let format, let pad, let privacy):
+                message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
+
+            case .cgfloat(let value, let format, let pad, let privacy):
+                message.append(value().format(format).padded(pad).privacy(privacy))
+                
+            case .cgsize(let value, let format, let pad, let privacy):
+                message.append(value().format(format).padded(pad).privacy(privacy))
+
+            case .signedInt(let value, let format, let pad, let privacy):
+                switch format {
+                case let .decimal(minDigits, explicitPositiveSign):
+                    message.append(String(format: "\(explicitPositiveSign ? "+" : "")%0\(minDigits)ld", value()).padded(pad).privacy(privacy))
+                }
+                
+            case .unsignedInt(let value, let format, let pad,  let privacy):
+                switch format {
+                case let .decimal(minDigits, explicitPositiveSign):
+                    message.append(String(format: "\(explicitPositiveSign ? "+" : "")%0\(minDigits)ld", value()).padded(pad).privacy(privacy))
+                }
+                
+            case .bool(let value, let format, let privacy):
+                message.append(value().format(format).privacy(privacy))
+                
+            case .date(let value, let format, let privacy):
+                message.append(value().format(format).privacy(privacy))
+                
+            }
+        }
+        
+        return message
+    }
+    
+    
 }
 
 // MARK: - `String`, `CustomConvertibleString`

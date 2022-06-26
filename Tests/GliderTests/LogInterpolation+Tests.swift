@@ -19,42 +19,46 @@ final class LogInterpolationTests: XCTestCase {
     
     // MARK: - Tests
     
-
-    func testRedactionOnDebug() async throws {
+    /// The following test validate the redaction functions of the logging.
+    func testLogRedactions() async throws {
         GliderSDK.shared.reset()
         
-      /*let user = LogInterpolationUser(name: "Mark", surname: "Howens", email: "mark.howens@gmail.com", creditCardCVV: 4566)
-
+        let user = LogInterpolationUser(name: "Mark", surname: "Howens", email: "mark.howens@gmail.com", creditCardCVV: 4566)
+        
         let expectedMessages: [String] = [
-        //    "Hello \(user.fullName), your email is mark.howens@gmail.com",
-        //    "Email set to *******ens@gmail.com",
-        //    "CVV is <redacted>",
-            "CVV is <redacted>"
+            "Hello \(user.fullName), your email is mark.howens@gmail.com",
+            "Email is *******ens@gmail.com",
+            "CVV is <redacted>",
         ]
         
         var testIndex = 0
         
-        let log = createTestingLog { event in
-            print(event.message)
+        let log = createTestingLog(level: .trace, { event in
+            print(event.message.content)
             
-            XCTAssertTrue(event.message.description == expectedMessages[testIndex])
+            XCTAssertEqual(expectedMessages[testIndex], event.message.content)
             testIndex += 1
-        }
-                
-      //  log.info?.write("Hello \(user.fullName), your email is \(user.email, privacy: .partiallyHide)")
+        })
         
+        // This message should be shown in clear because in debug the privacy set is disabled automatically.
+        log.info?.write(msg: "Hello \(user.fullName), your email is \(user.email, privacy: .partiallyHide)")
+        
+        // Now we force the production behaviour and check if everything is redacted correctly.
         GliderSDK.shared.disablePrivacyRedaction = false
-                
-        log.alert?.write(msg: "Email set to \(user.email, privacy: .private)")
-       // log.alert?.write("CVV is \(user.creditCardCVV ?? 0, privacy: .private)")
-       // log.alert?.write(msg: "CVV is \(user.creditCardCVV ?? 0, privacy: .private)")*/
+        
+        log.alert?.write(msg: "Email is \(user.email, privacy: .partiallyHide)")
+        log.alert?.write(msg: "CVV is \(user.creditCardCVV ?? 0, privacy: .private)")
+    }
+    
+    func testLogInterpolationFormatting() async throws {
+        
     }
     
     // MARK: - Private Functions
     
-    private func createTestingLog(_ onReceiveEvent: @escaping TestTransport.OnReceiveEvent) -> Log {
+    private func createTestingLog(level: Level = .info, _ onReceiveEvent: @escaping TestTransport.OnReceiveEvent) -> Log {
         let log = Log {
-            $0.level = .info
+            $0.level = level
             $0.transports = [
                 TestTransport(onReceiveEvent: onReceiveEvent)
             ]
