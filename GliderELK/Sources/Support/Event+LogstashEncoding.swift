@@ -21,8 +21,8 @@ extension Event {
     fileprivate struct LogstashHTTPBody: Codable {
         let timestamp: String
         let label: String
-        let loglevel: Level
-        let message: Message
+        let loglevel: String
+        let message: String
         let metadata: [String: String]
     }
     
@@ -33,8 +33,8 @@ extension Event {
         let bodyObject = LogstashHTTPBody(
             timestamp: timestamp,
             label: label,
-            loglevel: level,
-            message: message,
+            loglevel: level.asLogstashLevel(),
+            message: message.content,
             metadata: convertMetadata(configuration: configuration)
         )
         
@@ -71,6 +71,8 @@ extension Event {
         return data
     }
     
+    // MARK: - Private Properties
+    
     /// Uses the `ISO8601DateFormatter` to create the timstamp of the log entry
     private var timestamp: String {
         Self.dateFormatter.string(from: Date())
@@ -91,5 +93,28 @@ extension Event {
         formatter.timeZone = TimeZone.autoupdatingCurrent
         return formatter
     }()
+    
+}
+
+// MARK: Level
+
+fileprivate extension Level {
+    
+    /// Convert to logstash default levels.
+    ///
+    /// - Returns: String
+    func asLogstashLevel() -> String {
+        switch self {
+        case .emergency: return "critical"
+        case .alert: return "critical"
+        case .critical: return "critical"
+        case .error: return "error"
+        case .warning: return "warning"
+        case .notice: return "notice"
+        case .info: return "info"
+        case .debug: return "debug"
+        case .trace: return "trace"
+        }
+    }
     
 }
