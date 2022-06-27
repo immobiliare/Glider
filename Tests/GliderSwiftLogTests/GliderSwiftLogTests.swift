@@ -31,10 +31,9 @@ final class GliderSwiftLogTests: XCTestCase {
         // Create glider setup
         let testTransport = TestTransport { event in
             // Validate the filtering.
-            XCTAssertNotEqual(event.message.description, "TRACE message")
-            
-            // Validate the tags
-            if event.level == .debug {
+            if event.level == .trace {
+                XCTAssertEqual(event.message.description, "TRACE message")
+            } else if event.level == .debug {
                 XCTAssertEqual(event.message.description, "DEBUG message")
                 XCTAssertTrue(event.allExtra?.values["extra_2"] as? String == "v1")
                 XCTAssertTrue(event.allExtra?.values["global_extra"] as? String == "global")
