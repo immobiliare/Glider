@@ -19,20 +19,20 @@ public struct LogInterpolation: StringInterpolationProtocol {
     @usableFromInline
     enum Value {
         case literal(String)
-        case string(() -> String, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case convertible(() -> CustomStringConvertible, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case string(() -> String, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case convertible(() -> CustomStringConvertible, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         
-        case meta(() -> Any.Type, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case object(() -> NSObject, privacy: LogPrivacy)
+        case meta(() -> Any.Type, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case object(() -> NSObject, trunc: String.TruncationStyle?, privacy: LogPrivacy)
         
-        case float(() -> Float, format: LogDoubleFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case double(() -> Double, format: LogDoubleFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case float(() -> Float, format: LogDoubleFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case double(() -> Double, format: LogDoubleFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
 
-        case signedInt(() -> Int64, format: LogIntegerFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case unsignedInt(() -> UInt64, format: LogIntegerFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case signedInt(() -> Int64, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case unsignedInt(() -> UInt64, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case bool(() -> Bool, format: LogBoolFormatting, privacy: LogPrivacy)
 
-        case date(() -> Date, format: LogDateFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case date(() -> Date, format: LogDateFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
     }
     
     // MARK: - Private Properties
@@ -68,35 +68,35 @@ public struct LogInterpolation: StringInterpolationProtocol {
             case .literal(let value):
                 message.append(value)
 
-            case .string(let value, let pad, let privacy):
-                message.append(value().padded(pad).privacy(privacy))
+            case .string(let value, let trunc, let pad, let privacy):
+                message.append(value().trunc(trunc).padded(pad).privacy(privacy))
 
-            case .convertible(let value, let pad, let privacy):
-                message.append(value().description.padded(pad).privacy(privacy))
+            case .convertible(let value, let trunc, let pad, let privacy):
+                message.append(value().description.trunc(trunc).padded(pad).privacy(privacy))
 
-            case .meta(let value, let pad, let privacy):
-                message.append(String(describing: value()).padded(pad).privacy(privacy))
+            case .meta(let value, let trunc, let pad, let privacy):
+                message.append(String(describing: value()).trunc(trunc).padded(pad).privacy(privacy))
 
-            case .object(let value, let privacy):
-                message.append(String(describing: value()).privacy(privacy))
+            case .object(let value, let trunc, let privacy):
+                message.append(String(describing: value()).trunc(trunc).privacy(privacy))
 
-            case .float(let value, let format, let pad, let privacy):
-                message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
+            case .float(let value, let format, let trunc, let pad, let privacy):
+                message.append(Double.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
                 
-            case .double(let value, let format, let pad, let privacy):
-                message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
+            case .double(let value, let format, let trunc, let pad, let privacy):
+                message.append(Double.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
                 
-            case .signedInt(let value, let format, let pad, let privacy):
-                message.append(Int.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
+            case .signedInt(let value, let format, let trunc, let pad, let privacy):
+                message.append(Int.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
                 
-            case .unsignedInt(let value, let format, let pad, let privacy):
-                message.append(Int.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
+            case .unsignedInt(let value, let format, let trunc, let pad, let privacy):
+                message.append(Int.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
                 
             case .bool(let value, let format, let privacy):
                 message.append(value().format(format).privacy(privacy))
                 
-            case .date(let value, let format, let pad, let privacy):
-                message.append(value().format(format).padded(pad).privacy(privacy))
+            case .date(let value, let format, let trunc, let pad, let privacy):
+                message.append(value().format(format).trunc(trunc).padded(pad).privacy(privacy))
                 
             }
         }
@@ -119,17 +119,19 @@ extension LogInterpolation {
     
     /// Defines interpolation for expressions of type `String`
     public mutating func appendInterpolation(_ argumentString: @autoclosure @escaping () -> String,
+                                             trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.string(argumentString, pad: pad, privacy: privacy))
+        storage.append(.string(argumentString, trunc: trunc, pad: pad, privacy: privacy))
     }
     
     /// Defines interpolation for values conforming to `CustomStringConvertible`.
     /// The values are displayed using the description methods on them.
     public mutating func appendInterpolation<T>(_ value: @autoclosure @escaping () -> T,
+                                                trunc: String.TruncationStyle? = nil,
                                                 pad: String.PaddingStyle? = nil,
                                                 privacy: LogPrivacy = .private) where T: CustomStringConvertible {
-        storage.append(.convertible(value, pad: pad, privacy: privacy))
+        storage.append(.convertible(value, trunc: trunc, pad: pad, privacy: privacy))
     }
     
 }
@@ -142,9 +144,10 @@ extension LogInterpolation {
     /// Defines interpolation for expressions of type `Date`
     public mutating func appendInterpolation(_ boolean: @autoclosure @escaping () -> Date,
                                              format: LogDateFormatting = .iso8601,
+                                             trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.date(boolean, format: format, pad: pad, privacy: privacy))
+        storage.append(.date(boolean, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
 }
 
@@ -155,15 +158,17 @@ extension LogInterpolation {
     
     /// Defines interpolation for meta-types.
     public mutating func appendInterpolation(_ value: @autoclosure @escaping () -> Any.Type,
+                                             trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.meta(value, pad: pad, privacy: privacy))
+        storage.append(.meta(value, trunc: trunc, pad: pad, privacy: privacy))
     }
     
     /// Defines interpolation for expressions of type `NSObject`.
     public mutating func appendInterpolation(_ argumentObject: @autoclosure @escaping () -> NSObject,
+                                             trunc: String.TruncationStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.object(argumentObject, privacy: privacy))
+        storage.append(.object(argumentObject, trunc: trunc, privacy: privacy))
     }
     
 }
@@ -173,21 +178,23 @@ extension LogInterpolation {
 extension LogInterpolation {
     
     public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> Int,
-                                                               format: LogIntegerFormatting = .`default`,
-                                                               pad: String.PaddingStyle? = nil,
-                                                               privacy: LogPrivacy = .private) {
+                                             format: LogIntegerFormatting = .`default`,
+                                             trunc: String.TruncationStyle? = nil,
+                                             pad: String.PaddingStyle? = nil,
+                                             privacy: LogPrivacy = .private) {
         storage.append(.signedInt({
             Int64(number())
-        }, format: format, pad: pad, privacy: privacy))
+        }, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
     
     public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> UInt,
-                                                               format: LogIntegerFormatting = .`default`,
-                                                               pad: String.PaddingStyle? = nil,
-                                                               privacy: LogPrivacy = .private) {
+                                             format: LogIntegerFormatting = .`default`,
+                                             trunc: String.TruncationStyle? = nil,
+                                             pad: String.PaddingStyle? = nil,
+                                             privacy: LogPrivacy = .private) {
         storage.append(.unsignedInt({
             UInt64(number())
-        }, format: format, pad: pad, privacy: privacy))
+        }, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
     
 }
@@ -199,17 +206,19 @@ extension LogInterpolation {
     /// Defines interpolation for expressions of type `Float`
     public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> Float,
                                              format: LogDoubleFormatting = .`default`,
+                                             trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.float(number, format: format, pad: pad, privacy: privacy))
+        storage.append(.float(number, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
     
     /// Defines interpolation for expressions of type `Double`
     public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> Double,
                                              format: LogDoubleFormatting = .`default`,
+                                             trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.double(number, format: format, pad: pad, privacy: privacy))
+        storage.append(.double(number, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
     
 }
