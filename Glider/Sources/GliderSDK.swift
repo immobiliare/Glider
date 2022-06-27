@@ -78,6 +78,10 @@ public struct GliderError: Error, LocalizedError {
     /// Message of the error.
     public let message: String
     
+    /// Additional info dictionary.
+    public var info: [String: Any]
+    
+    /// Description of the error.
     public var errorDescription: String? {
         message
     }
@@ -87,8 +91,9 @@ public struct GliderError: Error, LocalizedError {
     /// Initialize a new error with message.
     ///
     /// - Parameter message: message to hold.
-    public init(message: String) {
+    public init(message: String, info: [String: Any] = [:]) {
         self.message = message
+        self.info = info
     }
     
 }

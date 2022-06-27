@@ -17,6 +17,18 @@ import NIOConcurrencyHelpers
 import Logging
 import AsyncHTTPClient
 
+
+/// The `GliderELKTransport` library provides a logging transport for glider and ELK environments.
+/// The log entries are properly formatted, cached, and then uploaded via HTTP/HTTPS to elastic/logstash,
+/// which allows for further processing in its pipeline. The logs can then be stored in elastic/elasticsearch
+/// and visualized in elastic/kibana.
+/// The original inspiration is from <https://github.com/Apodini/swift-log-elk>.
+///
+/// Features:
+/// - Uploads the log data automatically to Logstash (eg. the ELK stack)
+/// - Caches the created log entries and sends them via HTTP either periodically or when exceeding a certain configurable memory threshold to Logstash
+/// - Converts the logging metadata to a JSON representation, which allows querying after those values (eg. filter after a specific parameter in Kibana)
+/// - Logs itself via a background activity logger (including protection against a possible infinite recursion)
 public class GliderELKTransport: Transport {
     
     // MARK: - Public Properties
@@ -29,6 +41,9 @@ public class GliderELKTransport: Transport {
     
     /// Configuration set.
     public let configuration: Configuration
+    
+    /// Delegate events.
+    public weak var delegate: GliderELKTransportDelegate?
     
     // MARK: - Private Properties
     
@@ -60,9 +75,12 @@ public class GliderELKTransport: Transport {
     
     /// Initialize with a given configuration.
     ///
-    /// - Parameter configuration: configuration.
-    public init(configuration: Configuration) throws {
+    /// - Parameters:
+    ///   - configuration: configuration
+    ///   - delegate: delegate to monitor events.
+    public init(configuration: Configuration, delegate: GliderELKTransportDelegate? = nil) throws {
         self.configuration = configuration
+        self.delegate = delegate
         self.httpClient = HTTPClient(
             eventLoopGroupProvider: .shared(configuration.eventLoopGroup),
             configuration: HTTPClient.Configuration(),
@@ -79,9 +97,12 @@ public class GliderELKTransport: Transport {
     /// - Parameters:
     ///   - hostname: hostname.
     ///   - port: port number.
+    ///   - delegate: delegate to monitor events.
     ///   - builder: builder function.
-    public convenience init(hostname: String, port: Int, _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        try self.init(configuration: Configuration(hostname: hostname, port: port, builder))
+    public convenience init(hostname: String, port: Int,
+                            delegate: GliderELKTransportDelegate? = nil,
+                            _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(hostname: hostname, port: port, builder), delegate: delegate)
     }
     
     // MARK: - Conformance
@@ -89,10 +110,102 @@ public class GliderELKTransport: Transport {
     public func record(event: Event) -> Bool {
         guard isEnabled else { return false }
         
-        return true
+        guard let data = event.encodeToLogstashFormat(configuration.jsonEncoder) else {
+            let error = GliderError(message: "Failed to encode event in data", info: ["id": event.id])
+            delegate?.elkTransport(self, didFailSendingEvent: event, error: error)
+            return false
+        }
+        
+        return dispatchEvent(event, withData: data)
     }
     
     // MARK: - Private Functions
+    
+    /// Provide dispatching the event to the underlying system.
+    ///
+    /// - Parameters:
+    ///   - event: event to send.
+    ///   - logData: transformed event data.
+    /// - Returns: Bool
+    private func dispatchEvent(_ event: Event, withData logData: Data) -> Bool {
+        // This function is thread-safe via a `ConditionalLock` on the log store `ByteBuffer`
+        
+        // The conditional lock ensures that the uploading function is not "manually" scheduled multiple times
+        // The state of the lock, in this case "false", indicates, that the byteBuffer isn't full at the moment
+        guard byteBufferLock.lock(whenValue: false, timeoutSeconds: TimeAmount.seconds(1).rawSeconds) else {
+            let error = GliderError(message: "Lock on the log data byte buffer couldn't be aquired", info: [
+                "id": event.id,
+                "logStorage": [
+                    "readableBytes": byteBuffer.readableBytes,
+                    "writableBytes": byteBuffer.writableBytes,
+                    "readerIndex": byteBuffer.readerIndex,
+                    "writerIndex": byteBuffer.writerIndex,
+                    "capacity": byteBuffer.capacity
+                ],
+                "conditionalLockState": byteBufferLock.value
+            ])
+            delegate?.elkTransport(self, didFailSendingEvent: event, error: error)
+            return false
+        }
+            
+        // Check if the maximum storage size of the byte buffer would be exeeded.
+        // If that's the case, trigger the uploading of the logs manually
+        if (byteBuffer.readableBytes + MemoryLayout<Int>.size + logData.count) > byteBuffer.capacity {
+            // A single log entry is larger than the current byte buffer size
+            if byteBuffer.readableBytes == 0 {
+                let error = GliderError(message: "A single log entry is larger than the configured log storage size", info: [
+                    "id": event.id,
+                    "logStorageSize": byteBuffer.capacity,
+                    "logLevel": event.level.rawValue,
+                    "size": logData.count
+                ])
+                delegate?.elkTransport(self, didFailSendingEvent: event, error: error)
+                
+                byteBufferLock.unlock()
+                return false
+            }
+            
+            // Cancel the "old" upload task
+            uploadTask?.cancel(promise: nil)
+            
+            // The state of the lock, in this case "true", indicates, that the byteBuffer
+            // is full at the moment and must be emptied before writing to it again
+            byteBufferLock.unlock(withValue: true)
+
+            // Trigger the upload task immediatly
+            uploadLogData()
+            
+            // Schedule a new upload task with the appropriate inital delay
+            uploadTask = scheduleUploadTask(initialDelay: self.configuration.uploadInterval)
+        } else {
+            byteBufferLock.unlock()
+        }
+        
+        guard byteBufferLock.lock(whenValue: false, timeoutSeconds: TimeAmount.seconds(1).rawSeconds) else {
+            // If lock couldn't be aquired, don't log the data and just return
+            let error = GliderError(message: "Lock on the log data byte buffer couldn't be aquired", info: [
+                "logStorage": [
+                    "readableBytes": byteBuffer.readableBytes,
+                    "writableBytes": byteBuffer.writableBytes,
+                    "readerIndex": byteBuffer.readerIndex,
+                    "writerIndex": byteBuffer.writerIndex,
+                    "capacity": byteBuffer.capacity
+                ],
+                "conditionalLockState": byteBufferLock.value
+            ])
+            delegate?.elkTransport(self, didFailSendingEvent: event, error: error)
+            return false
+        }
+        
+        // Write size of the log data
+        byteBuffer.writeInteger(logData.count)
+        // Write actual log data to log store
+        byteBuffer.writeData(logData)
+
+        byteBufferLock.unlock()
+        
+        return true
+    }
     
     /// Schedules the `uploadLogData` function with a certain `TimeAmount` as `initialDelay` and `delay` (delay between repeating the task)
     private func scheduleUploadTask(initialDelay: TimeAmount) -> RepeatedTask {
@@ -215,11 +328,8 @@ public class GliderELKTransport: Transport {
     /// Creates the HTTP request which stays constant during the entire lifetime of the `LogstashLogHandler`
     /// Sets some default headers, eg. a dynamically adjusted "Keep-Alive" header
     ///
-
-    
-    /// Creates the HTTP request.
     ///
-    /// - Returns: HTTPClient.Request
+    /// - Returns: `HTTPClient.Request`
     private func createHTTPRequest() -> HTTPClient.Request? {
         let scheme = configuration.useHTTPS ? "https" : "http"
         var httpRequest = try? HTTPClient.Request(url: "\(scheme)://\(configuration.hostname):\(configuration.port)",

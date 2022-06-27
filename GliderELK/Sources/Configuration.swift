@@ -46,6 +46,21 @@ extension GliderELKTransport {
         /// This logger MUST be created BEFORE the `LoggingSystem` is bootstrapped, else it results in an infinte recusion!
         public var backgroundActivityLogger: Logger
         
+        /// The `JSONEncoder` used to encode the event.
+        /// By default you should never need to change it.
+        public var jsonEncoder: JSONEncoder = {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes, .sortedKeys]
+            encoder.dateEncodingStrategy = .iso8601
+            encoder.dataEncodingStrategy = .base64
+            encoder.nonConformingFloatEncodingStrategy = .convertToString(
+                positiveInfinity: "+inf",
+                negativeInfinity: "-inf",
+                nan: "NaN"
+            )
+            return encoder
+        }()
+        
         /// Initialize a new configuration for ELK transport service.
         ///
         /// - Parameters:
