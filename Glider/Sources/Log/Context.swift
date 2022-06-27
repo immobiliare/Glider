@@ -80,6 +80,8 @@ internal class ContextsData {
     
     // MARK: - Private Properties
     
+    private let queue = DispatchQueue(label: "com.glider.contextdata")
+    
     /// Device context attributes
     private var device = Context.DeviceAttributes()
     
@@ -114,12 +116,14 @@ internal class ContextsData {
     /// - Returns: Context
     public func captureContext() -> Context {
         if shouldUpdateData {
-            if GliderSDK.shared.contextsCaptureOptions.contains(.device) {
-                updateDeviceDynamicAttributes()
-            }
-            
-            if GliderSDK.shared.contextsCaptureOptions.contains(.os) {
-                updateOSDynamicAttributes()
+            queue.sync {
+                if GliderSDK.shared.contextsCaptureOptions.contains(.device) {
+                    updateDeviceDynamicAttributes()
+                }
+                
+                if GliderSDK.shared.contextsCaptureOptions.contains(.os) {
+                    updateOSDynamicAttributes()
+                }
             }
         }
         
