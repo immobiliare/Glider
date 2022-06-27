@@ -77,8 +77,10 @@ extension Double {
         }
         
         switch format {
-        case .fixed(let precision, let explicitPositiveSign):
-            return  String(format: "\(explicitPositiveSign ? "+" : "")%.0\(precision)f", value)
+        case .fixed(let precision):
+            let formatter = NumberFormatter()
+            formatter.maximumFractionDigits = precision
+            return formatter.string(from: value) ?? ""
             
         case .formatter(let formatter):
             return formatter.string(for: value) ?? ""
@@ -92,8 +94,22 @@ extension Double {
             
         case .bytes(let style):
             let formatter = ByteCountFormatter()
+            formatter.allowedUnits = .useAll
+            formatter.includesUnit = true
+            formatter.isAdaptive = true
             formatter.countStyle = style
             return formatter.string(from: .init(value: value.doubleValue, unit: .bytes))
+            
+        case .currency(let symbol, let usesGroupingSeparator):
+            let currencyFormatter = NumberFormatter()
+            currencyFormatter.usesGroupingSeparator = true
+            currencyFormatter.numberStyle = .currency
+            if let symbol = symbol {
+                currencyFormatter.currencySymbol = symbol
+            }
+            currencyFormatter.usesGroupingSeparator = usesGroupingSeparator
+            currencyFormatter.locale = GliderSDK.shared.locale
+            return currencyFormatter.string(from: value) ?? ""
             
         }
     }
@@ -123,36 +139,21 @@ extension Date {
     
 }
 
-extension CGSize {
+extension Int {
     
-    internal func format(_ format: LogCGModelsFormatting?) -> String {
+    internal static func format(value: NSNumber, _ format: LogIntegerFormatting?) -> String {
         guard let format = format else {
             return String(describing: self)
         }
         
         switch format {
-        case .withPrecision(let precision):
-            return "(\(String(format: "%.\(precision)f", width)), \(String(format: "%.\(precision)f", height)))"
-        case .natural:
-            return "(w:\(String(format: "%.2f", width)), h:\(String(format: "%.2f", height)))"
-
-        }
-    }
-    
-}
-
-extension CGFloat {
-    
-    internal func format(_ format: LogCGModelsFormatting?) -> String {
-        guard let format = format else {
-            return String(describing: self)
-        }
-        
-        switch format {
-        case .withPrecision(let precision):
-            return "\(String(format: "%.\(precision)f"))"
-        case .natural:
-            return "\(String(format: "%.2f"))"
+        case .decimal(let minDigits):
+            let formatter = NumberFormatter()
+            formatter.minimumIntegerDigits = minDigits
+            return formatter.string(from: value) ?? ""
+            
+        case .formatter(let formatter):
+            return formatter.string(from: value) ?? ""
 
         }
     }

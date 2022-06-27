@@ -14,7 +14,6 @@ import XCTest
 @testable import Glider
 @testable import GliderSwiftLog
 import Logging
-import GliderTests
 
 final class GliderSwiftLogTests: XCTestCase {
     

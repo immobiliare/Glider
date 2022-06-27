@@ -23,20 +23,22 @@ public enum LogBoolFormatting {
 // MARK: - Int
 
 public enum LogIntegerFormatting {
-    case decimal(minDigits: Int, explicitPositiveSign: Bool)
+    case decimal(minDigits: Int)
+    case formatter(NumberFormatter)
     
-    public static let `default`: LogIntegerFormatting = .decimal(minDigits: 0, explicitPositiveSign: false)
+    public static let `default`: LogIntegerFormatting = .decimal(minDigits: 0)
 }
 
 // MARK: - Double
 
 public enum LogDoubleFormatting {
-    case fixed(precision: Int, explicitPositiveSign: Bool)
+    case fixed(precision: Int)
     case formatter(formatter: Formatter)
     case measure(unit: Unit, options: MeasurementFormatter.UnitOptions, style: Formatter.UnitStyle = .short)
+    case currency(symbol: String?, usesGroupingSeparator: Bool = true)
     case bytes(style: ByteCountFormatter.CountStyle)
     
-    public static let `default`: LogDoubleFormatting = .fixed(precision: 6, explicitPositiveSign: false)
+    public static let `default`: LogDoubleFormatting = .fixed(precision: 2)
 }
 
 // MARK: - Date

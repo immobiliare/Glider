@@ -27,14 +27,12 @@ public struct LogInterpolation: StringInterpolationProtocol {
         
         case float(() -> Float, format: LogDoubleFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case double(() -> Double, format: LogDoubleFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case cgfloat(() -> CGFloat, format: LogCGModelsFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case cgsize(() -> CGSize, format: LogCGModelsFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
 
         case signedInt(() -> Int64, format: LogIntegerFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case unsignedInt(() -> UInt64, format: LogIntegerFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case bool(() -> Bool, format: LogBoolFormatting, privacy: LogPrivacy)
 
-        case date(() -> Date, format: LogDateFormatting, privacy: LogPrivacy)
+        case date(() -> Date, format: LogDateFormatting, pad: String.PaddingStyle?, privacy: LogPrivacy)
     }
     
     // MARK: - Private Properties
@@ -87,30 +85,18 @@ public struct LogInterpolation: StringInterpolationProtocol {
                 
             case .double(let value, let format, let pad, let privacy):
                 message.append(Double.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
-
-            case .cgfloat(let value, let format, let pad, let privacy):
-                message.append(value().format(format).padded(pad).privacy(privacy))
                 
-            case .cgsize(let value, let format, let pad, let privacy):
-                message.append(value().format(format).padded(pad).privacy(privacy))
-
             case .signedInt(let value, let format, let pad, let privacy):
-                switch format {
-                case let .decimal(minDigits, explicitPositiveSign):
-                    message.append(String(format: "\(explicitPositiveSign ? "+" : "")%0\(minDigits)ld", value()).padded(pad).privacy(privacy))
-                }
+                message.append(Int.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
                 
-            case .unsignedInt(let value, let format, let pad,  let privacy):
-                switch format {
-                case let .decimal(minDigits, explicitPositiveSign):
-                    message.append(String(format: "\(explicitPositiveSign ? "+" : "")%0\(minDigits)ld", value()).padded(pad).privacy(privacy))
-                }
+            case .unsignedInt(let value, let format, let pad, let privacy):
+                message.append(Int.format(value: NSNumber(value: value()), format).padded(pad).privacy(privacy))
                 
             case .bool(let value, let format, let privacy):
                 message.append(value().format(format).privacy(privacy))
                 
-            case .date(let value, let format, let privacy):
-                message.append(value().format(format).privacy(privacy))
+            case .date(let value, let format, let pad, let privacy):
+                message.append(value().format(format).padded(pad).privacy(privacy))
                 
             }
         }
@@ -156,8 +142,9 @@ extension LogInterpolation {
     /// Defines interpolation for expressions of type `Date`
     public mutating func appendInterpolation(_ boolean: @autoclosure @escaping () -> Date,
                                              format: LogDateFormatting = .iso8601,
+                                             pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.date(boolean, format: format, privacy: privacy))
+        storage.append(.date(boolean, format: format, pad: pad, privacy: privacy))
     }
 }
 
@@ -185,9 +172,7 @@ extension LogInterpolation {
 
 extension LogInterpolation {
     
-    
-    /// Defines interpolation for expressions of type `Int`
-    public mutating func appendInterpolation<T: SignedInteger>(_ number: @autoclosure @escaping () -> T,
+    public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> Int,
                                                                format: LogIntegerFormatting = .`default`,
                                                                pad: String.PaddingStyle? = nil,
                                                                privacy: LogPrivacy = .private) {
@@ -195,12 +180,11 @@ extension LogInterpolation {
             Int64(number())
         }, format: format, pad: pad, privacy: privacy))
     }
-
-    /// Defines interpolation for expressions of type `UInt`
-    public mutating func appendInterpolation<T: UnsignedInteger>(_ number: @autoclosure @escaping () -> T,
-                                                                 format: LogIntegerFormatting = .`default`,
-                                                                 pad: String.PaddingStyle? = nil,
-                                                                 privacy: LogPrivacy = .private) {
+    
+    public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> UInt,
+                                                               format: LogIntegerFormatting = .`default`,
+                                                               pad: String.PaddingStyle? = nil,
+                                                               privacy: LogPrivacy = .private) {
         storage.append(.unsignedInt({
             UInt64(number())
         }, format: format, pad: pad, privacy: privacy))
@@ -208,7 +192,7 @@ extension LogInterpolation {
     
 }
 
-// MARK: - `Float`, `CGFloat` and `Double`
+// MARK: - `Float`, `CGFloat`, `CGSize` and `Double`
 
 extension LogInterpolation {
     
@@ -226,14 +210,6 @@ extension LogInterpolation {
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
         storage.append(.double(number, format: format, pad: pad, privacy: privacy))
-    }
-    
-    /// Defines interpolation for expressions of type `CGFloat`
-    public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> CGFloat,
-                                             format: LogCGModelsFormatting = .natural,
-                                             pad: String.PaddingStyle? = nil,
-                                             privacy: LogPrivacy = .private) {
-        storage.append(.cgfloat(number, format: format, pad: pad, privacy: privacy))
     }
     
 }
