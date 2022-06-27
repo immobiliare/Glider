@@ -69,7 +69,23 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         
         wait(for: [exp], timeout: 80)
     }
+    
+}
 
+class ThrottledTransportTestsFlush: XCTestCase, ThrottledTransportDelegate {
+
+    var numberOfEvents = 100
+    var maxEntries = 10
+    
+    var captureDelegateBlock: ((_ events: [ThrottledTransport.Payload], _ reason: ThrottledTransport.FlushReason) -> Void)?
+    
+    var emitTimer: Timer?
+    
+    func record(_ transport: ThrottledTransport, events: [ThrottledTransport.Payload],
+                reason: ThrottledTransport.FlushReason, _ completion: ThrottledTransport.Completion?) {
+        captureDelegateBlock?(events, reason)
+    }
+    
     /// Tests if transport flush interval set is respected.
     func tests_throttledTransportBufferTimeInterval() async throws {
         let exp = expectation(description: "end of sent")
@@ -128,7 +144,9 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         
         let allMessages = receivedEventsBlock.reduce([Event](), +)
         for i in 0..<allMessages.count {
-            XCTAssertTrue(allMessages[i].message.description == "test message \(i)!")
+            let messageText = allMessages[i].message.content
+            print(messageText)
+            XCTAssertEqual(messageText, "test message \(i)!")
         }
     }
 
