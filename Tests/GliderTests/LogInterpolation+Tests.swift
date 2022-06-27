@@ -83,7 +83,19 @@ final class LogInterpolationTests: XCTestCase {
             "Set card Card ID 34553 issued by Bank Of Monopoly expire on 2022",
             "Set card ******************* by Bank Of Monopoly expire on 2022",
             
-            "Object is MyNSObject: Me!"
+            "Object is MyNSObject: Me!",
+            
+            "Value is yes",
+            "Value is 1",
+            "Value is true",
+            "Value is no",
+            "Value is 0",
+            "Value is false",
+            
+            "Value is My long st…te anyway",
+            "Value is My long st…",
+            "Value is …nyway",
+            "There are 13345…"
         ]
         
         var testIndex = 0
@@ -134,6 +146,22 @@ final class LogInterpolationTests: XCTestCase {
 
         // NSObject
         log.alert?.write(msg: "Object is \(self.myObj, privacy: .public)")
+        
+        // Bool
+        log.alert?.write(msg: "Value is \(true, format: .answer, privacy: .public)")
+        log.alert?.write(msg: "Value is \(true, format: .numeric, privacy: .public)")
+        log.alert?.write(msg: "Value is \(true, format: .truth, privacy: .public)")
+        log.alert?.write(msg: "Value is \(false, format: .answer, privacy: .public)")
+        log.alert?.write(msg: "Value is \(false, format: .numeric, privacy: .public)")
+        log.alert?.write(msg: "Value is \(false, format: .truth, privacy: .public)")
+        
+        // Truncation
+        let someLongString = "My long string is not enough to represent anything but it will truncate anyway"
+        log.alert?.write(msg: "Value is \(someLongString, trunc: .middle(length: 20), privacy: .public)")
+        log.alert?.write(msg: "Value is \(someLongString, trunc: .tail(length: 10), privacy: .public)")
+        log.alert?.write(msg: "Value is \(someLongString, trunc: .head(length: 5), privacy: .public)")
+        log.alert?.write(msg: "There are \(13345.5534955068292334, format: .formatter(formatter: customFormatter), trunc: .tail(length: 5), privacy: .public)")
+
     }
     
     // MARK: - Private Functions
