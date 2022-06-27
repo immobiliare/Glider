@@ -39,12 +39,36 @@ extension GliderELKTransport {
         /// Specifies how large the log storage `ByteBuffer` must be at least
         public var logStorageSize: Int = 524_288
         
-        /// Specifies how large the log storage `ByteBuffer` with all the current uploading buffers can be at the most
+        /// Specifies how large the log storage `ByteBuffer` with all the current uploading buffers can be at the most.
+        ///
+        /// NOTE:
+        /// The `maximumTotalLogStorageSize` MUST be at least twice as large as the logStorageSize
+        /// (this is also validated during instanciation of the LogstashLogHandler).
+        /// The reason for this are the temporary buffers that are allocated during uploading
+        /// of the log data, so that a simultaneous logging call doesn't block
+        /// (except for the duration it takes to copy the logs to the temporary buffer which is very fast).
+        ///
+        /// DISCUSSION
+        /// <https://github.com/Apodini/swift-log-elk>
+        /// Why at least twice as large? The process of allocating temporary buffers could possibly be repeated,
+        /// if the log storage runs full during uploading of "old" log data. A possible scenario is an environment,
+        /// where the network conncection to Logstash is really slow and therefore the uploading takes long.
+        ///
+        /// This process could repeat itself over and over again until the maximumTotalLogStorageSize is reached.
+        /// Then, a new logging call blocks until enought memory space is available again, achieved through a
+        /// partial completed uploading of log data, resulting in freed temporary buffers.
+        /// In practice, approaching the maximumTotalLogStorageSize should basically never happen,
+        /// except in very resource restricted environments.
         public var maximumTotalLogStorageSize: Int = 4_194_304
         
         /// Used to log background activity of the transport and `HTTPClient`.
         /// This logger MUST be created BEFORE the `LoggingSystem` is bootstrapped, else it results in an infinte recusion!
         public var backgroundActivityLogger: Logger
+        
+        /// What fields of the event must be part of the `metadata` field of the logstash body representation.
+        /// By default the `extra` is used (only `String` convertible data).
+        /// NOTE: If you set both `extra` and `tags`, `tags` may override existing `extra` values when there are conflicts.
+        public var logstashMetadataSources: [MetadataOrigin] = [.extra]
         
         /// The `JSONEncoder` used to encode the event.
         /// By default you should never need to change it.
@@ -90,6 +114,22 @@ extension GliderELKTransport {
             maximumTotalLogStorageSize = maximumTotalLogStorageSize.nextPowerOf2()
         }
         
+    }
+    
+}
+
+extension GliderELKTransport.Configuration {
+    
+    /// What kind of fields must be part of sent metadata in logstash.
+    ///
+    /// NOTE:
+    /// Tags may replace extra because have an higher priority.
+    ///
+    /// - `extra`: the `allExtra` property is used (only `String` representable data).
+    /// - `tags`: the `allTags` property is used (all values).
+    public enum MetadataOrigin {
+        case extra
+        case tags
     }
     
 }

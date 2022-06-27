@@ -23,25 +23,53 @@ extension Event {
         let label: String
         let loglevel: Level
         let message: Message
-        let metadata: Metadata
+        let metadata: [String: String]
     }
     
     /// Provide encoding of the event into `Data` object.
     /// - Parameter event: event to convert.
     /// - Returns: `Data?`
-    internal func encodeToLogstashFormat(_ jsonEncoder: JSONEncoder) -> Data? {
+    internal func encodeToLogstashFormat(_ jsonEncoder: JSONEncoder, configuration: GliderELKTransport.Configuration) -> Data? {
         let bodyObject = LogstashHTTPBody(
             timestamp: timestamp,
             label: label,
             loglevel: level,
             message: message,
-            metadata: extra ?? [:]
+            metadata: convertMetadata(configuration: configuration)
         )
         
         return try? jsonEncoder.encode(bodyObject)
     }
     
     // MARK: - Private Functions
+    
+    /// Convert metadata to a `[String:String]` representation.
+    ///
+    /// - Parameter configuration: configuration to use.
+    /// - Returns: `[String: String]`
+    private func convertMetadata(configuration: GliderELKTransport.Configuration) -> [String: String] {
+        var data = [String: String]()
+        
+        if configuration.logstashMetadataSources.contains(.extra) {
+            let composedExtra = self.allExtra
+            composedExtra?.keys.forEach({ key in
+                if let value = composedExtra?[key]?.asString() {
+                    data[key] = value
+                }
+            })
+        }
+        
+        if configuration.logstashMetadataSources.contains(.tags) {
+            let composedTags = self.allTags
+            composedTags?.keys.forEach({ key in
+                if let value = composedTags?[key]?.asString() {
+                    data[key] = value
+                }
+            })
+        }
+        
+        return data
+    }
     
     /// Uses the `ISO8601DateFormatter` to create the timstamp of the log entry
     private var timestamp: String {
