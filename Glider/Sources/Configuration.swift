@@ -25,6 +25,22 @@ extension Log {
         /// Category identiifer of the log.
         public var category: LoggerIdentifiable = ""
         
+        /// Full label of the log.
+        ///
+        /// NOTE:
+        /// It's composed by the subsystem and category
+        /// separated by a comma trimming whitespaces and newlines.
+        public var label: String {
+            [subsystem.id, category.id]
+                .map({
+                    $0.wipeCharacters(characters: "\n\r ")
+                })
+                .filter({
+                    $0.isEmpty == false
+                })
+                .joined(separator: ".")
+        }
+        
         // Minimum severity level for this logger.
         // Messages sent to a logger with a level lower than this will be automatically
         // ignored by the system. By default this value is set to `info`.

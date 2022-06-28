@@ -20,20 +20,7 @@ public class Log: Equatable {
     public let uuid = UUID()
     
     /// Full label of the log.
-    ///
-    /// NOTE:
-    /// It's composed by the subsystem and category
-    /// separated by a comma trimming whitespaces and newlines.
-    public lazy var label: String = {
-        [subsystem.id, category.id]
-            .map({
-                $0.wipeCharacters(characters: "\n\r ")
-            })
-            .filter({
-                $0.isEmpty == false
-            })
-            .joined(separator: ".")
-    }()
+    public private(set) var label: String
     
     /// Subsystem helps you to track and identify the logger. Typically this is
     /// the bundle identifier of the package which produce the log messages.
@@ -135,6 +122,7 @@ public class Log: Equatable {
         self.isEnabled = config.isEnabled
         self.category = config.category
         self.subsystem = config.subsystem
+        self.label = config.label
         setLevel(config.level)
     }
     
