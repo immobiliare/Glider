@@ -15,6 +15,30 @@ import XCTest
 
 final class CoreTests: XCTestCase {
     
+    func test_logLabel() throws {
+        let log = Log {
+            $0.subsystem = "com.myawesomeapp"
+            $0.category = "network"
+        }
+        XCTAssertEqual(log.label, "\(log.subsystem).\(log.category)")
+        
+        let log2 = Log {
+            $0.subsystem = "com.myawesomeapp"
+        }
+        XCTAssertEqual(log2.label, log2.subsystem.id)
+
+        let log3 = Log {
+            $0.category = "network"
+        }
+        XCTAssertEqual(log3.label, log3.category.id)
+        
+        let log4 = Log {
+            $0.subsystem = "com. password\n.test"
+            $0.category = "testing phase"
+        }
+        XCTAssertEqual(log4.label, "com.password.test.testingphase")
+    }
+    
     func test_multipleThreads() throws {
         let exp1 = expectation(description: "Finish 1")
         let exp2 = expectation(description: "Finish 2")

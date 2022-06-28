@@ -73,13 +73,13 @@ extension Event {
     
     // MARK: - Private Properties
     
+    public var label: String {
+        [(subsystem ?? ""), (category ?? "")].filter({ $0.isEmpty == false }).joined(separator: ".")
+    }
+    
     /// Uses the `ISO8601DateFormatter` to create the timstamp of the log entry
     private var timestamp: String {
         Self.dateFormatter.string(from: Date())
-    }
-    
-    private var label: String {
-        [subsystem, category].compactMap({ $0 }).joined(separator: ".")
     }
 
     /// An `ISO8601DateFormatter` used to format the timestamp of the log entry in an ISO8601 conformant fashion

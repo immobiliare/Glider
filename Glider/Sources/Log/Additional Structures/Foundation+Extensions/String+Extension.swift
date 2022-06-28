@@ -71,6 +71,24 @@ extension String {
         return style.pad(text: self, length: style.columnsLength, filler: filler)
     }
     
+    // MARK: - Internal Function
+    
+    /// Wipe characters from string.
+    ///
+    /// - Parameter characters: characters to remove.
+    /// - Returns: String
+    func wipeCharacters(characters: String) -> String {
+        return replaceCharacters(characters: characters, toSeparator: "")
+    }
+    
+    // MARK: - Internal Function
+
+    private func replaceCharacters(characters: String, toSeparator: String) -> String {
+        let characterSet = CharacterSet(charactersIn: characters)
+        let components = self.components(separatedBy: characterSet)
+        return components.joined(separator: toSeparator)
+    }
+    
 }
 
 extension String.PaddingStyle {

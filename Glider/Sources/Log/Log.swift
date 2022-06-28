@@ -19,6 +19,22 @@ public class Log: Equatable {
     /// Unique identifier of the log instance.
     public let uuid = UUID()
     
+    /// Full label of the log.
+    ///
+    /// NOTE:
+    /// It's composed by the subsystem and category
+    /// separated by a comma trimming whitespaces and newlines.
+    public lazy var label: String = {
+        [subsystem.id, category.id]
+            .map({
+                $0.wipeCharacters(characters: "\n\r ")
+            })
+            .filter({
+                $0.isEmpty == false
+            })
+            .joined(separator: ".")
+    }()
+    
     /// Subsystem helps you to track and identify the logger. Typically this is
     /// the bundle identifier of the package which produce the log messages.
     ///
