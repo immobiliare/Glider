@@ -26,7 +26,7 @@ extension String {
             return self
         }
 
-       #if DEBUG
+        #if DEBUG
         if GliderSDK.shared.disablePrivacyRedaction {
             return String(describing: self)
         }
@@ -35,14 +35,17 @@ extension String {
         switch privacy {
         case .public:
             return String(describing: self)
+            
         case .private(mask: .hash):
             return "\(String(describing: self).hash)"
+            
         case .private(mask: .partiallyHide):
             var hiddenString = self
             let charsToHide = Int(Double(hiddenString.count) * 0.35)
             let endIndex = index(hiddenString.startIndex, offsetBy: charsToHide)
             hiddenString.replaceSubrange(...endIndex, with: String(repeating: "*", count: charsToHide))
             return hiddenString
+            
         default:
             return LogPrivacy.redacted
         }
@@ -128,9 +131,9 @@ extension Date {
             let formatter = ISO8601DateFormatter()
             return formatter.string(from: self)
             
-        case .custom(let format):
+        case let .custom(format, locale):
             let formatter = DateFormatter()
-            formatter.locale = GliderSDK.shared.locale
+            formatter.locale = locale
             formatter.dateFormat = format
             return formatter.string(from: self)
             
@@ -147,9 +150,17 @@ extension Int {
         }
         
         switch format {
-        case .decimal(let minDigits):
+        case .decimal(let minDigits, let maxDigits):
             let formatter = NumberFormatter()
-            formatter.minimumIntegerDigits = minDigits
+            
+            if let minDigits = minDigits {
+                formatter.minimumIntegerDigits = minDigits
+            }
+            
+            if let maxDigits = maxDigits {
+                formatter.maximumIntegerDigits = maxDigits
+            }
+            
             return formatter.string(from: value) ?? ""
             
         case .formatter(let formatter):

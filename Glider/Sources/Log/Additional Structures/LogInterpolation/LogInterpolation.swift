@@ -11,33 +11,33 @@
 //
 
 import Foundation
-import CoreGraphics
 
 @frozen
 public struct LogInterpolation: StringInterpolationProtocol {
 
     @usableFromInline
     enum Value {
+        // String
         case literal(String)
         case string(() -> String, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case convertible(() -> CustomStringConvertible, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         
+        // Objects
         case meta(() -> Any.Type, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case object(() -> NSObject, trunc: String.TruncationStyle?, privacy: LogPrivacy)
-        
+        case date(() -> Date, format: LogDateFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+
+        // Numbers
         case float(() -> Float, format: LogDoubleFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case double(() -> Double, format: LogDoubleFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
-
         case signedInt(() -> Int64, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case unsignedInt(() -> UInt64, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case bool(() -> Bool, format: LogBoolFormatting, privacy: LogPrivacy)
-
-        case date(() -> Date, format: LogDateFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
     }
     
     // MARK: - Private Properties
 
-    private(set) var storage: [Value] = []
+    private(set) var storage = [Value]()
     
     // MARK: - Initialization
     
@@ -140,7 +140,6 @@ extension LogInterpolation {
 
 extension LogInterpolation {
     
-    
     /// Defines interpolation for expressions of type `Date`
     public mutating func appendInterpolation(_ boolean: @autoclosure @escaping () -> Date,
                                              format: LogDateFormatting = .iso8601,
@@ -199,7 +198,7 @@ extension LogInterpolation {
     
 }
 
-// MARK: - `Float`, `CGFloat`, `CGSize` and `Double`
+// MARK: - `Float`, `Double`
 
 extension LogInterpolation {
     

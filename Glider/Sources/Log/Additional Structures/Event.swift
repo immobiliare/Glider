@@ -148,18 +148,3 @@ public struct Event: Codable, Equatable {
     }
 
 }
-
-extension Dictionary {
-    
-    internal static func merge(baseDictionary: [Key: Value], additionalData:  [Key: Value]?) ->  [Key: Value] {
-        guard let additionalData = additionalData else {
-            return baseDictionary
-        }
-        
-        let result = baseDictionary.merging(additionalData, uniquingKeysWith: { (_, new) in
-            new
-        })
-        return result
-    }
-    
-}

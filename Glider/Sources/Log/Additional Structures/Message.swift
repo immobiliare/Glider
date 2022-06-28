@@ -54,9 +54,7 @@ extension Event {
         
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-            let text = try container.decode(String.self, forKey: .text)
-            //self.interpolation = .init(literal: text)
-            self.content = text
+            self.content = try container.decode(String.self, forKey: .text)
         }
 
     }
