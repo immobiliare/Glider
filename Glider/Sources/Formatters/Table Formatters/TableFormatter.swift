@@ -117,6 +117,7 @@ public class TableFormatter: EventFormatter {
                     padding.bottom = 0
                 })
             })
+            col.verticalAlignment = .top
             col.maxWidth = self.maxColumnWidths.info
             col.horizontalAlignment = .leading
         }
@@ -167,7 +168,7 @@ public class TableFormatter: EventFormatter {
                 
             case let dictionaryValue as [String: Any]:
                 // Split each <key,value> in a dictionary in a separate row
-                for key in dictionaryValue.keys.sorted() {
+                for key in field.field.keysToRetrive ?? [] {
                     let value = dictionaryValue[key]
                     guard let value = value as? SerializableData else {
                         continue
