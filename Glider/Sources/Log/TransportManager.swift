@@ -68,16 +68,15 @@ public class TransportManager {
         
         let mainExecutor = executorForQueue(acceptQueue, synchronous: isSynchronous)
         mainExecutor { [event, filters, transports] in
-            // Verify if payload pass the filters check (if set).
             guard filters.canAcceptEvent(event) else {
-                return
+                return // event ignored by the filters
             }
             
             for recorder in transports {
                 if let queue = recorder.queue {
-                    guard let minimumAcceptedLevel = recorder.minimumAcceptedLevel,
-                          event.level.rawValue <= minimumAcceptedLevel.rawValue else {
-                        continue
+                    if let minimumAcceptedLevel = recorder.minimumAcceptedLevel,
+                          event.level.rawValue > minimumAcceptedLevel.rawValue {
+                        continue // event ignored by the transport itself.
                     }
                     
                     let recorderExecutor = self.executorForQueue(queue, synchronous: self.isSynchronous)

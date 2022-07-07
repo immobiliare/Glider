@@ -95,6 +95,12 @@ public class Log: Equatable {
         get { transporter.filters }
     }
     
+    /// List of transports set.
+    public var transports: [Transport] {
+        get { transporter.transports }
+        set { transporter.transports = newValue }
+    }
+    
     // MARK: - Private Properties
     
     /// The low-level interface for accepting log messages.
@@ -148,6 +154,19 @@ public class Log: Equatable {
                 channels[cLevel.rawValue] = (cLevel > level ? nil :  Channel(for: self, level: cLevel))
             }
         }
+    }
+    
+    /// Get the first transport instance for a given type.
+    ///
+    /// - Parameter type: type of transport to get.
+    /// - Returns: `T`
+    public func transport<T: Transport>(ofType type: T.Type) -> T? {
+        for transport in transports {
+            if let t = transport as? T {
+                return t
+            }
+        }
+        return nil
     }
     
     public static func == (lhs: Log, rhs: Log) -> Bool {

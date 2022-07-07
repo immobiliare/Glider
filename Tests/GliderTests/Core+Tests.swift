@@ -15,6 +15,52 @@ import XCTest
 
 final class CoreTests: XCTestCase {
     
+    /// The following test check if the `minimumAcceptedLevel` set for a transport
+    /// is respected both with a set value and in default cases when `nil`.
+    /// This value is used to limit the messages received by a particular transport
+    /// so you can avoid to write all the messages on it even if logger accepts them.
+    func test_minimumTransportAcceptLevel() throws {
+        var minAcceptedLevel: Glider.Level? = .error
+        var passedCountWhenNil = 0
+        
+        let transport = TestTransport { event in
+            print("[\(event.level.description)] \(event.message)")
+            
+            if let minAcceptedLevel = minAcceptedLevel {
+                XCTAssertTrue(event.level <= minAcceptedLevel)
+            } else {
+                passedCountWhenNil += 1
+            }
+        }
+        
+        let log = Log {
+            $0.subsystem = "com.myawesomeapp"
+            $0.category = "network"
+            $0.level = .info
+            $0.transports = [
+                transport
+            ]
+        }
+        
+        transport.minimumAcceptedLevel = minAcceptedLevel
+
+        log.trace?.write(msg: "[SET] Should not pass the log service")
+        log.info?.write(msg: "[SET] Should pass the log service but not the minimum accepted level for transport")
+        log.error?.write(msg: "[SET] Should pass both")
+        log.critical?.write(msg: "[SET] Should pass both")
+        
+        // ignore
+        transport.minimumAcceptedLevel = nil
+        minAcceptedLevel = nil
+        
+        log.trace?.write(msg: "[NIL] Should not pass the log service")
+        log.info?.write(msg: "[NIL] Should pass both")
+        log.error?.write(msg: "[NIL] Should pass both")
+        log.critical?.write(msg: "[NIL] Should pass both")
+        
+        XCTAssertEqual(passedCountWhenNil, 3)
+    }
+    
     func test_logLabel() throws {
         let log = Log {
             $0.subsystem = "com.myawesomeapp"
