@@ -42,6 +42,10 @@ public class GliderELKTransport: Transport {
     /// Configuration set.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Delegate events.
     public weak var delegate: GliderELKTransportDelegate?
     
@@ -80,6 +84,7 @@ public class GliderELKTransport: Transport {
     ///   - delegate: delegate to monitor events.
     public init(configuration: Configuration, delegate: GliderELKTransportDelegate? = nil) throws {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
         self.httpClient = HTTPClient(
             eventLoopGroupProvider: .shared(configuration.eventLoopGroup),

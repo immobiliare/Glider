@@ -24,6 +24,10 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     /// Configuration used.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
@@ -51,6 +55,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration, delegate: LogstashTransportDelegate? = nil) throws {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
         self.queue = configuration.queue
         
@@ -197,6 +202,10 @@ extension LogstashTransport {
         
         /// Delegate class.
         public weak var delegate: LogstashTransportDelegate?
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         /// Formatters set.
         ///

@@ -27,6 +27,10 @@ public class POSIXStreamTransport: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     // MARK: - Initialization
     
     /// Initialize with configuration.
@@ -34,6 +38,7 @@ public class POSIXStreamTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.queue = configuration.queue
     }
     
@@ -106,6 +111,10 @@ extension POSIXStreamTransport {
         public var formatters: [EventFormatter] = [
             FieldsFormatter.defaultStdStreamFormatter()
         ]
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Initialization
         

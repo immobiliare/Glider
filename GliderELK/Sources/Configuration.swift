@@ -70,6 +70,10 @@ extension GliderELKTransport {
         /// NOTE: If you set both `extra` and `tags`, `tags` may override existing `extra` values when there are conflicts.
         public var logstashMetadataSources: [MetadataOrigin] = [.extra]
         
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
+        
         /// The `JSONEncoder` used to encode the event.
         /// By default you should never need to change it.
         public var jsonEncoder: JSONEncoder = {

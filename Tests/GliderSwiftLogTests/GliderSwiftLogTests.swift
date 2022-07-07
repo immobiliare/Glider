@@ -77,6 +77,10 @@ fileprivate class TestTransport: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     init(onReceiveEvent: @escaping OnReceiveEvent) {
         self.onReceiveEvent = onReceiveEvent
     }

@@ -24,6 +24,10 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     /// Configuration set.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
@@ -55,6 +59,7 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
         self.configuration = configuration
         self.queue = configuration.queue
         self.delegate = delegate
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
 
         self.socket = WebSocketClient(url: configuration.url,
                                       connectAutomatically: false,
@@ -208,6 +213,10 @@ extension WebSocketTransportClient {
         /// What kind of data send.
         /// By default is send to `message` to send formatted message when available.
         public var dataType: WebSocketTransportDataType = .message
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Private Properties
         

@@ -31,6 +31,10 @@ public class AsyncTransport: Transport {
     /// Configuration used.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
@@ -59,6 +63,7 @@ public class AsyncTransport: Transport {
         self.delegate = delegate
         self.configuration = configuration
         self.queue = configuration.queue
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
 
         let fileExists = configuration.bufferStorage.fileExists
         self.db = try SQLiteDb(configuration.bufferStorage,
@@ -385,6 +390,10 @@ extension AsyncTransport {
         
         /// GCD queue for operations.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         public init(_ builder: ((inout Configuration) -> Void)? = nil) {
             builder?(&self)

@@ -25,6 +25,10 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     /// Configuration used to prepare the transport.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Count running operations.
     public var runningOperations: Int {
         networkQueue.operationCount
@@ -46,6 +50,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     public init(delegate: HTTPTransportDelegate, configuration: Configuration) throws {
         self.delegate = delegate
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.asyncTransport = try AsyncTransport(delegate: self,
                                                  configuration: configuration.asyncTransportConfiguration)
                 
@@ -184,6 +189,10 @@ extension HTTPTransport {
         /// GCD Queue.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
+        
         // MARK: - Private Properties
         
         /// Async transport used to configure the underlying service.

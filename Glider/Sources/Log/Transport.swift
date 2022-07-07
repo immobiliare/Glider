@@ -32,6 +32,14 @@ public protocol Transport {
     /// Is the transport enabled. When disabled transport ignore all incoming events to record.
     var isEnabled: Bool { get set }
     
+    /// It allows you to filter severity levels accepted by this transport.
+    /// You can, for example, create a logger which logs in `info` but for one of the transport
+    /// (for example ELK or Sentry) it avoids to send messages with a severity lower than `error`
+    /// in order to clog your remote service).
+    /// When `nil` the message is not filtered and all messages accepted by the parent `Log` instance
+    /// are accepted automatically.
+    var minimumAcceptedLevel: Level? { get set }
+    
     // MARK: - Public Functions
     
     /// Called by the channel to register a new payload to the given recorder.

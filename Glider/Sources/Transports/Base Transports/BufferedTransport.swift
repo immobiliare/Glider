@@ -26,6 +26,10 @@ public class BufferedTransport<BufferItem>: Transport {
     /// Configuration.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
@@ -43,6 +47,7 @@ public class BufferedTransport<BufferItem>: Transport {
     /// - Parameter config: configuration.
     public init(configuration config: Configuration) {
         self.configuration = config
+        self.minimumAcceptedLevel = config.minimumAcceptedLevel
         self.queue = configuration.queue
     }
     
@@ -119,6 +124,10 @@ extension BufferedTransport {
         /// Dispatch queue where the record happens.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
+        
         // MARK: - Initialization
         
         /// Initialize a new `BufferedTransport` with configuration.

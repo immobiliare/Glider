@@ -26,6 +26,10 @@ public class ConsoleTransport: Transport {
     /// Configuration.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     // MARK: - Initialization
     
     /// Initialize with configuration.
@@ -33,6 +37,7 @@ public class ConsoleTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
     }
     
     /// Initialize new console transport.
@@ -71,6 +76,10 @@ extension ConsoleTransport {
 
         /// Formatter used to transform a payload into a string.
         public var formatters = [EventFormatter]()
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Initialization
         

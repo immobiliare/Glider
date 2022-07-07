@@ -29,6 +29,10 @@ public class ThrottledTransport: Transport {
     /// Configuration
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
@@ -66,6 +70,7 @@ public class ThrottledTransport: Transport {
         self.configuration = config
         self.buffer.reserveCapacity(configuration.maxEntries) // Reserve capacity to optimize storage in memory.
         self.delegate = configuration.delegate
+        self.minimumAcceptedLevel = config.minimumAcceptedLevel
         
         self.queue = configuration.queue
         queue!.sync { [weak self] in
@@ -197,6 +202,10 @@ extension ThrottledTransport {
 
         /// Formatters used to format events into messages.
         public var formatters = [EventFormatter]()
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Initialization
         

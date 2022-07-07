@@ -43,6 +43,10 @@ public class FileTransport: Transport {
     /// Configuration settings.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Current file size (expressed in bytes).
     public var size: UInt64 {
         fileHandle?.seekToEndOfFile() ?? 0
@@ -74,6 +78,8 @@ public class FileTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) throws {
         self.configuration = configuration
+        
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         
         let fileHandler = fopen(configuration.fileURL.path, "a")
         guard fileHandler != nil else {
@@ -165,6 +171,10 @@ extension FileTransport {
         /// endpoints.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
+        
         // MARK: - Initialization
         
         /// Initialize a new `FileTransport` service.

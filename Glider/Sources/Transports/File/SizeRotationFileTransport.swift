@@ -36,6 +36,10 @@ public class SizeRotationFileTransport: Transport {
     /// Configuration used.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// URL of the current logging file.
     public var currentFileURL: URL {
         configuration.directoryURL
@@ -64,6 +68,7 @@ public class SizeRotationFileTransport: Transport {
             try fManager.createDirectory(at: configuration.directoryURL, withIntermediateDirectories: false)
         }
         
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.queue = configuration.queue
         self.delegate = configuration.delegate
         
@@ -221,6 +226,10 @@ extension SizeRotationFileTransport {
         
         /// New lines format for each record.
         public var newLines: String = "\n"
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Initialization
         

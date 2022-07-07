@@ -35,6 +35,10 @@ public class StdStreamsTransport: Transport {
     /// Configuration settings.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
@@ -53,6 +57,7 @@ public class StdStreamsTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
                 
         self.stdoutTransport = POSIXStreamTransport.stdOut(formatters: configuration.formatters, queue: configuration.queue)
         self.stderrTransport = POSIXStreamTransport.stdErr(formatters: configuration.formatters, queue: configuration.queue)
@@ -95,6 +100,10 @@ extension StdStreamsTransport {
         public var formatters: [EventFormatter] = [
             FieldsFormatter.defaultStdStreamFormatter()
         ]
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Initialization
         

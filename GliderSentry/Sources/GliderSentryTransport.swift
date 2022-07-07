@@ -27,6 +27,10 @@ open class GliderSentryTransport: Transport {
     /// Configuration.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     // MARK: - Initialization
     
     /// Initialize a new configuration.
@@ -34,6 +38,7 @@ open class GliderSentryTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         
         if let sdkConfiguration = configuration.sdkConfiguration {
             SentrySDK.start(options: sdkConfiguration)

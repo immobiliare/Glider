@@ -25,6 +25,10 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// SQLiteTransport configuration.
     public let configuration: Configuration
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     /// Transport is enabled.
     public var isEnabled: Bool = true
 
@@ -57,6 +61,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) throws {
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         
         let fileExists = configuration.databaseLocation.fileExists
 
@@ -400,6 +405,10 @@ extension SQLiteTransport {
         /// By default is initialized with the default configuration
         /// of the `ThrottledTransport`.
         public var throttledTransport: ThrottledTransport
+        
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
         
         // MARK: - Initialization
         

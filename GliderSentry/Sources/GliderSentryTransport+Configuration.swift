@@ -31,6 +31,10 @@ extension GliderSentryTransport {
         ///  This match is case sensitive.
         public var loggerName: String?
         
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
+        
         /// Generally, the tag accepts any value, but it's intended to refer to your code deployments'
         /// naming convention, such as development, testing, staging, or production.
         /// More on <https://docs.sentry.io/product/sentry-basics/environments/>.

@@ -75,6 +75,11 @@ public class TransportManager {
             
             for recorder in transports {
                 if let queue = recorder.queue {
+                    guard let minimumAcceptedLevel = recorder.minimumAcceptedLevel,
+                          event.level.rawValue <= minimumAcceptedLevel.rawValue else {
+                        continue
+                    }
+                    
                     let recorderExecutor = self.executorForQueue(queue, synchronous: self.isSynchronous)
                     recorderExecutor {
                         recorder.record(event: event)

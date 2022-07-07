@@ -27,6 +27,10 @@ public class OSLogTransport: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
+    /// Minumum accepted level for this transport.
+    /// `nil` means every passing message level is accepted.
+    public var minimumAcceptedLevel: Level? = nil
+    
     // The `OSLog` used to perform logging.
     public let log: OSLog
     
@@ -44,6 +48,7 @@ public class OSLogTransport: Transport {
         }
         
         self.configuration = configuration
+        self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.log = OSLog(subsystem: configuration.subsystem, category: configuration.category)
         self.queue = configuration.queue
     }
@@ -112,6 +117,10 @@ extension OSLogTransport {
         // The GCD queue used by the receiver to record messages.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
+        /// Minumum accepted level for this transport.
+        /// `nil` means every passing message level is accepted.
+        public var minimumAcceptedLevel: Level? = nil
+        
         // MARK: - Initialization
         
         public init(_ builder: ((inout Configuration) -> Void)?) {
