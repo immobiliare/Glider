@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "GliderELK"
-  s.version      = "0.9.11"
+  s.version      = "0.9.12"
   s.summary      = "ELK (Elasticsearch, Logstash, Kibana) Transport for Glider in SwiftNIO"
   s.homepage     = "https://github.com/malcommac/Glider.git"
   s.license      = { :type => "MIT", :file => "LICENSE" }
@@ -16,6 +16,6 @@ Pod::Spec.new do |s|
 
   s.module_name = "GliderELK"
   s.source_files = 'GliderELK/Sources/**/*'
-  s.dependency 'GliderLogger', '~> 0.9.11'
+  s.dependency 'GliderLogger', '~> 0.9.12'
 
 end
