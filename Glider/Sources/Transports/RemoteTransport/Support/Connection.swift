@@ -208,6 +208,10 @@ extension RemoteTransport.Connection {
     public struct RawPacket {
         public let code: UInt8
         public let body: Data
+        
+        public var readableCode: RemoteTransport.PacketCode? {
+            .init(rawValue: code)
+        }
     }
     
     /// Parsing errors.
@@ -222,7 +226,7 @@ extension RemoteTransport.Connection {
         
         /// Identifier of the data.
         let code: UInt8
-        
+
         /// Size of the incoming data.
         let contentSize: UInt32
         
