@@ -15,6 +15,7 @@ import Network
 
 extension RemoteTransport {
     
+    /// Identify a connection server which will receive messages from the transport.
     public final class Connection {
         
         // MARK: - Private Properties
@@ -28,7 +29,7 @@ extension RemoteTransport {
         // MARK: - Public Properties
         
         /// Delegate method
-        public weak var delegate: RemoteTransportConnectionDelegate?
+        internal weak var delegate: RemoteTransportConnectionDelegate?
         
         // MARK: - Initialization
         
@@ -67,16 +68,26 @@ extension RemoteTransport {
             connection.cancel()
         }
         
-        // MARK: - Send Packets
+        // MARK: - Send Data
         
-        public func sendEmptyPacket(withCode code: PacketCode, _ completion: ((NWError?) -> Void)? = nil) {
+        /// Send an empty packet with the following control code.
+        ///
+        /// - Parameters:
+        ///   - code: control code.
+        ///   - completion: completion callback.
+        public func sendPacketCode(_ code: PacketCode, _ completion: ((NWError?) -> Void)? = nil) {
             let packet = RemoteTransport.PacketEmpty(code: code)
             sendPacket(packet, completion)
         }
         
+        /// Send event to the remote side.
+        ///
+        /// - Parameters:
+        ///   - event: event to send.
+        ///   - completion: completion callback.
         public func sendEvent(_ event: Glider.Event, _ completion: ((NWError?) -> Void)? = nil) {
-            let packetEvent = PacketEvent(event: event)
-            sendPacket(packetEvent)
+            let packet = PacketEvent(event: event)
+            sendPacket(packet, completion)
         }
         
         /// Send a packet to the remote connection.
@@ -97,7 +108,7 @@ extension RemoteTransport {
             }
         }
         
-        // MARK: - Sending Events
+        // MARK: - Private Functions
 
         private func receive() {
             connection.receive(minimumIncompleteLength: 1, maximumLength: 65535) { [weak self] data, _, isCompleted, error in
@@ -197,85 +208,47 @@ extension RemoteTransport {
     
 }
 
-extension RemoteTransport.Connection {
-    
-    public enum Event {
-        case packet(RawPacket)
-        case error(Error)
-        case completed
-    }
-    
-    public struct RawPacket {
-        public let code: UInt8
-        public let body: Data
-        
-        public var readableCode: RemoteTransport.PacketCode? {
-            .init(rawValue: code)
-        }
-    }
-    
-    /// Parsing errors.
-    enum PacketParsingError: Error {
-        case notEnoughData
-        case unsupportedContentSize
-    }
-    
-    /// This is the structure of a raw data received or sent to the other side.
-    /// It's structured as `|code|contentSize|body?|``
-    struct PacketHeader {
-        
-        /// Identifier of the data.
-        let code: UInt8
+// MARK: - RemoteTransportConnectionDelegate
 
-        /// Size of the incoming data.
-        let contentSize: UInt32
-        
-        /// Total packet size including the header.
-        var totalPacketLength: Int {
-            Int(PacketHeader.size + contentSize)
-        }
-        
-        /// Starting offset of the content.
-        var contentOffset: Int {
-            Int(PacketHeader.size)
-        }
-
-        static let size: UInt32 = 5
-
-        // MARK: - Initialization
-        
-        init(code: UInt8, contentSize: UInt32) {
-            self.code = code
-            self.contentSize = contentSize
-        }
-
-        init(data: Data) throws {
-            guard data.count >= PacketHeader.size else {
-                throw PacketParsingError.notEnoughData
-            }
-            self.code = data[data.startIndex]
-            self.contentSize = UInt32(data.from(1, size: 4))
-        }
-        
-    }
+/// This is the internal protocol used to exchange messages between the `RemoteTransport`
+/// and their `Connection` instances.
+internal protocol RemoteTransportConnectionDelegate: AnyObject {
     
-}
-
-
-extension RemoteTransport {
+    /// Triggered when a connection did change its state.
+    ///
+    /// - Parameters:
+    ///   - connection: connection destination.
+    ///   - newState: new state.
+    func connection(_ connection: RemoteTransport.Connection,
+                    didChangeState newState: NWConnection.State)
     
-    public enum ConnectionState: CustomStringConvertible {
-        case idle
-        case connecting
-        case connected
-        
-        public var description: String {
-            switch self {
-            case .idle: return "idle"
-            case .connecting: return "connecting"
-            case .connected: return "connected"
-            }
-        }
-    }
+    /// Triggered when a new event has been fired from a connection instance.
+    ///
+    /// - Parameters:
+    ///   - connection: connection destination.
+    ///   - event: event.
+    func connection(_ connection: RemoteTransport.Connection,
+                    didReceiveEvent event: RemoteTransport.RemoteEvent)
+    
+    /// Triggered when a packet send operation di fail to a child connection.
+    ///
+    /// - Parameters:
+    ///   - connection: connection destination.
+    ///   - packet: packet to send.
+    ///   - error: error occurred.
+    func connection(_ connection: RemoteTransport.Connection,
+                    failedToSendPacket packet: RemoteTransportPacket,
+                    error: Error)
+    
+    /// Triggered when a packet encoding operation did fail with error.
+    ///
+    /// - Parameters:
+    ///   - connection: connection destination.
+    ///   - data: data to send.
+    ///   - error: error occurred.
+    func connection(_ connection: RemoteTransport.Connection,
+                    failedToDecodingPacketData data: Data,
+                    error: Error)
+
     
 }

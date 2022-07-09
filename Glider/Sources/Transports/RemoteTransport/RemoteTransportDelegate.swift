@@ -13,40 +13,96 @@
 import Foundation
 import Network
 
+/// You can implement the following method in order to receive important information
+/// about the status and the events of the `RemoteTransport` instance during its lifecycle.
 public protocol RemoteTransportDelegate: AnyObject {
  
     // MARK: - General
     
-    func remoteTransport(_ transport: RemoteTransport, errorOccurred error: GliderError)
+    /// Triggered when an error has occurred.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - error: error.
+    func remoteTransport(_ transport: RemoteTransport,
+                         errorOccurred error: GliderError)
     
-    func remoteTransport(_ transport: RemoteTransport, connectionStateDidChange newState: RemoteTransport.ConnectionState)
+    /// Triggered when cnnection of the transport did change.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - newState: new state.
+    func remoteTransport(_ transport: RemoteTransport,
+                         connectionStateDidChange newState: RemoteTransport.ConnectionState)
     
-    // MARK: - Connection
+    /// Triggered when a new connection is in progress.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - endpoint: endpoint.
+    func remoteTransport(_ transport: RemoteTransport,
+                         willStartConnectionTo endpoint: NWEndpoint)
     
-    func remoteTransport(_ transport: RemoteTransport, willStartConnectionTo endpoint: NWEndpoint)
+    /// Triggered when a connection client state did change.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - connection: connection target.
+    ///   - newState: new state.
+    func remoteTransport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         didChangeState newState: NWConnection.State)
     
-    func remoteTransport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State)
+    /// Triggered when a new connection is establishing with the initial handshake.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - connection: connection.
+    func remoteTransport(_ transport: RemoteTransport,
+                         willHandshakeWithConnection connection: RemoteTransport.Connection)
     
-    func remoteTransport(_ transport: RemoteTransport, willHandshakeWithConnection connection: RemoteTransport.Connection)
+    /// Triggered when a connection did fail with error.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - connection: connection.
+    ///   - error: error.
+    func remoteTransport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         error: GliderError)
     
-    func remoteTransport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, error: GliderError)
+    /// Triggered when an unknown data payload has been received.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - connection: connection.
+    ///   - data: data raw.
+    ///   - error: error.
+    func remoteTrasnport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         invalidMessageReceived data: Data, error: Error)
     
-    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, invalidMessageReceived data: Data, error: Error)
+    /// Triggered when a send method fail with error.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - connection: connection destination.
+    ///   - packet: packet to send.
+    ///   - error: error.
+    func remoteTrasnport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         failedToSendPacket packet: RemoteTransportPacket, error: Error)
     
-    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error)
-    
-    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, failedToDecodingPacketData data: Data, error: Error)
-
-    
-}
-
-public protocol RemoteTransportConnectionDelegate: AnyObject {
-    
-    func connection(_ connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State)
-    func connection(_ connection: RemoteTransport.Connection, didReceiveEvent event: RemoteTransport.Connection.Event)
-
-    func connection(_ connection: RemoteTransport.Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error)
-    func connection(_ connection: RemoteTransport.Connection, failedToDecodingPacketData data: Data, error: Error)
+    /// Triggered when encoding of payload did fails.
+    ///
+    /// - Parameters:
+    ///   - transport: transport.
+    ///   - connection: connection destination.
+    ///   - data: data.
+    ///   - error: error.
+    func remoteTrasnport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         failedToDecodingPacketData data: Data, error: Error)
 
     
 }

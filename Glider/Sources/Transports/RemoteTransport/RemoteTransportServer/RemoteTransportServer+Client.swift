@@ -51,7 +51,7 @@ extension RemoteTransportServer {
             self.info = request.info
             
             pingTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self]_ in
-                self?.connection?.sendEmptyPacket(withCode: .ping)
+                self?.connection?.sendPacketCode(.ping)
             }
         }
         
@@ -77,7 +77,6 @@ extension RemoteTransportServer {
             sendConnectionStatus()
         }
 
-        
         // MARK: - Internal Functions
         
         /// Called when a ping request has been received.
@@ -90,7 +89,7 @@ extension RemoteTransportServer {
             
             if didFailToUpdateStatus {
                 didFailToUpdateStatus = false
-                connection?.sendEmptyPacket(withCode: (isPaused ? .pause : .resume))
+                connection?.sendPacketCode((isPaused ? .pause : .resume))
             }
         }
         
@@ -103,7 +102,7 @@ extension RemoteTransportServer {
             didFailToUpdateStatus = false
             let isPaused = self.isPaused
             
-            connection?.sendEmptyPacket(withCode: (isPaused ? .pause : .resume), { [weak self] error in
+            connection?.sendPacketCode((isPaused ? .pause : .resume), { [weak self] error in
                 if error != nil {
                     self?.didFailToUpdateStatus = true
                 }

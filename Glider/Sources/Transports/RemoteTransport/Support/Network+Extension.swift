@@ -30,7 +30,7 @@ extension NWBrowser.Result {
 
 // Expects big endian.
 
-extension Data {
+internal extension Data {
     
     init(_ value: UInt32) {
         var contentSize = value.bigEndian
@@ -43,7 +43,7 @@ extension Data {
     
 }
 
-extension UInt32 {
+internal extension UInt32 {
     
     init(_ data: Data) {
         self = UInt32(data.parseInt(size: 4))
@@ -51,7 +51,7 @@ extension UInt32 {
     
 }
 
-private extension Data {
+fileprivate extension Data {
     
     func parseInt(size: Int) -> UInt64 {
         precondition(size > 0 && size <= 8)

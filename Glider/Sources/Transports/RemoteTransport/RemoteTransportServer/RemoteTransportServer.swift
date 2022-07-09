@@ -155,7 +155,7 @@ public class RemoteTransportServer {
         }
     }
     
-    private func didReceivePacket(_ rawPacket: RemoteTransport.Connection.RawPacket,
+    private func didReceivePacket(_ rawPacket: RemoteTransport.RawPacket,
                                   fromConnection connection: RemoteTransport.Connection) throws {
         
         let client: Client? = clients.values.first(where: { $0.connection === connection })
@@ -197,7 +197,7 @@ public class RemoteTransportServer {
             delegate?.remoteTransportServer(self, didConnectedClient: client)
         }
         
-        connection.sendEmptyPacket(withCode: .serverHello)
+        connection.sendPacketCode(.serverHello)
     }
     
 }
@@ -217,7 +217,7 @@ extension RemoteTransportServer: RemoteTransportConnectionDelegate {
         }
     }
     
-    public func connection(_ connection: RemoteTransport.Connection, didReceiveEvent event: RemoteTransport.Connection.Event) {
+    public func connection(_ connection: RemoteTransport.Connection, didReceiveEvent event: RemoteTransport.RemoteEvent) {
         switch event {
         case .packet(let packet):
             try? didReceivePacket(packet, fromConnection: connection)

@@ -17,12 +17,19 @@ import AppKit
 
 extension RemoteTransport {
     
+    /// Packet presets code.
+    /// - `clientHello`: the message sent to send important information about the listening server.
+    /// - `serverHello`: a reply to `clientHello`.
+    /// - `pause`: pause client reception.
+    /// - `resume`: resume client reception.
+    /// - `message`: the data send with log.
+    /// - `ping`: ping.
     public enum PacketCode: UInt8 {
-        case clientHello = 0 // PacketClientHello
+        case clientHello = 0
         case serverHello = 1
         case pause = 2
         case resume = 3
-        case message = 4 // Message
+        case message = 4
         case ping = 6
     }
     
@@ -42,7 +49,7 @@ public protocol RemoteTransportPacket {
     ///
     /// - Parameter data: data to decode.
     /// - Returns: `Self?`
-    static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> Self?
+    static func decode(_ packet: RemoteTransport.RawPacket) throws -> Self?
     
 }
 
@@ -72,7 +79,7 @@ extension RemoteTransport {
             try JSONEncoder().encode(event)
         }
         
-        public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> RemoteTransport.PacketEvent? {
+        public static func decode(_ packet: RemoteTransport.RawPacket) throws -> RemoteTransport.PacketEvent? {
             guard let code = PacketCode(rawValue: packet.code),
                   code == .message else {
                 throw GliderError(message: "Unknown code for event")
@@ -97,7 +104,7 @@ extension RemoteTransport {
             Data()
         }
         
-        public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> RemoteTransport.PacketEmpty? {
+        public static func decode(_ packet: RemoteTransport.RawPacket) throws -> RemoteTransport.PacketEmpty? {
             guard let code =  PacketCode(rawValue: packet.code) else {
                 throw GliderError(message: "Unknown code for event")
             }
@@ -204,11 +211,117 @@ extension RemoteTransport {
             try JSONEncoder().encode(info)
         }
         
-        public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws ->  RemoteTransport.PacketHello? {
+        public static func decode(_ packet: RemoteTransport.RawPacket) throws ->  RemoteTransport.PacketHello? {
             let data = try JSONDecoder().decode(Info.self, from: packet.body)
             return .init(info: data)
         }
         
+    }
+    
+}
+
+extension RemoteTransport {
+    
+    // MARK: - RemoteEvent
+
+    /// Identify a remote event received from the side.
+    /// - `packet`: a raw packet has been received.
+    /// - `error`: an error has occurred.
+    /// - `completed`: when closing a connection.
+    public enum RemoteEvent {
+        case packet(RawPacket)
+        case error(Error)
+        case completed
+    }
+    
+    // MARK: - RawPacket
+    
+    /// The raw packet representation.
+    public struct RawPacket {
+        
+        /// Raw control code.
+        public let code: UInt8
+        
+        /// Content of the message.
+        public let body: Data
+        
+        /// Readable control code
+        public var readableCode: RemoteTransport.PacketCode? {
+            .init(rawValue: code)
+        }
+        
+    }
+    
+    // MARK: - PacketParsingError
+    
+    /// Parsing errors.
+    enum PacketParsingError: Error {
+        case notEnoughData
+        case unsupportedContentSize
+    }
+    
+    // MARK: - PacketHeader
+
+    /// This is the structure of a raw data received or sent to the other side.
+    /// It's structured as `|code|contentSize|body?|``
+    struct PacketHeader {
+        
+        /// Identifier of the data.
+        let code: UInt8
+
+        /// Size of the incoming data.
+        let contentSize: UInt32
+        
+        /// Total packet size including the header.
+        var totalPacketLength: Int {
+            Int(PacketHeader.size + contentSize)
+        }
+        
+        /// Starting offset of the content.
+        var contentOffset: Int {
+            Int(PacketHeader.size)
+        }
+
+        static let size: UInt32 = 5
+
+        // MARK: - Initialization
+        
+        init(code: UInt8, contentSize: UInt32) {
+            self.code = code
+            self.contentSize = contentSize
+        }
+
+        init(data: Data) throws {
+            guard data.count >= PacketHeader.size else {
+                throw PacketParsingError.notEnoughData
+            }
+            self.code = data[data.startIndex]
+            self.contentSize = UInt32(data.from(1, size: 4))
+        }
+        
+    }
+    
+    // MARK: - ConnectionState
+    
+    /// State of the connection.
+    /// - `idle`: waiting for connect.
+    /// - `connecting`: connection in progress.
+    /// - `connected`: connected to the endpoint.
+    public enum ConnectionState: CustomStringConvertible {
+        case idle
+        case connecting
+        case connected
+        
+        public var description: String {
+            switch self {
+            case .idle:
+                return "idle"
+            case .connecting:
+                return "connecting"
+            case .connected:
+                return "connected"
+            }
+        }
     }
     
 }

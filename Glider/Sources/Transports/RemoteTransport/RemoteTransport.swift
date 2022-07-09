@@ -86,7 +86,7 @@ public class RemoteTransport: Transport {
     private var timeoutDisconnectItem: DispatchWorkItem?
     private var pingItem: DispatchWorkItem?
 
-    private var buffer: [Event]? = []
+    private var buffer: [Glider.Event]? = []
 
     // MARK: - Initialization
     
@@ -117,7 +117,7 @@ public class RemoteTransport: Transport {
     
     // MARK: - Public Functions
     
-    public func record(event: Event) -> Bool {
+    public func record(event: Glider.Event) -> Bool {
         if isLoggingPaused {
             buffer?.append(event)
         } else {
@@ -336,7 +336,7 @@ public class RemoteTransport: Transport {
     }
     
     private func schedulePeriodicPingToCurrentConnection() {
-        connection?.sendEmptyPacket(withCode: .ping)
+        connection?.sendPacketCode(.ping)
 
         let item = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
@@ -369,7 +369,7 @@ public class RemoteTransport: Transport {
     
     // MARK: - Incoming Messages
     
-    private func didReceivePacket(_ packet: Connection.RawPacket, fromConnection connection: Connection) {
+    private func didReceivePacket(_ packet: RawPacket, fromConnection connection: Connection) {
         let code = PacketCode(rawValue: packet.code)
         switch code {
         case .serverHello:
@@ -422,7 +422,7 @@ extension RemoteTransport: RemoteTransportConnectionDelegate {
     /// - Parameters:
     ///   - connection: connection source.
     ///   - event: event.
-    public func connection(_ connection: Connection, didReceiveEvent event: Connection.Event) {
+    public func connection(_ connection: Connection, didReceiveEvent event: RemoteTransport.RemoteEvent) {
         guard connectionState != .idle else { return }
 
         switch event {
