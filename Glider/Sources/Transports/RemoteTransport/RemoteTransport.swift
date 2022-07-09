@@ -26,12 +26,7 @@ public class RemoteTransport: Transport {
  
     /// Delegate object to receive messages.
     public weak var delegate: RemoteTransportDelegate?
-    
-    /// Used to temporary disable logging to remote destination without
-    /// disconnecting from the endpoint.
-    /// Logs are stored into the internal buffer (not truncated) and send once possible.
-    public var isLoggingPaused: Bool = false
-    
+        
     /// Is logging enabled?
     public var isEnabled: Bool {
         didSet {
@@ -72,6 +67,8 @@ public class RemoteTransport: Transport {
     
     /// Is the connections started.
     private var isStarted = false
+    
+    private var isLoggingPaused = true
     
     /// The browser discovery class.
     private var browser: NWBrowser?
