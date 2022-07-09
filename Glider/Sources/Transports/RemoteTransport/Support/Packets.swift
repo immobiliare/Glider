@@ -43,7 +43,7 @@ public protocol RemoteTransportPacket {
     ///
     /// - Parameter data: data to decode.
     /// - Returns: `Self?`
-    static func decode(_ data: Data) throws -> Self?
+    static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> Self?
     
 }
 
@@ -80,14 +80,13 @@ extension RemoteTransport {
             try JSONEncoder().encode(event)
         }
         
-        public static func decode(_ data: Data) throws -> RemoteTransport.PacketEvent? {
-            let header = try Connection.PacketHeader(data: data)
-            guard let code =  PacketCode(rawValue: header.code),
+        public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> RemoteTransport.PacketEvent? {
+            guard let code =  PacketCode(rawValue: packet.code),
                   code == .logMessage else {
                 throw GliderError(message: "Unknown code for event")
             }
             
-            let event = try JSONDecoder().decode(Glider.Event.self, from: data)
+            let event = try JSONDecoder().decode(Glider.Event.self, from: packet.body)
             return PacketEvent(event: event)
         }
     }
@@ -106,9 +105,8 @@ extension RemoteTransport {
             Data()
         }
         
-        public static func decode(_ data: Data) throws -> RemoteTransport.PacketEmpty? {
-            let header = try Connection.PacketHeader(data: data)
-            guard let code =  PacketCode(rawValue: header.code) else {
+        public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> RemoteTransport.PacketEmpty? {
+            guard let code =  PacketCode(rawValue: packet.code) else {
                 throw GliderError(message: "Unknown code for event")
             }
             
@@ -214,8 +212,8 @@ extension RemoteTransport {
             try JSONEncoder().encode(info)
         }
         
-        public static func decode(_ data: Data) throws -> RemoteTransport.PacketHello? {
-            let data = try JSONDecoder().decode(Info.self, from: data)
+        public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws ->  RemoteTransport.PacketHello? {
+            let data = try JSONDecoder().decode(Info.self, from: packet.body)
             return .init(info: data)
         }
         
