@@ -67,9 +67,9 @@ private extension Data {
 
 // MARK: - NWListener.State
 
-private extension NWListener.State {
+extension NWListener.State {
     
-    var description: String {
+    public var description: String {
         switch self {
         case .setup:
             return ".setup"
