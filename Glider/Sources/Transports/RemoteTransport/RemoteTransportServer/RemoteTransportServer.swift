@@ -158,8 +158,9 @@ public class RemoteTransportServer {
     private func didReceivePacket(_ rawPacket: RemoteTransport.Connection.RawPacket,
                                   fromConnection connection: RemoteTransport.Connection) throws {
         
-        guard let client = clients.values.first(where: { $0.connection === connection }),
-              let code = rawPacket.readableCode else {
+        let client: Client? = clients.values.first(where: { $0.connection === connection })
+        
+        guard let code = rawPacket.readableCode else {
             throw GliderError(message: "Unknown/unsupported code for event received or client not found")
         }
         
@@ -170,12 +171,12 @@ public class RemoteTransportServer {
             }
             
         case .logMessage: // Received a new log message
-            if let packet = try RemoteTransport.PacketEvent.decode(rawPacket) {
+            if let client = client, let packet = try RemoteTransport.PacketEvent.decode(rawPacket) {
                 delegate?.remoteTransportServer(self, client: client, didReceiveEvent: packet.event)
             }
             
         case .ping: // Received ping message.
-            client.didReceivePing()
+            client?.didReceivePing()
          
         default:
             break
