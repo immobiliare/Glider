@@ -43,7 +43,7 @@ public protocol RemoteTransportPacket {
     ///
     /// - Parameter data: data to decode.
     /// - Returns: `Self?`
-    func decode(_ data: Data) throws -> Self?
+    static func decode(_ data: Data) throws -> Self?
     
 }
 
@@ -80,7 +80,7 @@ extension RemoteTransport {
             try JSONEncoder().encode(event)
         }
         
-        public func decode(_ data: Data) throws -> RemoteTransport.PacketEvent? {
+        public static func decode(_ data: Data) throws -> RemoteTransport.PacketEvent? {
             fatalError()
         }
     }
@@ -99,7 +99,7 @@ extension RemoteTransport {
             Data()
         }
         
-        public func decode(_ data: Data) throws -> RemoteTransport.PacketEmpty? {
+        public static func decode(_ data: Data) throws -> RemoteTransport.PacketEmpty? {
             let header = try Connection.PacketHeader(data: data)
             guard let code =  PacketCode(rawValue: header.code) else {
                 throw GliderError(message: "Unknown code for event")
@@ -195,7 +195,7 @@ extension RemoteTransport {
             try JSONEncoder().encode(info)
         }
         
-        public func decode(_ data: Data) throws -> RemoteTransport.PacketHello? {
+        public static func decode(_ data: Data) throws -> RemoteTransport.PacketHello? {
             fatalError()
         }
         

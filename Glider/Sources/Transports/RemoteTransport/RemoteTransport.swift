@@ -178,7 +178,7 @@ public class RemoteTransport: Transport {
     
     /// Connect automatically to a preferred server, if any.
     private func connectAutomaticallyIfNeeded() {
-        if connectedServer != nil {
+        if isStarted && connectedServer != nil {
             return
         }
       /*  guard isStarted, selectedServer.isEmpty == false, connectedServer == nil else {
