@@ -178,16 +178,37 @@ public class RemoteTransport: Transport {
     
     /// Connect automatically to a preferred server, if any.
     private func connectAutomaticallyIfNeeded() {
-        guard isStarted else { return }
-
-        guard !selectedServer.isEmpty,
-                connectedServer == nil,
-              let server = self.servers.first(where: { $0.name == selectedServer }) else {
+        if connectedServer != nil {
             return
         }
+      /*  guard isStarted, selectedServer.isEmpty == false, connectedServer == nil else {
+            return
+        }*/
 
         // Will connect automatically to the server endpoint.
-        connect(to: server)
+        let server = suitableServer()
+        if let server = server {
+            connect(to: server)
+        }
+    }
+    
+    private func suitableServer() -> NWBrowser.Result? {
+        guard servers.isEmpty == false else {
+            return nil
+        }
+        
+        guard let serverName = configuration.autoConnectServerName else {
+            if configuration.autoConnectAvailableServer {
+                return servers.first
+            } else {
+                return nil
+            }
+        }
+        
+        let found = servers.first {
+            $0.name == serverName
+        }
+        return found
     }
     
     /// Connects to the given server and saves the selection persistently. Cancels

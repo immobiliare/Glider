@@ -20,18 +20,26 @@ extension RemoteTransport {
         
         /// The GCD dispatch queue to use.
         /// If not specified a queue is created for you.
-        var queue: DispatchQueue?
+        public var queue: DispatchQueue?
         
         /// Name of the service.
         /// By default is set to `_glider._tcp` but you can configure it.
-        var serviceType: String
+        public var serviceType: String
+        
+        /// If specified the remote transport automatically connects to the
+        /// server with the specified name and the same `serviceType`.
+        public var autoConnectServerName: String?
+        
+        /// If `autoConnectServerName` when this value is `true` the transport
+        /// automatically connects to the first available server of the same type.
+        public var autoConnectAvailableServer = false
         
         /// The delay interval to retry connection after a disconnection.
         /// By default is set to `3` seconds.
-        var autoRetryConnectInterval = 3
+        public var autoRetryConnectInterval = 3
         
         /// Used default encoder. You should never change it unless you are sure.
-        var encoder: JSONEncoder = .init()
+        public var encoder: JSONEncoder = .init()
         
         // MARK: - Initialization
         
