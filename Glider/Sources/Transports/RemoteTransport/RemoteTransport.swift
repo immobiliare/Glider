@@ -128,11 +128,10 @@ public class RemoteTransport: Transport {
     public func record(event: Event) -> Bool {
         if isLoggingPaused {
             buffer?.append(event)
-            return true
         } else {
-            let packet = PacketEvent(event: event)
-            return connection?.send(packet: packet) ?? false
+            connection?.sendEvent(event)
         }
+        return true
     }
     
     // MARK: - Private Functions (Browsing)
@@ -245,6 +244,7 @@ public class RemoteTransport: Transport {
         self.connection = connection
     }
     
+    /// Close active connection.
     private func cancelConnection() {
         connectionState = .idle // The order is important
         connectedServer = nil
@@ -267,6 +267,7 @@ public class RemoteTransport: Transport {
         cancelConnection()
     }
     
+    /// Cancel ping pong handshacke while pausing.
     private func cancelPingPong() {
         timeoutDisconnectItem?.cancel()
         timeoutDisconnectItem = nil
@@ -277,7 +278,8 @@ public class RemoteTransport: Transport {
     
     // MARK: - Private Function (Server Connection)
     
-    private func handshakeWithServer() {
+    /// Perform sever handshake.
+    private func performServerHandshake() {
         guard let connection = connection else {
             return
         }
@@ -285,7 +287,7 @@ public class RemoteTransport: Transport {
         delegate?.remoteTransport(self, willHandshakeWithConnection: connection)
 
         // Say "hello" to the server and share information about the client
-        connection.send(packet: PacketClientHello())
+        connection.sendPacket(PacketClientHello())
 
         // Set timeout and retry in case there was no response from the server
         queue?.asyncAfter(deadline: .now() + .seconds(10)) { [weak self] in
@@ -320,9 +322,72 @@ public class RemoteTransport: Transport {
         connectionRetryItem = item
     }
     
+    private func schedulePeriodicPingToCurrentConnection() {
+        connection?.sendEmptyPacket(withCode: .ping)
+
+        let item = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            guard self.connectionState == .connected else { return }
+            self.schedulePeriodicPingToCurrentConnection()
+        }
+        
+        queue?.asyncAfter(deadline: .now() + .seconds(2), execute: item)
+        pingItem = item
+    }
+    
+    private func scheduleAutomaticDisconnect() {
+        timeoutDisconnectItem?.cancel()
+
+        guard connectionState == .connected else { return }
+
+        let item = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            guard self.connectionState == .connected else { return }
+            
+            let error = GliderError(message: "Haven't received pings from a server in a while, disconnecting")
+            self.delegate?.remoteTransport(self, connection: self.connection!, error: error)
+
+            self.scheduleConnectionRetry()
+        }
+        
+        queue?.asyncAfter(deadline: .now() + .seconds(4), execute: item)
+        timeoutDisconnectItem = item
+    }
+    
+    // MARK: - Incoming Messages
+    
+    private func didReceivePacket(_ packet: Connection.RawPacket, fromConnection connection: Connection) {
+        let code = PacketCode(rawValue: packet.code)
+        switch code {
+        case .serverHello:
+            guard connectionState != .connected else { return }
+            connectionState = .connected
+            schedulePeriodicPingToCurrentConnection()
+            
+        case .pause:
+            isLoggingPaused = true
+            
+        case .resume:
+            isLoggingPaused = false
+            buffer?.forEach {
+                connection.sendEvent($0)
+            }
+            
+        case .ping:
+            scheduleAutomaticDisconnect()
+            
+        default:
+            // Invalid packet code received.
+            break
+        }
+    }
+    
 }
 
+// MARK: - RemoteTransport Connection Manager
+
 extension RemoteTransport: RemoteTransportConnectionDelegate {
+    
     
     public func connection(_ connection: Connection, didChangeState newState: NWConnection.State) {
         guard connectionState != .idle else { return }
@@ -331,7 +396,7 @@ extension RemoteTransport: RemoteTransportConnectionDelegate {
 
         switch newState {
         case .ready:
-            handshakeWithServer()
+            performServerHandshake()
         case .failed:
             scheduleConnectionRetry()
         default:
@@ -339,36 +404,32 @@ extension RemoteTransport: RemoteTransportConnectionDelegate {
         }
     }
     
+    /// A new event from the other connection side has been received.
+    ///
+    /// - Parameters:
+    ///   - connection: connection source.
+    ///   - event: event.
     public func connection(_ connection: Connection, didReceiveEvent event: Connection.Event) {
         guard connectionState != .idle else { return }
 
         switch event {
         case .packet(let packet):
-            do {
-                try didReceiveMessage(packet: packet)
-            } catch {
-                delegate.
-                log(label: "RemoteLogger", "Invalid message from the server: \(error)")
-            }
+            didReceivePacket(packet, fromConnection: connection)
+
         case .error:
             scheduleConnectionRetry()
+            
         case .completed:
             break
         }
-        
     }
     
-    public func connection(_ connection: Connection, failedToProcessingPacket data: Data, error: Error) {
-        
+    public func connection(_ connection: Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error) {
+        delegate?.remoteTrasnport(self, connection: connection, failedToSendPacket: packet, error: error)
     }
     
-    public func connection(_ connection: Connection, failedToEncodingObject: Any, error: Error) {
-        
+    public func connection(_ connection: Connection, failedToDecodingPacketData data: Data, error: Error) {
+        delegate?.remoteTrasnport(self, connection: connection, failedToDecodingPacketData: data, error: error)
     }
-    
-    public func connection(_ connection: Connection, failedToSendData data: Data, error: NWError) {
-        
-    }
-    
     
 }

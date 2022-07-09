@@ -75,6 +75,26 @@ extension RemoteTransport {
         }
     }
     
+    // MARK: - PacketEmpty
+    
+    public struct PacketEmpty: RemoteTransportPacket {
+        
+        public let code: RemoteTransport.PacketCode
+        
+        public init(code: RemoteTransport.PacketCode) {
+            self.code = code
+        }
+        
+        public func encode() throws -> Data {
+            Data()
+        }
+        
+        public func decode(_ data: Data) throws -> RemoteTransport.PacketEmpty {
+            fatalError()
+        }
+        
+    }
+    
     // MARK: - PacketClientHello
     
     public struct PacketClientHello: RemoteTransportPacket {

@@ -1,14 +1,18 @@
 //
-//  File.swift
-//  
+//  Glider
+//  Fast, Lightweight yet powerful logging system for Swift.
 //
-//  Created by Daniele Margutti on 09/07/22.
+//  Created by Daniele Margutti
+//  Email: <hello@danielemargutti.com>
+//  Web: <http://www.danielemargutti.com>
+//
+//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
 import Network
 
-//@available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
 public protocol RemoteTransportDelegate: AnyObject {
  
     // MARK: - General
@@ -29,6 +33,11 @@ public protocol RemoteTransportDelegate: AnyObject {
     
     func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, invalidMessageReceived data: Data, error: Error)
     
+    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error)
+    
+    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, failedToDecodingPacketData data: Data, error: Error)
+
+    
 }
 
 public protocol RemoteTransportConnectionDelegate: AnyObject {
@@ -36,10 +45,8 @@ public protocol RemoteTransportConnectionDelegate: AnyObject {
     func connection(_ connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State)
     func connection(_ connection: RemoteTransport.Connection, didReceiveEvent event: RemoteTransport.Connection.Event)
 
-    func connection(_ connection: RemoteTransport.Connection, failedToProcessingPacket data: Data, error: Error)
+    func connection(_ connection: RemoteTransport.Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error)
+    func connection(_ connection: RemoteTransport.Connection, failedToDecodingPacketData data: Data, error: Error)
 
-    func connection(_ connection: RemoteTransport.Connection, failedToEncodingObject: Any, error: Error)
-
-    func connection(_ connection: RemoteTransport.Connection, failedToSendData data: Data, error: NWError)
     
 }

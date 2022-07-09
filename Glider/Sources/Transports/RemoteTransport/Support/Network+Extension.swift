@@ -18,12 +18,10 @@ import Network
 extension NWBrowser.Result {
     
     internal var name: String? {
-        switch endpoint {
-        case .service(let name, _, _, _):
-            return name
-        default:
+        guard case .service(let name, _, _, _) = endpoint else {
             return nil
         }
+        return name
     }
     
 }

@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Glider",
     platforms: [
-        .iOS(.v13), .macOS(.v12), .watchOS(.v5), .tvOS(.v13)
+        .iOS(.v14), .macOS(.v11), .watchOS(.v7), .tvOS(.v14)
     ],
     products: [
         .library(name: "Glider", targets: ["Glider"]),
