@@ -22,8 +22,7 @@ extension RemoteTransport {
         case serverHello = 1
         case pause = 2
         case resume = 3
-        case logMessage = 4 // Regular message
-        case logNewtworkMessage = 5 // Network message (multipart data)
+        case message = 4 // Message
         case ping = 6
     }
     
@@ -53,14 +52,7 @@ extension RemoteTransport {
     public struct PacketEvent: RemoteTransportPacket {
         
         /// The packet code.
-        public var code: RemoteTransport.PacketCode {
-            switch event.kind {
-            case .log:
-                return .logMessage
-            case .networkLog:
-                return .logNewtworkMessage
-            }
-        }
+        public var code: RemoteTransport.PacketCode = .message
         
         /// Event stored.
         public let event: Glider.Event
@@ -81,8 +73,8 @@ extension RemoteTransport {
         }
         
         public static func decode(_ packet: RemoteTransport.Connection.RawPacket) throws -> RemoteTransport.PacketEvent? {
-            guard let code =  PacketCode(rawValue: packet.code),
-                  code == .logMessage else {
+            guard let code = PacketCode(rawValue: packet.code),
+                  code == .message else {
                 throw GliderError(message: "Unknown code for event")
             }
             

@@ -170,7 +170,7 @@ public class RemoteTransportServer {
                 didReceiveConnectionRequestFromClient(connection, request: packet)
             }
             
-        case .logMessage: // Received a new log message
+        case .message: // Received a new log message
             if let client = client, let packet = try RemoteTransport.PacketEvent.decode(rawPacket) {
                 delegate?.remoteTransportServer(self, client: client, didReceiveEvent: packet.event)
             }
