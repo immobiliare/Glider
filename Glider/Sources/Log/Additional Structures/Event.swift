@@ -13,6 +13,14 @@
 import Foundation
 
 public struct Event: Codable, Equatable {
+    
+    /// Identify the kind of the event.
+    /// - `log`: a standard log event.
+    /// - `network`: a network log event.
+    public enum Kind {
+        case log
+        case networkLog
+    }
 
     // MARK: - Public Properties
     
@@ -22,6 +30,9 @@ public struct Event: Codable, Equatable {
     
     /// Message to record.
     public var message: Message
+    
+    /// The type of the event passed.
+    public private(set) var kind: Kind = .log
     
     /// Object to serialize.
     public var object: SerializableObject?
