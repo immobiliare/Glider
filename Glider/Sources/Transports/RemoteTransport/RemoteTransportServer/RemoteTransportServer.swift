@@ -82,7 +82,7 @@ public class RemoteTransportServer {
         #elseif os(watchOS)
         return WKInterfaceDevice.current()
         #else
-        return Host.current().localizedName
+        return Host.current().localizedName ?? "Unknown"
         #endif
     }
     
