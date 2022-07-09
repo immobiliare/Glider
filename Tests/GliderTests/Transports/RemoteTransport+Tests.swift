@@ -118,9 +118,9 @@ class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
 
 }
 
-// MARK: - RemoteTransportReconnectTests
+// MARK: - RemoteTransportReconnectClientTests
 
-final class RemoteTransportReconnectTests: RemoteTransportTests {
+final class RemoteTransportReconnectClientTests: RemoteTransportTests {
     
     private var connectionClosed = false
     private var remoteTransport: RemoteTransport?
@@ -183,6 +183,82 @@ final class RemoteTransportReconnectTests: RemoteTransportTests {
         }
     }
     
+    
+    override func remoteTransportServer(_ server: RemoteTransportServer,
+                               didChangeState newState: NWListener.State) {
+        print("RemoteTransportServer state did change to \(newState.description)")
+    }
+    
+}
+
+// MARK: - RemoteTransportReconnectServerTests
+
+final class RemoteTransportReconnectServerTests: RemoteTransportTests {
+    
+    private var connectionClosed = false
+    private var remoteTransport: RemoteTransport?
+    private var fulfilled = false
+    
+    override func test_remoteTransport() async throws {
+        
+    }
+
+    func test_remoteTransportAutoServerReconnect() async throws {
+        exp = expectation(description: "Waiting for reconnection test")
+        
+        // Create a remote transport
+        remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
+            $0.autoConnectServerName = self.serverName
+            $0.autoRetryConnectInterval = 2
+        })
+
+        // Create logger.
+        let log = Log {
+            $0.transports = [
+                remoteTransport!
+            ]
+        }
+                
+        // Periodically send messages.
+        messageTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            log.info?.write(msg: "Hello \(self.sentEvents)", extra: ["idx": self.sentEvents])
+            self.sentEvents += 1
+        }
+                
+        // Create a server
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            do {
+                self.server = RemoteTransportServer(serviceName: self.serverName, serviceType: self.serviceType, delegate: self)
+                try self.server?.start()
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
+        
+        // Close connection for server.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            self.connectionClosed = true
+            self.remoteTransport?.stop()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+            self.remoteTransport?.start()
+        }
+        
+        wait(for: [exp!], timeout: 60)
+    }
+    
+    override func remoteTransportServer(_ server: RemoteTransportServer,
+                               client: RemoteTransportServer.Client,
+                               didReceiveEvent event: Event) {
+        print("Event received: \(event.message)")
+        
+        if connectionClosed == true  && fulfilled == false{
+            server.stop()
+            fulfilled = true
+            exp?.fulfill()
+        }
+    }
     
     override func remoteTransportServer(_ server: RemoteTransportServer,
                                didChangeState newState: NWListener.State) {

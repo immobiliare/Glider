@@ -117,6 +117,16 @@ public class RemoteTransport: Transport {
     
     // MARK: - Public Functions
     
+    /// Start browser.
+    public func start() {
+        isEnabled = true
+    }
+    
+    /// Stop browser.
+    public func stop() {
+        isEnabled = false
+    }
+    
     public func record(event: Glider.Event) -> Bool {
         if isLoggingPaused {
             buffer?.append(event)
