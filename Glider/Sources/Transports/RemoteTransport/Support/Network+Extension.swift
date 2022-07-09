@@ -65,3 +65,26 @@ private extension Data {
     
 }
 
+// MARK: - NWListener.State
+
+private extension NWListener.State {
+    
+    var description: String {
+        switch self {
+        case .setup:
+            return ".setup"
+        case .waiting(let error):
+            return ".waiting(error: \(error))"
+        case .ready:
+            return ".ready"
+        case .failed(let error):
+            return ".failed(error: \(error))"
+        case .cancelled:
+            return ".cancelled"
+        @unknown default:
+            return ".unknown"
+        }
+    }
+    
+}
+
