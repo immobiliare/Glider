@@ -189,14 +189,27 @@ extension RemoteTransport {
         public let code: RemoteTransport.PacketCode = .clientHello
         
         /// Data encoded.
-        public let info = Info()
+        public private(set) var info: Info
+        
+        // MARK: - Initialization
+        
+        public init() {
+            self.info = Info()
+        }
+        
+        private init(info: Info) {
+            self.info = info
+        }
+        
+        // MARK: Encoding/Decoding
         
         public func encode() throws -> Data {
             try JSONEncoder().encode(info)
         }
         
         public static func decode(_ data: Data) throws -> RemoteTransport.PacketHello? {
-            fatalError()
+            let data = try JSONDecoder().decode(Info.self, from: data)
+            return .init(info: data)
         }
         
     }
