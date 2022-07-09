@@ -398,7 +398,6 @@ public class RemoteTransport: Transport {
 
 extension RemoteTransport: RemoteTransportConnectionDelegate {
     
-    
     public func connection(_ connection: Connection, didChangeState newState: NWConnection.State) {
         guard connectionState != .idle else { return }
 
@@ -407,7 +406,7 @@ extension RemoteTransport: RemoteTransportConnectionDelegate {
         switch newState {
         case .ready:
             performServerHandshake()
-        case .failed:
+        case .failed, .cancelled:
             scheduleConnectionRetry()
         default:
             break

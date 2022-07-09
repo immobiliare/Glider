@@ -36,8 +36,7 @@ class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
     
     /// The following test validate the auto connection and data receive.
     func test_remoteTransport() async throws {
-        
-        exp = expectation(description: "")
+        exp = expectation(description: "Waiting for receive messages")
         
         // Create a remote transport
         let remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
@@ -124,28 +123,33 @@ class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
 final class RemoteTransportReconnectTests: RemoteTransportTests {
     
     private var connectionClosed = false
+    private var remoteTransport: RemoteTransport?
+    private var fulfilled = false
+    
+    override func test_remoteTransport() async throws {
+        
+    }
 
-    func test_remoteTransportAutoReconnect() async throws {
-        exp = expectation(description: "")
+    func test_remoteTransportAutoClientReconnect() async throws {
+        exp = expectation(description: "Waiting for reconnection test")
         
         // Create a remote transport
-        let remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
+        remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
             $0.autoConnectServerName = self.serverName
+            $0.autoRetryConnectInterval = 2
         })
 
         // Create logger.
         let log = Log {
             $0.transports = [
-                remoteTransport
+                remoteTransport!
             ]
         }
                 
         // Periodically send messages.
         messageTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            if let event = log.info?.write(msg: "Hello \(self.sentEvents)", extra: ["idx": self.sentEvents]) {
-                self.sendEvents.append(event)
-                self.sentEvents += 1
-            }
+            log.info?.write(msg: "Hello \(self.sentEvents)", extra: ["idx": self.sentEvents])
+            self.sentEvents += 1
         }
                 
         // Create a server
@@ -158,12 +162,10 @@ final class RemoteTransportReconnectTests: RemoteTransportTests {
             }
         }
         
+        // Close connection for server.
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.server?.stop()
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-            try? self.server?.start()
+            self.connectionClosed = true
+            self.server?.clientsArray.first?.disconnect()
         }
         
         wait(for: [exp!], timeout: 60)
@@ -174,7 +176,9 @@ final class RemoteTransportReconnectTests: RemoteTransportTests {
                                didReceiveEvent event: Event) {
         print("Event received: \(event.message)")
 
-        if connectionClosed == true {
+        if connectionClosed == true  && fulfilled == false{
+            server.stop()
+            fulfilled = true
             exp?.fulfill()
         }
     }
@@ -182,12 +186,7 @@ final class RemoteTransportReconnectTests: RemoteTransportTests {
     
     override func remoteTransportServer(_ server: RemoteTransportServer,
                                didChangeState newState: NWListener.State) {
-        if newState == .cancelled {
-            print("RemoteTransportServer closed!")
-            connectionClosed = true
-        } else {
-            print("RemoteTransportServer state did change to \(newState.description)")
-        }
+        print("RemoteTransportServer state did change to \(newState.description)")
     }
     
 }

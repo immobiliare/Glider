@@ -19,6 +19,8 @@ extension RemoteTransportServer {
         
         // MARK: - Public Properties
         
+        public internal(set) var clientId: ClientId?
+        
         /// Client info.
         public private(set) var info: RemoteTransport.PacketHello.Info
         
@@ -60,6 +62,11 @@ extension RemoteTransportServer {
         }
         
         // MARK: - Public Functions
+        
+        public func disconnect() {
+            isConnected = false
+            connection?.cancel()
+        }
         
         /// Pause client.
         public func pause() {

@@ -47,6 +47,11 @@ public class RemoteTransportServer {
     /// Connected clients.
     public private(set) var clients = [ClientId: Client]()
     
+    /// All clients.
+    public var clientsArray: [Client] {
+        Array(clients.values)
+    }
+    
     // MARK: - Private Properties
     
     /// Network listener.
@@ -78,6 +83,7 @@ public class RemoteTransportServer {
     }
     
     /// Get the current device name.
+    /// 
     /// - Returns: `String`
     public static func currentMachineName() -> String {
         #if os(iOS) || os(tvOS)
@@ -202,11 +208,13 @@ public class RemoteTransportServer {
         let clientId = ClientId(request: request)
         
         if let client = clients[clientId] {
+            client.clientId = clientId
             client.connection = connection
             client.didConnectExistingClient()
             delegate?.remoteTransportServer(self, didConnectedClient: client)
         } else {
             let client = Client(request: request)
+            client.clientId = clientId
             client.connection = connection
             clients[clientId] = client
             client.resume()
@@ -227,6 +235,9 @@ extension RemoteTransportServer: RemoteTransportConnectionDelegate {
 
         switch newState {
         case .failed, .cancelled: // remove connection
+            if let clientId = clients.values.first(where: { $0.connection === connection })?.clientId {
+                clients.removeValue(forKey: clientId)
+            }
             connections[ConnectionId(connection)] = nil
         default:
             break
@@ -245,11 +256,11 @@ extension RemoteTransportServer: RemoteTransportConnectionDelegate {
     }
     
     public func connection(_ connection: RemoteTransport.Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error) {
-        print("error")
+        
     }
     
     public func connection(_ connection: RemoteTransport.Connection, failedToDecodingPacketData data: Data, error: Error) {
-        print("data")
+        
     }
     
 }
