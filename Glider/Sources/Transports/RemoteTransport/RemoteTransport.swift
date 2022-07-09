@@ -104,9 +104,9 @@ public class RemoteTransport: Transport {
 
         // The buffer is used to cover the time between the app launch and the
         // iniitial (automatic) connection to the server.
-        queue?.asyncAfter(deadline: .now() + .seconds(2)) { [weak self] in
+        /*queue?.asyncAfter(deadline: .now() + .seconds(2)) { [weak self] in
             self?.buffer = nil
-        }
+        }*/
     }
     
     public convenience init(serviceType: String = "_glider._tcp",

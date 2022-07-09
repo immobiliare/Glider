@@ -81,7 +81,14 @@ extension RemoteTransport {
         }
         
         public static func decode(_ data: Data) throws -> RemoteTransport.PacketEvent? {
-            fatalError()
+            let header = try Connection.PacketHeader(data: data)
+            guard let code =  PacketCode(rawValue: header.code),
+                  code == .logMessage else {
+                throw GliderError(message: "Unknown code for event")
+            }
+            
+            let event = try JSONDecoder().decode(Glider.Event.self, from: data)
+            return PacketEvent(event: event)
         }
     }
     
