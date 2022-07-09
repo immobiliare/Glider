@@ -112,15 +112,10 @@ public class RemoteTransport: Transport {
         }
     }
     
-    /// Initialize a new remote transport.
-    ///
-    /// - Parameters:
-    ///   - delegate: delegate for events.
-    ///   - builder: builder to configure extra options.
-    public convenience init(host: String, port: Int,
-                delegate: RemoteTransportDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
-        try self.init(configuration: Configuration(builder), delegate: delegate)
+    public convenience init(serviceType: String = "_glider._tcp",
+                            delegate: RemoteTransportDelegate? = nil,
+                            _ builder: ((inout Configuration) -> Void)? = nil) throws {
+        try self.init(configuration: Configuration(serviceType: serviceType, builder), delegate: delegate)
     }
     
     // MARK: - Public Functions
@@ -287,7 +282,7 @@ public class RemoteTransport: Transport {
         delegate?.remoteTransport(self, willHandshakeWithConnection: connection)
 
         // Say "hello" to the server and share information about the client
-        connection.sendPacket(PacketClientHello())
+        connection.sendPacket(PacketHello())
 
         // Set timeout and retry in case there was no response from the server
         queue?.asyncAfter(deadline: .now() + .seconds(10)) { [weak self] in

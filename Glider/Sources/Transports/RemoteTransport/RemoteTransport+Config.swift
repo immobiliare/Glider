@@ -24,18 +24,22 @@ extension RemoteTransport {
         
         /// Name of the service.
         /// By default is set to `_glider._tcp` but you can configure it.
-        var serviceType = "_glider._tcp"
+        var serviceType: String
         
         /// The delay interval to retry connection after a disconnection.
         /// By default is set to `3` seconds.
         var autoRetryConnectInterval = 3
+        
+        /// Used default encoder. You should never change it unless you are sure.
+        var encoder: JSONEncoder = .init()
         
         // MARK: - Initialization
         
         /// Initialize a new remote configuration object via builder function.
         ///
         /// - Parameter builder: builder callback.
-        public init(_ builder: ((inout Configuration) -> Void)?) {
+        public init(serviceType: String = "_glider._tcp", _ builder: ((inout Configuration) -> Void)?) {
+            self.serviceType = serviceType
             self.queue = DispatchQueue(label: "com.glider.remote-logger")
             builder?(&self)
         }

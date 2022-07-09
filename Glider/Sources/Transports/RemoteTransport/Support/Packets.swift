@@ -29,12 +29,22 @@ extension RemoteTransport {
     
 }
 
+// MARK: - RemoteTransportPacket
+
 public protocol RemoteTransportPacket {
     var code: RemoteTransport.PacketCode { get }
     
+    /// Encode the packet content.
+    ///
+    /// - Returns: `Data`
     func encode() throws -> Data
     
-    func decode(_ data: Data) throws -> Self
+    /// Decode packet content.
+    ///
+    /// - Parameter data: data to decode.
+    /// - Returns: `Self?`
+    func decode(_ data: Data) throws -> Self?
+    
 }
 
 extension RemoteTransport {
@@ -67,10 +77,10 @@ extension RemoteTransport {
         // MARK: - Public Function
         
         public func encode() throws -> Data {
-            fatalError()
+            try JSONEncoder().encode(event)
         }
         
-        public func decode(_ data: Data) throws -> RemoteTransport.PacketEvent {
+        public func decode(_ data: Data) throws -> RemoteTransport.PacketEvent? {
             fatalError()
         }
     }
@@ -89,15 +99,20 @@ extension RemoteTransport {
             Data()
         }
         
-        public func decode(_ data: Data) throws -> RemoteTransport.PacketEmpty {
-            fatalError()
+        public func decode(_ data: Data) throws -> RemoteTransport.PacketEmpty? {
+            let header = try Connection.PacketHeader(data: data)
+            guard let code =  PacketCode(rawValue: header.code) else {
+                throw GliderError(message: "Unknown code for event")
+            }
+            
+            return .init(code: code)
         }
         
     }
     
     // MARK: - PacketClientHello
     
-    public struct PacketClientHello: RemoteTransportPacket {
+    public struct PacketHello: RemoteTransportPacket {
         
         public struct DeviceInfo: Codable {
             public let name: String
@@ -123,50 +138,64 @@ extension RemoteTransport {
             }
         }
         
+        public struct Info: Codable {
+            /// Device unique identifier.
+            public let deviceId: UUID?
+            
+            /// Device informations.
+            public let deviceInfo: DeviceInfo
+            
+            /// Application informations.
+            public let appInfo: AppInfo
+            
+            public init() {
+                self.appInfo = .current
+                #if os(iOS) || os(tvOS)
+                let device = UIDevice.current
+                self.deviceId = device.identifierForVendor
+                self.deviceInfo = DeviceInfo(
+                    name: device.name,
+                    model: device.model,
+                    localizedModel: device.localizedModel,
+                    systemName: device.systemName,
+                    systemVersion: device.systemVersion
+                )
+                #elseif os(watchOS)
+                let device = WKInterfaceDevice.current()
+                self.deviceId = device.identifierForVendor
+                self.deviceInfo = DeviceInfo(
+                    name: device.name,
+                    model: device.model,
+                    localizedModel: device.localizedModel,
+                    systemName: device.systemName,
+                    systemVersion: device.systemVersion
+                )
+                #else
+                self.deviceId = nil
+                self.deviceInfo = DeviceInfo(
+                    name: Host.current().name ?? "unknown",
+                    model: "unknown",
+                    localizedModel: "unknown",
+                    systemName: "macOS",
+                    systemVersion: ProcessInfo().operatingSystemVersionString
+                )
+                #endif
+            }
+        }
+        
+        // MARK: - Public Properties
+        
+        /// Code of the message.
         public let code: RemoteTransport.PacketCode = .clientHello
         
-        public let deviceId: UUID?
-        public let deviceInfo: DeviceInfo
-        public let appInfo: AppInfo = .current
-        
-        public init() {
-            #if os(iOS) || os(tvOS)
-            let device = UIDevice.current
-            self.deviceId = device.identifierForVendor
-            self.deviceInfo = DeviceInfo(
-                name: device.name,
-                model: device.model,
-                localizedModel: device.localizedModel,
-                systemName: device.systemName,
-                systemVersion: device.systemVersion
-            )
-            #elseif os(watchOS)
-            let device = WKInterfaceDevice.current()
-            self.deviceId = device.identifierForVendor
-            self.deviceInfo = DeviceInfo(
-                name: device.name,
-                model: device.model,
-                localizedModel: device.localizedModel,
-                systemName: device.systemName,
-                systemVersion: device.systemVersion
-            )
-            #else
-            self.deviceId = nil
-            self.deviceInfo = DeviceInfo(
-                name: Host.current().name ?? "unknown",
-                model: "unknown",
-                localizedModel: "unknown",
-                systemName: "macOS",
-                systemVersion: ProcessInfo().operatingSystemVersionString
-            )
-            #endif
-        }
+        /// Data encoded.
+        public let info = Info()
         
         public func encode() throws -> Data {
-            fatalError()
+            try JSONEncoder().encode(info)
         }
         
-        public func decode(_ data: Data) throws -> RemoteTransport.PacketClientHello {
+        public func decode(_ data: Data) throws -> RemoteTransport.PacketHello? {
             fatalError()
         }
         
