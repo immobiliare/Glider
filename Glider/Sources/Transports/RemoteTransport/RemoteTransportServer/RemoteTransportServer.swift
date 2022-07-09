@@ -66,12 +66,15 @@ public class RemoteTransportServer {
     ///   - serviceName: service name; when not set the current host machine name is used.
     ///   - serviceType: service type.
     ///   - port: port of listening; when not specified `any` is used.
+    ///   - delegate: events delegate.
     public init(serviceName: String = RemoteTransportServer.currentMachineName(),
                 serviceType: String = RemoteTransport.Configuration.defaultServiceType,
-                port: UInt16? = nil) {
+                port: UInt16? = nil,
+                delegate: RemoteTransportServerDelegate? = nil) {
         self.port = (port != nil ? .init(rawValue: port!)! : .any)
         self.serviceName = serviceName
         self.serviceType = serviceType
+        self.delegate = delegate
     }
     
     /// Get the current device name.
