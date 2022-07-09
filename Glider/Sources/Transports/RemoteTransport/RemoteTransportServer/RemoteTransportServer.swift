@@ -116,6 +116,18 @@ public class RemoteTransportServer {
         self.listener = listener
     }
     
+    /// Stop server.
+    public func stop() {
+        guard isStarted else { return }
+        
+        isStarted = false
+        
+        self.listener?.cancel()
+        self.listener = nil
+        self.clients.removeAll()
+        self.connections.removeAll()
+    }
+    
     // MARK: - Private Functions
     
     /// Called when the state of the server did change.

@@ -16,30 +16,31 @@ import Network
 import XCTest
 @testable import Glider
 
-final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, RemoteTransportDelegate {
+class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
     
     // MARK: - Private Properties
     
-    private var server: RemoteTransportServer?
-    private let serviceType = "_mylogger._tcp"
-    private let serverName = "MyViewer"
+    open var server: RemoteTransportServer?
+    public let serviceType = "_mylogger._tcp"
+    public let serverName = "MyViewer"
     
-    private var messageTimer: Timer?
-    private var exp: XCTestExpectation?
-    private var sendEvents = [Glider.Event]()
-    private var receivedEvents = [Glider.Event]()
+    open var messageTimer: Timer?
+    open var exp: XCTestExpectation?
+    open var sendEvents = [Glider.Event]()
+    open var receivedEvents = [Glider.Event]()
 
-    private var countEvents = 10
-    private var sentEvents = 0
+    open var countEvents = 10
+    open var sentEvents = 0
 
     // MARK: - Tests
     
+    /// The following test validate the auto connection and data receive.
     func test_remoteTransport() async throws {
         
         exp = expectation(description: "")
         
         // Create a remote transport
-        let remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: self, {
+        let remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
             $0.autoConnectServerName = self.serverName
         })
 
@@ -73,57 +74,6 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
         }
         
         wait(for: [exp!], timeout: 60)
-    }
-    
-    // MARK: - RemoteTransportDelegate
-    
-    func remoteTransport(_ transport: RemoteTransport, errorOccurred error: GliderError) {
-        
-    }
-    
-    func remoteTransport(_ transport: RemoteTransport,
-                         connectionStateDidChange newState: RemoteTransport.ConnectionState) {
-        
-    }
-    
-    func remoteTransport(_ transport: RemoteTransport,
-                         willStartConnectionTo endpoint: NWEndpoint) {
-        
-    }
-    
-    func remoteTransport(_ transport: RemoteTransport,
-                         connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State) {
-        
-    }
-    
-    func remoteTransport(_ transport: RemoteTransport,
-                         willHandshakeWithConnection connection: RemoteTransport.Connection) {
-        
-    }
-    
-    func remoteTransport(_ transport: RemoteTransport,
-                         connection: RemoteTransport.Connection,
-                         error: GliderError) {
-        
-    }
-    
-    func remoteTrasnport(_ transport: RemoteTransport,
-                         connection: RemoteTransport.Connection,
-                         invalidMessageReceived data: Data,
-                         error: Error) {
-        
-    }
-    
-    func remoteTrasnport(_ transport: RemoteTransport,
-                         connection: RemoteTransport.Connection,
-                         failedToSendPacket packet: RemoteTransportPacket, error: Error) {
-        
-    }
-    
-    func remoteTrasnport(_ transport: RemoteTransport,
-                         connection: RemoteTransport.Connection,
-                         failedToDecodingPacketData data: Data, error: Error) {
-        
     }
     
     // MARK: - RemoteTransportServerDelegate
@@ -167,4 +117,77 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
         print("RemoteTransportServer client connected!")
     }
 
+}
+
+// MARK: - RemoteTransportReconnectTests
+
+final class RemoteTransportReconnectTests: RemoteTransportTests {
+    
+    private var connectionClosed = false
+
+    func test_remoteTransportAutoReconnect() async throws {
+        exp = expectation(description: "")
+        
+        // Create a remote transport
+        let remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
+            $0.autoConnectServerName = self.serverName
+        })
+
+        // Create logger.
+        let log = Log {
+            $0.transports = [
+                remoteTransport
+            ]
+        }
+                
+        // Periodically send messages.
+        messageTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            if let event = log.info?.write(msg: "Hello \(self.sentEvents)", extra: ["idx": self.sentEvents]) {
+                self.sendEvents.append(event)
+                self.sentEvents += 1
+            }
+        }
+                
+        // Create a server
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            do {
+                self.server = RemoteTransportServer(serviceName: self.serverName, serviceType: self.serviceType, delegate: self)
+                try self.server?.start()
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            self.server?.stop()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+            try? self.server?.start()
+        }
+        
+        wait(for: [exp!], timeout: 60)
+    }
+    
+    override func remoteTransportServer(_ server: RemoteTransportServer,
+                               client: RemoteTransportServer.Client,
+                               didReceiveEvent event: Event) {
+        print("Event received: \(event.message)")
+
+        if connectionClosed == true {
+            exp?.fulfill()
+        }
+    }
+    
+    
+    override func remoteTransportServer(_ server: RemoteTransportServer,
+                               didChangeState newState: NWListener.State) {
+        if newState == .cancelled {
+            print("RemoteTransportServer closed!")
+            connectionClosed = true
+        } else {
+            print("RemoteTransportServer state did change to \(newState.description)")
+        }
+    }
+    
 }
