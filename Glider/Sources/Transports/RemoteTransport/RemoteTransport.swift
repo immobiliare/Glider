@@ -109,7 +109,7 @@ public class RemoteTransport: Transport {
         }*/
     }
     
-    public convenience init(serviceType: String = "_glider._tcp",
+    public convenience init(serviceType: String = Configuration.defaultServiceType,
                             delegate: RemoteTransportDelegate? = nil,
                             _ builder: ((inout Configuration) -> Void)? = nil) throws {
         try self.init(configuration: Configuration(serviceType: serviceType, builder), delegate: delegate)

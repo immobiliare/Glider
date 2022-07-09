@@ -16,6 +16,8 @@ extension RemoteTransport {
     
     public struct Configuration {
         
+        public static let defaultServiceType = "_glider._tcp"
+        
         // MARK: - Public Properties
         
         /// The GCD dispatch queue to use.
