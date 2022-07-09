@@ -181,9 +181,6 @@ public class RemoteTransport: Transport {
         if isStarted && connectedServer != nil {
             return
         }
-      /*  guard isStarted, selectedServer.isEmpty == false, connectedServer == nil else {
-            return
-        }*/
 
         // Will connect automatically to the server endpoint.
         let server = suitableServer()

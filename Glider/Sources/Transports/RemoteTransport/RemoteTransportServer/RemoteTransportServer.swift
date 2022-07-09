@@ -197,6 +197,7 @@ public class RemoteTransportServer {
             let client = Client(request: request)
             client.connection = connection
             clients[clientId] = client
+            client.resume()
             delegate?.remoteTransportServer(self, didConnectedClient: client)
         }
         

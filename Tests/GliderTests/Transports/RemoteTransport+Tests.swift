@@ -26,7 +26,12 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
     
     private var messageTimer: Timer?
     private var exp: XCTestExpectation?
-    
+    private var sendEvents = [Glider.Event]()
+    private var receivedEvents = [Glider.Event]()
+
+    private var countEvents = 10
+    private var sentEvents = 0
+
     // MARK: - Tests
     
     func test_remoteTransport() async throws {
@@ -47,7 +52,14 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
                 
         // Periodically send messages.
         messageTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            log.info?.write(msg: "Ciao")
+            if let event = log.info?.write(msg: "Hello \(self.sentEvents)", extra: ["idx": self.sentEvents]) {
+                self.sendEvents.append(event)
+                self.sentEvents += 1
+                
+                if self.sentEvents == self.countEvents {
+                    self.messageTimer?.invalidate()
+                }
+            }
         }
                 
         // Create a server
@@ -61,7 +73,6 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
         }
         
         wait(for: [exp!], timeout: 60)
-
     }
     
     // MARK: - RemoteTransportDelegate
@@ -70,35 +81,48 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
         
     }
     
-    func remoteTransport(_ transport: RemoteTransport, connectionStateDidChange newState: RemoteTransport.ConnectionState) {
+    func remoteTransport(_ transport: RemoteTransport,
+                         connectionStateDidChange newState: RemoteTransport.ConnectionState) {
         
     }
     
-    func remoteTransport(_ transport: RemoteTransport, willStartConnectionTo endpoint: NWEndpoint) {
+    func remoteTransport(_ transport: RemoteTransport,
+                         willStartConnectionTo endpoint: NWEndpoint) {
         
     }
     
-    func remoteTransport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State) {
+    func remoteTransport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State) {
         
     }
     
-    func remoteTransport(_ transport: RemoteTransport, willHandshakeWithConnection connection: RemoteTransport.Connection) {
+    func remoteTransport(_ transport: RemoteTransport,
+                         willHandshakeWithConnection connection: RemoteTransport.Connection) {
         
     }
     
-    func remoteTransport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, error: GliderError) {
+    func remoteTransport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         error: GliderError) {
         
     }
     
-    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, invalidMessageReceived data: Data, error: Error) {
+    func remoteTrasnport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         invalidMessageReceived data: Data,
+                         error: Error) {
         
     }
     
-    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, failedToSendPacket packet: RemoteTransportPacket, error: Error) {
+    func remoteTrasnport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         failedToSendPacket packet: RemoteTransportPacket, error: Error) {
         
     }
     
-    func remoteTrasnport(_ transport: RemoteTransport, connection: RemoteTransport.Connection, failedToDecodingPacketData data: Data, error: Error) {
+    func remoteTrasnport(_ transport: RemoteTransport,
+                         connection: RemoteTransport.Connection,
+                         failedToDecodingPacketData data: Data, error: Error) {
         
     }
     
@@ -129,6 +153,13 @@ final class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate, Rem
                                client: RemoteTransportServer.Client,
                                didReceiveEvent event: Event) {
         print("Event received: \(event.message)")
+        
+        receivedEvents.append(event)
+        
+        if receivedEvents.count == countEvents {
+            XCTAssertEqual(receivedEvents, sendEvents)
+            exp?.fulfill()
+        }
     }
     
     func remoteTransportServer(_ server: RemoteTransportServer,
