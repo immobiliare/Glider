@@ -30,7 +30,7 @@ final class TableFormattersTest: XCTestCase {
                 .subsystem(),
                 .level(style: .simple),
                 .callSite(),
-                .extra(keys: ["MagicNumber", "AdSearch"]),
+                .extra(keys: ["AdSearch", "MagicNumber"]),
                 .customValue({ event in
                     return ("MyKey", event?.id ?? "-")
             })
