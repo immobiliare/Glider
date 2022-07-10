@@ -12,7 +12,8 @@ let package = Package(
         .library(name: "Glider", targets: ["Glider"]),
         .library(name: "GliderSwiftLog", targets: ["GliderSwiftLog"]),
         .library(name: "GliderELK", targets: ["GliderELK"]),
-        .library(name: "GliderSentry", targets: ["GliderSentry"])
+        .library(name: "GliderSentry", targets: ["GliderSentry"]),
+        .library(name: "GliderNetworkLogger", targets: ["Glider"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
@@ -49,6 +50,13 @@ let package = Package(
             ],
             path:"GliderSentry/Sources"
         ),
+        .target(
+            name: "GliderNetworkLogger",
+            dependencies: [
+                "Glider"
+            ],
+            path:"GliderNetworkLogger/Sources"
+        ),
 
         // TESTS
         .testTarget(
@@ -81,6 +89,14 @@ let package = Package(
                 "GliderSentry"
             ],
             path: "Tests/GliderSentryTests"
+        ),
+        .testTarget(
+            name: "GliderNetworkLoggerTests",
+            dependencies: [
+                "Glider",
+                "GliderNetworkLogger"
+            ],
+            path: "Tests/GliderNetworkLoggerTests"
         )
     ]
 )

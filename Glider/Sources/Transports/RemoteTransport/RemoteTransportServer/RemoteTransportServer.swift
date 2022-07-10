@@ -196,7 +196,7 @@ public class RemoteTransportServer {
                 delegate?.remoteTransportServer(self, client: client, didReceiveEvent: packet.event)
             }
             
-        case .ping: // Received ping message.
+        case .ping: // Received ping message
             client?.didReceivePing()
          
         default:
