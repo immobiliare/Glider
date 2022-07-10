@@ -128,13 +128,15 @@ extension RemoteTransport {
         
         public struct AppInfo: Codable {
             public static let current = AppInfo()
-            
+
+            public let sdkVersion: String
             public let bundleIdentifier: String?
             public let name: String?
             public let version: String?
             public let build: String?
             
             private init() {
+                self.sdkVersion = GliderSDK.version
                 self.bundleIdentifier = Bundle.main.bundleIdentifier
                 self.name = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String
                 self.version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
