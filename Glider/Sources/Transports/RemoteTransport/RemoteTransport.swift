@@ -17,6 +17,19 @@ import Network
 /// It's used when you want to debug sessions to the GliderViewer client or similar.
 /// Usually you should use a single instance of this transport for all of yours log.
 /// In this case use the `RemoteTransport.shared` shortcut instead of creating a new one.
+///
+/// IMPORTANT:
+/// Be sure to set the following keys in your app's `Info.plist`:
+///
+/// ```xml
+/// <key>NSLocalNetworkUsageDescription</key>
+///    <string>Network usage required for debugging activities</string>
+/// <key>NSBonjourServices</key>
+/// <array>
+///    <string>_pulse._tcp</string>
+/// </array>
+/// ```
+/// 
 public class RemoteTransport: Transport {
     
     // MARK: - Public Properties

@@ -13,7 +13,7 @@ let package = Package(
         .library(name: "GliderSwiftLog", targets: ["GliderSwiftLog"]),
         .library(name: "GliderELK", targets: ["GliderELK"]),
         .library(name: "GliderSentry", targets: ["GliderSentry"]),
-        .library(name: "GliderNetworkLogger", targets: ["Glider"])
+        .library(name: "GliderNetworkLogger", targets: ["GliderNetworkLogger"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
