@@ -54,9 +54,7 @@ open class GliderSentryTransport: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Glider.Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Glider.Event) -> Bool {        
         let message = configuration.formatters.format(event: event)
         let sentryEvent = event.toSentryEvent(withMessage: message)
         

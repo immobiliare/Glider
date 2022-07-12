@@ -203,9 +203,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
-        return throttledTransport?.record(event: event) ?? false
+        throttledTransport?.record(event: event) ?? false
     }
     
     // MARK: - Private Functions

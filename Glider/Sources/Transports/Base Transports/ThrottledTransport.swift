@@ -101,9 +101,7 @@ public class ThrottledTransport: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         queue!.async { [weak self] in
             guard let self = self else { return }
             

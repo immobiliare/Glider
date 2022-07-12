@@ -89,9 +89,7 @@ public class SizeRotationFileTransport: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         do {
             try rotateFileIfNeeded()
             return currentFileTransport?.record(event: event) ?? false

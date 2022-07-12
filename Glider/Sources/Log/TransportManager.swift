@@ -75,7 +75,7 @@ public class TransportManager {
             for recorder in transports {
                 if let queue = recorder.queue {
                     if let minimumAcceptedLevel = recorder.minimumAcceptedLevel,
-                          event.level.rawValue > minimumAcceptedLevel.rawValue {
+                       event.level.rawValue > minimumAcceptedLevel.rawValue, recorder.isEnabled {
                         continue // event ignored by the transport itself.
                     }
                     

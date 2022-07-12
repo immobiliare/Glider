@@ -128,9 +128,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         guard server?.isStarted ?? false else {
             return false
         }

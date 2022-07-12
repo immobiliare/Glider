@@ -114,9 +114,7 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         do {
             switch configuration.dataType {
             case .message:

@@ -63,9 +63,7 @@ public class BufferedTransport<BufferItem>: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         guard let message = configuration.formatters.format(event: event) else {
             return false
         }

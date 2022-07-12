@@ -170,9 +170,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     }
     
     public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
-        return asyncTransport?.record(event: event) ?? false
+        asyncTransport?.record(event: event) ?? false
     }
     
 }

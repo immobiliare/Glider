@@ -68,9 +68,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
-        return asyncTransport?.record(event: event) ?? false // forward to async transport
+        asyncTransport?.record(event: event) ?? false // forward to async transport
     }
     
     // MARK: - AsyncTransportDelegate

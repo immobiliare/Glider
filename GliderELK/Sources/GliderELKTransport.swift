@@ -112,9 +112,7 @@ public class GliderELKTransport: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         guard let data = event.encodeToLogstashFormat(configuration.jsonEncoder, configuration: configuration) else {
             let error = GliderError(message: "Failed to encode event in data", info: ["id": event.id])
             delegate?.elkTransport(self, didFailSendingEvent: event, error: error)

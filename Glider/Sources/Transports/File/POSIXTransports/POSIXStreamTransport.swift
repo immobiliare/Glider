@@ -80,9 +80,7 @@ public class POSIXStreamTransport: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {
-        guard isEnabled else { return false }
-        
+    public func record(event: Event) -> Bool {        
         guard let message = configuration.formatters.format(event: event)?.asString(),
               message.isEmpty == false else {
             return false
