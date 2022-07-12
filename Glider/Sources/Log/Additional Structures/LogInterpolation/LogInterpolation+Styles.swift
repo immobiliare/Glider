@@ -34,7 +34,7 @@ public enum LogIntegerFormatting {
     case formatter(NumberFormatter)
     
     /// Default formatting.
-    public static let `default`: LogIntegerFormatting = .decimal(minDigits: 0, maxDigits: 0)
+    public static let `default`: LogIntegerFormatting = .decimal(minDigits: nil, maxDigits: nil)
 }
 
 // MARK: - Double

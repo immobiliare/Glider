@@ -61,8 +61,10 @@ extension FieldsFormatter {
         /// - Parameters:
         ///   - field: field identifier.
         ///   - configure: configuration callback.
-        internal init(_ field: FieldIdentifier, _ configure: Configure?) {
+        internal init(_ field: FieldIdentifier, format: StructureFormatStyle = .queryString, _ configure: Configure?) {
             self.field = field
+            self.format = format
+            self.stringFormat = format.defaultStringFormatForField(field, format: format)
             configure?(&self)
         }
         
@@ -102,16 +104,12 @@ extension FieldsFormatter {
             self.init(.literal(value), configure)
         }
         
-        public static func tags(keys: [String]?, _ configure: Configure? = nil) -> Field {
-            var field = self.init(.tags(keys), configure)
-            field.stringFormat = "\n%@"
-            return field
+        public static func tags(keys: [String]?, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
+            self.init(.tags(keys), format: format, configure)
         }
         
-        public static func extra(keys: [String]?, _ configure: Configure? = nil) -> Field {
-            var field = self.init(.extra(keys), configure)
-            field.stringFormat = "\n%@"
-            return field
+        public static func extra(keys: [String]?, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
+            self.init(.extra(keys), format: format, configure)
         }
         
         public static func custom(_ callback: @escaping CallbackFormatter.Callback, _ configure: Configure? = nil) -> Field {
@@ -151,20 +149,16 @@ extension FieldsFormatter {
             self.init(.ipAddress, configure)
         }
         
-        public static func userData(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
-            var field = self.init(.userData(keys), configure)
-            field.stringFormat = "\n%@"
-            return field
+        public static func userData(keys: [String]? = nil, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
+            self.init(.userData(keys), format: format, configure)
         }
         
         public static func fingerprint(_ configure: Configure? = nil) -> Field {
             self.init(.fingerprint, configure)
         }
         
-        public static func objectMetadata(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
-            var field = self.init(.objectMetadata(keys), configure)
-            field.stringFormat = "\n%@"
-            return field
+        public static func objectMetadata(keys: [String]? = nil, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
+            self.init(.objectMetadata(keys), format: format, configure)
         }
         
         public static func object() -> Field {
@@ -452,6 +446,32 @@ extension FieldsFormatter {
         
         // MARK: - Internal Functions
         
+        /// Return the default string format to compose special styles.
+        ///
+        /// - Parameter title: title of prefix.
+        /// - Returns: `String?`
+        internal func defaultStringFormatForField(_ field: FieldIdentifier, format: StructureFormatStyle) -> String? {
+            switch field {
+            case .tags, .extra, .userData, .objectMetadata:
+                switch self {
+                case .queryString:
+                    return "\(field.tableTitle?.lowercased() ?? "")={%@}"
+                case .list:
+                    return "\(field.tableTitle?.lowercased() ?? "")\n"
+                default:
+                    return nil
+                }
+            default:
+                return nil
+            }
+        }
+        
+        /// Produce a string representation of a complex object based upon the style of the field.
+        ///
+        /// - Parameters:
+        ///   - value: value to format.
+        ///   - field: field target.
+        /// - Returns: `String?`
         internal func stringify(_ value: Any?, forField field: Field) -> String? {
             guard let value = value else { return nil }
 
@@ -498,7 +518,7 @@ extension FieldsFormatter {
             case let dictValue as [String: Any?]:
                 return dictValue.keys.sorted().reduce(into: [String]()) { list, key in
                     if let value = dictValue[key] {
-                        list.append("\t- \(key) = '\(String(describing: value!))'")
+                        list.append("\t- \(key)=\"\(String(describing: value!))\"")
                     }
                 }.joined(separator: "\n")
             case let arrayValue as [Any?]:
@@ -526,7 +546,7 @@ extension FieldsFormatter {
                 
                 for key in dictValue.keys.sorted() {
                     if let value = dictValue[key], let value = value {
-                        components.append("\(key)='\(String(describing: value))'")
+                        components.append("\(key)=\"\(String(describing: value))\"")
                     }
                 }
                 

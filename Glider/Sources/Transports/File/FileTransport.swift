@@ -53,7 +53,7 @@ public class FileTransport: Transport {
     }
     
     /// Newline characters, by default `\n` are used.
-    public var newlines = "\n" {
+    public var newlines = "\r\n" {
         didSet {
             self.newLinesData = newlines.data(using: .utf8)
         }
@@ -146,8 +146,8 @@ extension FileTransport {
         /// if it does exist, new log messages will be appended to the end of the file.
         public var fileURL: URL
         
-        /// Newline characters, by default `\n` are used.
-        public var newlines = "\n"
+        /// Newline characters, by default `\r\n` are used.
+        public var newlines = "\r\n"
         
         /// An array of `LogFormatter`s to use for formatting log entries to be
         /// recorded by the receiver. Each formatter is consulted in sequence,

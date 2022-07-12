@@ -223,9 +223,9 @@ final class FormattersTest: XCTestCase {
         let formatter = FieldsFormatter(fields: [
             .message(),
             .delimiter(style: .spacedPipe),
-            .tags(keys: nil),
+            .tags(keys: nil, format: .queryString),
             .delimiter(style: .spacedPipe),
-            .extra(keys: nil)
+            .extra(keys: nil, format: .queryString)
         ])
         
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -241,16 +241,20 @@ final class FormattersTest: XCTestCase {
             log.error?.write(msg: "Event message \(i)", extra: ["e1": "\(i)"], tags: ["t1": "v1"])
         }
         
-        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").filter({
+        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\r\n").filter({
             $0.isEmpty == false
         })
         
+        print("File \(fileURL.path)")
+        
         for i in 0..<writtenLogLines.count {
             let line = writtenLogLines[i]
+            print(line)
+            
             let components = line.components(separatedBy: " | ")
             XCTAssertEqual(components[0], "Event message \(i)")
-            XCTAssertEqual(components[1], "tags={{\"t1\":\"v1\"}}")
-            XCTAssertEqual(components[2], "extra={{\"e1\":\"\(i)\"}}")
+            XCTAssertEqual(components[1], "tags={t1=\"v1\"}")
+            XCTAssertEqual(components[2], "extra={e1=\"\(i)\"}")
         }
     }
     

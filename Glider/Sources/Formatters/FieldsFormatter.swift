@@ -21,11 +21,6 @@ public class FieldsFormatter: EventFormatter {
     /// Formatted fields used to create the string.
     public var fields: [Field]
     
-    /// How array and dictionaries (like `tags` and `extra` are encoded).
-    /// The default's value is `queryString` but it may change depending
-    /// by the formatter.
-    //public var structureFormatStyle: StructureFormatStyle = .queryString
-    
     // MARK: - Initialization
     
     /// Initialize with a list of given fields used to format the event.

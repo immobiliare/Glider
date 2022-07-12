@@ -39,17 +39,17 @@ final class AsyncTransportTests: XCTestCase, AsyncTransportDelegate {
     
     // MARK: - Tests
     
-    func test_asyncTransportSucceded() async throws {
-        try await prepareAsyncTransport(id: successID)
+    func test_asyncTransportSucceded() throws {
+        try prepareAsyncTransport(id: successID)
     }
     
-    func test_asyncTransportRetries() async throws {
-        try await prepareAsyncTransport(id: failureID)
+    func test_asyncTransportRetries() throws {
+        try prepareAsyncTransport(id: failureID)
     }
     
     // MARK: - Private Functions
     
-    private func prepareAsyncTransport(id: String) async throws {
+    private func prepareAsyncTransport(id: String) throws {
         exp = expectation(description: "test_\(id)")
         
         let format = FieldsFormatter(fields: [

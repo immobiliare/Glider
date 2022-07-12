@@ -30,8 +30,8 @@ public struct LogInterpolation: StringInterpolationProtocol {
         // Numbers
         case float(() -> Float, format: LogDoubleFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case double(() -> Double, format: LogDoubleFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case signedInt(() -> Int64, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
-        case unsignedInt(() -> UInt64, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case signedInt(() -> Int, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
+        case unsignedInt(() -> UInt, format: LogIntegerFormatting, trunc: String.TruncationStyle?, pad: String.PaddingStyle?, privacy: LogPrivacy)
         case bool(() -> Bool, format: LogBoolFormatting, privacy: LogPrivacy)
     }
     
@@ -181,9 +181,7 @@ extension LogInterpolation {
                                              trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.signedInt({
-            Int64(number())
-        }, format: format, trunc: trunc, pad: pad, privacy: privacy))
+        storage.append(.signedInt(number, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
     
     public mutating func appendInterpolation(_ number: @autoclosure @escaping () -> UInt,
@@ -191,9 +189,7 @@ extension LogInterpolation {
                                              trunc: String.TruncationStyle? = nil,
                                              pad: String.PaddingStyle? = nil,
                                              privacy: LogPrivacy = .private) {
-        storage.append(.unsignedInt({
-            UInt64(number())
-        }, format: format, trunc: trunc, pad: pad, privacy: privacy))
+        storage.append(.unsignedInt(number, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
     
 }
