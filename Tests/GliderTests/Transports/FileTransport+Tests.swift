@@ -28,7 +28,6 @@ final class FileTransportTests: XCTestCase {
             .delimiter(style: .repeat("-", 5)),
             .extra(keys: ["index"])
         ])
-        format.structureFormatStyle = .object
         
         let fileTransport = try FileTransport(fileURL: fileURL) {
             $0.formatters = [format]

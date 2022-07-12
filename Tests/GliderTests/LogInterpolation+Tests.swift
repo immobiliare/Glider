@@ -35,7 +35,7 @@ final class LogInterpolationTests: XCTestCase {
         
         var testIndex = 0
         
-        let log = createTestingLog(level: .trace, { event in
+        let log = createTestingLog(level: .trace, { event, _ in
             print(event.message.content)
             
             XCTAssertEqual(expectedMessages[testIndex], event.message.content)
@@ -99,7 +99,7 @@ final class LogInterpolationTests: XCTestCase {
         ]
         
         var testIndex = 0
-        let log = createTestingLog(level: .trace, { event in
+        let log = createTestingLog(level: .trace, { event, _ in
             print(event.message.content)
             
             XCTAssertEqual(expectedOutput[testIndex], event.message.content)

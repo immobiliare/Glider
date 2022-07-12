@@ -45,10 +45,7 @@ public class JSONFormatter: FieldsFormatter {
         self.jsonOptions = jsonOptions
         self.encodeDataAsBase64 = encodeDataAsBase64
         super.init(fields: fields)
-        
-        // We want to keep the structure format in `JSONFormatter` because it can handle them.
-        self.structureFormatStyle = .object
-    }
+            }
     
     /// Use the default JSON formatter message.
     ///

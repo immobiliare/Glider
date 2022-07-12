@@ -39,7 +39,6 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
                 $0.truncate = .head(length: 10)
             }),
         ])
-        format.structureFormatStyle = .object
 
         let transport = try WebSocketTransportClient(url: "ws://localhost:1011", delegate: self) {
             $0.connectAutomatically = true

@@ -38,7 +38,6 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
                 $0.truncate = .head(length: 10)
             }),
         ])
-        format.structureFormatStyle = .object
         
         var countBlocks = 0
         captureDelegateBlock = { events, reason in

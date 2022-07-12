@@ -17,6 +17,33 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
+    func test_extraFieldListFormatting() async throws {
+        createTestWithExtraFormattingOfType(.list) { _, message in
+            XCTAssertTrue(message.contains("\n\t- key1 = \'a simple value\'\n\t- key2 = \'another value\'"))
+        }
+    }
+    
+    func test_extraFieldQueryStringFormatting() async throws {
+        createTestWithExtraFormattingOfType(.queryString) { _, message in
+            XCTAssertTrue(message.contains("""
+            key1='a simple value'&key2='another value'
+            """))
+        }
+    }
+    
+    func test_extraFieldsTableFormatting() async throws {
+        createTestWithExtraFormattingOfType(.table) { _, message in
+            XCTAssertTrue(message.contains("""
+            ┌───────┬────────────────┐
+            │ EXTRA │ VALUE          │
+            ├───────┼────────────────┤
+            │ key1  │ a simple value │
+            │ key2  │ another value  │
+            └───────┴────────────────┘
+            """))
+        }
+    }
+    
     func test_xcodeLogFormatter() async throws {
         let xcodeFormatter = XCodeLogFormatter()
         
@@ -200,7 +227,6 @@ final class FormattersTest: XCTestCase {
             .delimiter(style: .spacedPipe),
             .extra(keys: nil)
         ])
-        formatter.structureFormatStyle = .object
         
         let fileTransport = try FileTransport(fileURL: fileURL, {
             $0.formatters = [formatter]
@@ -268,7 +294,6 @@ final class FormattersTest: XCTestCase {
             .delimiter(style: .spacedPipe),
             .tags(keys: nil)
         ])
-        fieldFormatter.structureFormatStyle = .queryString
 
         let fileTransport = try FileTransport(fileURL: fileURL, {
             $0.formatters = [fieldFormatter]
@@ -320,7 +345,6 @@ final class FormattersTest: XCTestCase {
             .username()
         ])
         
-        fieldFormatter.structureFormatStyle = .object
 
         let fileTransport = try FileTransport(fileURL: fileURL, {
             $0.formatters =  [fieldFormatter]
@@ -356,6 +380,37 @@ final class FormattersTest: XCTestCase {
         
     }
     
+    // MARK: - Private Functions
+    
+    private func createTestWithExtraFormattingOfType(_ type: FieldsFormatter.StructureFormatStyle, onReceiveEvent: @escaping ((Event, String) -> Void)) {
+        let fieldFormatter = FieldsFormatter(fields: [
+                .timestamp(style: .iso8601),
+                .message(),
+                .literal(" "),
+                .extra(keys: ["key1", "key2", "key3"], {
+                    $0.format = type
+                })
+        ])
+        
+        let log = Log {
+            $0.level = .trace
+            $0.transports = [
+                TestTransport(formatters: [fieldFormatter], onReceiveEvent: { event, message in
+                    print(message)
+                    onReceiveEvent(event, message)
+                })
+            ]
+        }
+        
+        log.info?.write({
+            $0.message = "Hello welcome here!"
+            $0.extra = [
+                "key1": "a simple value",
+                "key2": "another value"
+            ]
+        })
+    }
+    
 }
 
 fileprivate struct UserTest: SerializableObject, Codable {
@@ -380,6 +435,7 @@ fileprivate extension UIImage {
         UIGraphicsEndImageContext()
         return image
     }
+    
     
 }
 

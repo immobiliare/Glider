@@ -23,7 +23,7 @@ final class CoreTests: XCTestCase {
         var minAcceptedLevel: Glider.Level? = .error
         var passedCountWhenNil = 0
         
-        let transport = TestTransport { event in
+        let transport = TestTransport { event, _ in
             print("[\(event.level.description)] \(event.message)")
             
             if let minAcceptedLevel = minAcceptedLevel {
@@ -100,7 +100,7 @@ final class CoreTests: XCTestCase {
             $0.level = .trace
             $0.transports = [
                 ConsoleTransport(),
-                TestTransport(onReceiveEvent: { _ in
+                TestTransport(onReceiveEvent: { _, _ in
                     receivedMessagesCount += 1
                 })
             ]
@@ -277,7 +277,7 @@ final class CoreTests: XCTestCase {
         // We'll check if transport receive correct events filtered.
         var countReceivedEvents = 0
         var prevReceivedValue: Int?
-        let finalTransport = TestTransport { eventReceived in
+        let finalTransport = TestTransport { eventReceived, _ in
             let valueAssociated = eventReceived.extra?["idx"] as! Int
             XCTAssertTrue(valueAssociated.isMultiple(of: 2), "Odd filter does not work as expected")
             XCTAssertTrue(valueAssociated < 50, "Max value filter does not work as expected")
@@ -431,13 +431,13 @@ final class CoreTests: XCTestCase {
         let imageData = try! Data(contentsOf: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Wikisource-logo.png/360px-Wikisource-logo.png")!)
         let image = UIImage(data: imageData)
         
-        let transport = TestTransport {
-            guard let _ = UIImage(data: $0.serializedObjectData!) else {
+        let transport = TestTransport { event, _ in
+            guard let _ = UIImage(data: event.serializedObjectData!) else {
                 XCTFail("Failed to decoded the image")
                 return
             }
             
-            XCTAssertNotNil($0.serializedObjectMetadata)
+            XCTAssertNotNil(event.serializedObjectMetadata)
         }
         
         let log = Log {
@@ -474,14 +474,14 @@ final class CoreTests: XCTestCase {
         
         let company = Company(name: "ExSpace", foundedDate: Date(), homepage: URL(string: "http://www.exspace.com")!, founders: ["Mark","Jane"])
 
-        let transport = TestTransport {
-            XCTAssertNotNil($0.serializedObjectData, "Failed to transport serialized data")
+        let transport = TestTransport { event, _ in
+            XCTAssertNotNil(event.serializedObjectData, "Failed to transport serialized data")
             
             // Validate metadata
-            XCTAssertEqual($0.serializedObjectMetadata?["class"] as? String, "company_class")
+            XCTAssertEqual(event.serializedObjectMetadata?["class"] as? String, "company_class")
          
             // Validate data
-            guard let rawData = $0.serializedObjectData else {
+            guard let rawData = event.serializedObjectData else {
                 XCTFail("Failed to read the serialized object data")
                 return
             }
@@ -518,16 +518,16 @@ final class CoreTests: XCTestCase {
             var avatar: URL?
         }
         
-        let transport = TestTransport {
-            XCTAssertNotNil($0.serializedObjectData, "Failed to transport serialized data")
+        let transport = TestTransport { event, _ in
+            XCTAssertNotNil(event.serializedObjectData, "Failed to transport serialized data")
             
             // Validate metadata
-            XCTAssertEqual($0.serializedObjectMetadata?["class"] as? String, "People")
-            XCTAssertEqual($0.serializedObjectMetadata?["interesting_key"] as? String, "any_value")
+            XCTAssertEqual(event.serializedObjectMetadata?["class"] as? String, "People")
+            XCTAssertEqual(event.serializedObjectMetadata?["interesting_key"] as? String, "any_value")
             
             // Validate serialized data
             do {
-                guard let data = $0.serializedObjectData else {
+                guard let data = event.serializedObjectData else {
                     XCTFail("Failed to transport serialized data of the object")
                     return
                 }
@@ -590,23 +590,31 @@ fileprivate class CallbackFilter: TransportFilter {
 }
 
 public class TestTransport: Transport {
-    typealias OnReceiveEvent = ((Event) -> Void)
+    typealias OnReceiveEvent = ((Event, String) -> Void)
 
     private var onReceiveEvent: OnReceiveEvent?
-    
+
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
+    public var formatters: [EventFormatter]
+
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
     public var minimumAcceptedLevel: Level? = nil
     
-    init(onReceiveEvent: @escaping OnReceiveEvent) {
+    init(formatters: [EventFormatter] = [], onReceiveEvent: @escaping OnReceiveEvent) {
+        self.formatters = formatters
         self.onReceiveEvent = onReceiveEvent
     }
     
     public func record(event: Event) -> Bool {
-        onReceiveEvent?(event)
+        guard let message = formatters.format(event: event)?.asString(),
+              message.isEmpty == false else {
+            return false
+        }
+        
+        onReceiveEvent?(event, message)
         return true
     }
     

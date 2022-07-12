@@ -40,7 +40,7 @@ final class TableFormattersTest: XCTestCase {
             $0.formatters = [tableFormatter]
         }
         
-        let testTransport = TestTransport { event in
+        let testTransport = TestTransport { event, message in
             let msg = tableFormatter.format(event: event)!.asString()!
             print(msg)
             

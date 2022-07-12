@@ -205,7 +205,7 @@ public class TableFormatter: EventFormatter {
         }
         
         var stringValue = stringifiedValue.trunc(field.truncate).padded(field.padding)
-        if let format = field.format {
+        if let format = field.stringFormat {
             stringValue = String.format(format, value: stringValue)
         }
         
@@ -219,7 +219,7 @@ public class TableFormatter: EventFormatter {
 extension FieldsFormatter.FieldIdentifier {
     
     /// Table's ID title.
-    fileprivate var tableTitle: String? {
+    internal var tableTitle: String? {
         switch self {
         case .message:          return "Message"
         case .callSite:         return "Call site"

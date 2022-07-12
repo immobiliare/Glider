@@ -24,7 +24,7 @@ public class FieldsFormatter: EventFormatter {
     /// How array and dictionaries (like `tags` and `extra` are encoded).
     /// The default's value is `queryString` but it may change depending
     /// by the formatter.
-    public var structureFormatStyle: StructureFormatStyle = .queryString
+    //public var structureFormatStyle: StructureFormatStyle = .queryString
     
     // MARK: - Initialization
     
@@ -73,7 +73,7 @@ public class FieldsFormatter: EventFormatter {
     open func valuesForEvent(event: Event) -> [String?] {
         fields.map { field in
             guard let value = event.valueForFormatterField(field),
-                  var stringifiedValue = structureFormatStyle.stringify(value, forField: field) else {
+                  var stringifiedValue = field.format.stringify(value, forField: field) else {
                 return nil
             }
             
@@ -83,7 +83,7 @@ public class FieldsFormatter: EventFormatter {
             }
             
             var stringValue = stringifiedValue.trunc(field.truncate).padded(field.padding)
-            if let format = field.format {
+            if let format = field.stringFormat {
                 stringValue = String.format(format, value: stringValue)
             }
             return stringValue

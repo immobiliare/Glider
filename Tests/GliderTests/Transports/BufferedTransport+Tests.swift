@@ -25,7 +25,6 @@ final class BufferedTransportTests: XCTestCase {
             .delimiter(style: .repeat("-", 5)),
             .extra(keys: ["index"])
         ])
-        format.structureFormatStyle = .object
         
         let bufferLimit = 5
         

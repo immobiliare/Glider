@@ -12,6 +12,7 @@
 
 import Foundation
 import SwiftUI
+import Network
 
 extension FieldsFormatter {
     
@@ -19,7 +20,7 @@ extension FieldsFormatter {
     /// Each `Field` represent a log attribute to print along with their options and styles.
     public struct Field {
         public typealias Configure = ((inout Field) -> Void)
-
+    
         // MARK: - Public Properties
         
         /// Represented field key.
@@ -38,9 +39,16 @@ extension FieldsFormatter {
         /// Some formatters (like the `JSONFormatter`= uses this value to print the field's readable label.
         public var label: String?
         
-        /// For array and dictionaries (like extra or tags) you can specify a format where the content is
-        /// encapsulasted (for example `keys={%@}` for tags will produce something like `keys={k1=v1,k2=v2}`).
-        public var format: String?
+        /// For array and dictionaries (like extra or tags) you can specify a format to write the content.
+        ///
+        /// By default is set to `auto`.
+        public var format: StructureFormatStyle = .serializedJSON
+        
+        /// Specify a prefix literal to format the result of formatted.
+        /// For example (`extra = { %@ }` uses the format and replace the placeholder with the value formatted.
+        ///
+        /// By default is set to `nil`•
+        public var stringFormat: String? = nil
         
         /// When encoding a field which contains array or dictionary the item separator is used to compose the string.
         public var separator: String = ","
@@ -96,13 +104,13 @@ extension FieldsFormatter {
         
         public static func tags(keys: [String]?, _ configure: Configure? = nil) -> Field {
             var field = self.init(.tags(keys), configure)
-            field.format = "tags={%@}"
+            field.stringFormat = "\n%@"
             return field
         }
         
         public static func extra(keys: [String]?, _ configure: Configure? = nil) -> Field {
             var field = self.init(.extra(keys), configure)
-            field.format = "extra={%@}"
+            field.stringFormat = "\n%@"
             return field
         }
         
@@ -145,7 +153,7 @@ extension FieldsFormatter {
         
         public static func userData(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
             var field = self.init(.userData(keys), configure)
-            field.format = "userData={%@}"
+            field.stringFormat = "\n%@"
             return field
         }
         
@@ -155,7 +163,7 @@ extension FieldsFormatter {
         
         public static func objectMetadata(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
             var field = self.init(.objectMetadata(keys), configure)
-            field.format = "metadata={%@}"
+            field.stringFormat = "\n%@"
             return field
         }
         
@@ -427,14 +435,20 @@ extension FieldsFormatter.CallingThreadStyle {
 // MARK: - FieldsFormatter.StructureFormatStyle
 
 extension FieldsFormatter {
-    
+        
     /// Defines how the structures like array or dictionaries are encoded
     /// inside the formatted string.
-    /// - `object`: structure is kept, this is useful when you have a format as JSON which support them
-    /// - `queryString`: values are composed in a string, like an url. This is useful for plain text formatter.
+    /// - `serializedJSON`: structure is kept, this is useful when you have a format as JSON which support the
+    /// - `list`: as list (a bullet list for each key (example: `\t- key1 = value1\n\t- key2 = value2...`)
+    /// - `table`: formatted as table with two columns (one for keys and one for values).
+    /// - `queryString`: formatted as query string (example `keys={k1=v1,k2=v2}`)
     public enum StructureFormatStyle {
-        case object
+        case serializedJSON
+        case list
+        case table
         case queryString
+        
+        public static var tableInfoMaxColumnsWidth: (keyColumn: Int?, valueColumn: Int?)
         
         // MARK: - Internal Functions
         
@@ -442,14 +456,62 @@ extension FieldsFormatter {
             guard let value = value else { return nil }
 
             switch self {
-            case .object:
-                return stringifyAsObject(value, forField: field)
+            case .serializedJSON:
+                return stringifyAsSerializedJSON(value, forField: field)
+            case .list:
+                return stringifyAsList(value, forField: field)
+            case .table:
+                return stringifyAsTable(value, forField: field)
             case .queryString:
                 return stringifyAsQueryString(value, forField: field)
             }
         }
         
         // MARK: - Private Functions
+        
+        private func stringifyAsTable(_ value: Any, forField field: Field) -> String? {
+            let keyColumnTitle = field.field.tableTitle?.uppercased() ?? "KEY"
+            
+            switch value {
+            case let stringValue as String:
+                return stringValue
+            case let dictValue as [String: Any?]:
+                let rows: [String] = dictValue.keys.sorted().reduce(into: [String]()) { list, key in
+                    if let value = dictValue[key] {
+                        list.append(key)
+                        list.append(String(describing: value!))
+                    }
+                }
+                return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
+            case let arrayValue as [Any?]:
+                let rows = arrayValue.map({ String(describing: $0) })
+                return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
+            default:
+                return nil
+            }
+        }
+        
+        private func stringifyAsList(_ value: Any, forField field: Field) -> String? {
+            switch value {
+            case let stringValue as String:
+                return stringValue
+            case let dictValue as [String: Any?]:
+                return dictValue.keys.sorted().reduce(into: [String]()) { list, key in
+                    if let value = dictValue[key] {
+                        list.append("\t- \(key) = '\(String(describing: value!))'")
+                    }
+                }.joined(separator: "\n")
+            case let arrayValue as [Any?]:
+                return arrayValue.compactMap {
+                    guard let value = $0 else {
+                        return nil
+                    }
+                    return "\t - \(String(describing: value))"
+                }.joined(separator: "\n")
+            default:
+                return nil
+            }
+        }
         
         private func stringifyAsQueryString(_ value: Any, forField field: Field) -> String? {
             switch value {
@@ -464,7 +526,7 @@ extension FieldsFormatter {
                 
                 for key in dictValue.keys.sorted() {
                     if let value = dictValue[key], let value = value {
-                        components.append("\(key)=\(String(describing: value))")
+                        components.append("\(key)='\(String(describing: value))'")
                     }
                 }
                 
@@ -474,13 +536,13 @@ extension FieldsFormatter {
                     return nil
                 }
                 
-                return arrayValue.map({ $0.debugDescription }).joined(separator: field.separator)
+                return arrayValue.map({ String(describing: $0) }).joined(separator: field.separator)
             default:
                 return nil
             }
         }
         
-        private func stringifyAsObject(_ value: Any, forField field: Field) -> String? {
+        private func stringifyAsSerializedJSON(_ value: Any, forField field: Field) -> String? {
             switch value {
             case let stringValue as String:
                 return stringValue
@@ -496,11 +558,55 @@ extension FieldsFormatter {
                     return nil
                 }
                 
-                return arrayValue.map({ $0.debugDescription }).joined(separator: field.separator)
+                return arrayValue.map({ String(describing: $0) }).joined(separator: field.separator)
             default:
                 return String(describing: value)
             }
         }
+        
+        private func createKeyValueTableWithRows(_ rows: [String], keyColumnTitle: String) -> ASCIITable? {
+            guard !rows.isEmpty else {
+                return nil
+            }
+            
+            let columnIdentifier = ASCIITable.Column { col in
+                col.footer = .init({ footer in
+                    footer.border = .boxDraw.heavyHorizontal
+                })
+                col.header = .init(title: keyColumnTitle, { header in
+                    header.fillCharacter = " "
+                    header.verticalPadding = .init({ padding in
+                        padding.top = 0
+                        padding.bottom = 0
+                    })
+                })
+                col.verticalAlignment = .top
+                col.maxWidth = StructureFormatStyle.tableInfoMaxColumnsWidth.keyColumn
+                col.horizontalAlignment = .leading
+            }
+            
+            
+            let columnValues = ASCIITable.Column { col in
+                col.footer = .init({ footer in
+                    footer.border = .boxDraw.heavyHorizontal
+                })
+                col.header = .init(title: "VALUE", { header in
+                    header.fillCharacter = " "
+                    header.verticalPadding = .init({ padding in
+                        padding.top = 0
+                        padding.bottom = 0
+                    })
+                })
+                col.maxWidth =  StructureFormatStyle.tableInfoMaxColumnsWidth.valueColumn
+                col.horizontalAlignment = .leading
+            }
+            
+            let columns = ASCIITable.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
+            return ASCIITable(columns: columns, content: rows)
+            
+        }
+        
     }
+    
     
 }

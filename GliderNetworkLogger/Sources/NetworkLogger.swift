@@ -22,6 +22,9 @@ public final class NetworkLogger: NSObject {
     
     /// Shared instance.
     public static var current = NetworkLogger()
+
+    /// By default, empty.
+    public var ignoredHosts = Set<String>()
     
     /// Where the network events are redirected.
     public var destinationLog: Log?
@@ -90,11 +93,11 @@ public final class NetworkLogger: NSObject {
     ///   - enabled: `true` to enable capture, `false` to disable.
     ///   - destinationLog: destination log, if `nil` a default console-based log instance is created for you.
     public static func captureGlobalTraffic(enabled: Bool, toLog destinationLog: Log? = nil) {
-        if enabled {
-            URLProtocol.registerClass(NetworkLoggerCustomHTTPProtocol.self)
+      /*  if enabled {
+            URLProtocol.registerClass(CustomHTTPProtocol.self)
         } else {
-            URLProtocol.unregisterClass(NetworkLoggerCustomHTTPProtocol.self)
-        }
+            URLProtocol.unregisterClass(CustomHTTPProtocol.self)
+        }*/
     }
     
     // MARK: - Private Functions (Helper)
