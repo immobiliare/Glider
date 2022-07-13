@@ -31,7 +31,7 @@ final class HTTPTransportTests: XCTestCase, HTTPTransportDelegate, HTTPServerDel
     
     // MARK: - Test
     
-    func test_HTTPTransportsSending() async throws {
+    func test_HTTPTransportsSending() throws {
         expServerStart = expectation(description: "Expecting server to start")
 
         // Start an http server to test data
