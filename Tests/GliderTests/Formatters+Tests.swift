@@ -19,14 +19,14 @@ final class FormattersTest: XCTestCase {
     
     func test_extraFieldListFormatting() async throws {
         createTestWithExtraFormattingOfType(.list) { _, message in
-            XCTAssertTrue(message.contains("\n\t- key1 = \'a simple value\'\n\t- key2 = \'another value\'"))
+            XCTAssertTrue(message.contains("extra={\n\t- key1=\"a_simple_value\"\n\t- key2=\"another_value\"\n}"))
         }
     }
     
     func test_extraFieldQueryStringFormatting() async throws {
         createTestWithExtraFormattingOfType(.queryString) { _, message in
             XCTAssertTrue(message.contains("""
-            key1='a simple value'&key2='another value'
+            key1=a_simple_value&key2=another_value
             """))
         }
     }
@@ -37,8 +37,8 @@ final class FormattersTest: XCTestCase {
             ┌───────┬────────────────┐
             │ EXTRA │ VALUE          │
             ├───────┼────────────────┤
-            │ key1  │ a simple value │
-            │ key2  │ another value  │
+            │ key1  │ a_simple_value │
+            │ key2  │ another_value  │
             └───────┴────────────────┘
             """))
         }
@@ -223,9 +223,9 @@ final class FormattersTest: XCTestCase {
         let formatter = FieldsFormatter(fields: [
             .message(),
             .delimiter(style: .spacedPipe),
-            .tags(keys: nil, format: .queryString),
+            .tags(keys: nil),
             .delimiter(style: .spacedPipe),
-            .extra(keys: nil, format: .queryString)
+            .extra(keys: nil)
         ])
         
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -409,8 +409,8 @@ final class FormattersTest: XCTestCase {
         log.info?.write({
             $0.message = "Hello welcome here!"
             $0.extra = [
-                "key1": "a simple value",
-                "key2": "another value"
+                "key1": "a_simple_value",
+                "key2": "another_value"
             ]
         })
     }

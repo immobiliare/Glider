@@ -44,14 +44,16 @@ extension FieldsFormatter {
         /// By default is set to `auto`.
         public var format: StructureFormatStyle = .serializedJSON
         
+        /// When encoding a field which contains array or dictionary the item separator is used to compose the string.
+        public var separator: String = ","
+        
+        // MARK: - Internal Properties
+        
         /// Specify a prefix literal to format the result of formatted.
         /// For example (`extra = { %@ }` uses the format and replace the placeholder with the value formatted.
         ///
         /// By default is set to `nil`•
-        public var stringFormat: String? = nil
-        
-        /// When encoding a field which contains array or dictionary the item separator is used to compose the string.
-        public var separator: String = ","
+        internal var stringFormat: String? = nil
         
         // MARK: - Initialization
                
@@ -61,11 +63,10 @@ extension FieldsFormatter {
         /// - Parameters:
         ///   - field: field identifier.
         ///   - configure: configuration callback.
-        internal init(_ field: FieldIdentifier, format: StructureFormatStyle = .queryString, _ configure: Configure?) {
+        internal init(_ field: FieldIdentifier, _ configure: Configure?) {
             self.field = field
-            self.format = format
-            self.stringFormat = format.defaultStringFormatForField(field, format: format)
             configure?(&self)
+            self.stringFormat = self.format.defaultStringFormatForField(field)
         }
         
         public static func field(_ field: FieldIdentifier, _ configure: Configure? = nil) -> Field {
@@ -104,12 +105,12 @@ extension FieldsFormatter {
             self.init(.literal(value), configure)
         }
         
-        public static func tags(keys: [String]?, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
-            self.init(.tags(keys), format: format, configure)
+        public static func tags(keys: [String]?, _ configure: Configure? = nil) -> Field {
+            self.init(.tags(keys), configure)
         }
         
-        public static func extra(keys: [String]?, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
-            self.init(.extra(keys), format: format, configure)
+        public static func extra(keys: [String]?, _ configure: Configure? = nil) -> Field {
+            self.init(.extra(keys), configure)
         }
         
         public static func custom(_ callback: @escaping CallbackFormatter.Callback, _ configure: Configure? = nil) -> Field {
@@ -149,16 +150,16 @@ extension FieldsFormatter {
             self.init(.ipAddress, configure)
         }
         
-        public static func userData(keys: [String]? = nil, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
-            self.init(.userData(keys), format: format, configure)
+        public static func userData(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
+            self.init(.userData(keys), configure)
         }
         
         public static func fingerprint(_ configure: Configure? = nil) -> Field {
             self.init(.fingerprint, configure)
         }
         
-        public static func objectMetadata(keys: [String]? = nil, format: StructureFormatStyle = .queryString, _ configure: Configure? = nil) -> Field {
-            self.init(.objectMetadata(keys), format: format, configure)
+        public static func objectMetadata(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
+            self.init(.objectMetadata(keys), configure)
         }
         
         public static func object() -> Field {
@@ -450,14 +451,16 @@ extension FieldsFormatter {
         ///
         /// - Parameter title: title of prefix.
         /// - Returns: `String?`
-        internal func defaultStringFormatForField(_ field: FieldIdentifier, format: StructureFormatStyle) -> String? {
+        internal func defaultStringFormatForField(_ field: FieldIdentifier) -> String? {
             switch field {
             case .tags, .extra, .userData, .objectMetadata:
                 switch self {
                 case .queryString:
                     return "\(field.tableTitle?.lowercased() ?? "")={%@}"
                 case .list:
-                    return "\(field.tableTitle?.lowercased() ?? "")\n"
+                    return "\(field.tableTitle?.lowercased() ?? "")={%@}"
+                case .table:
+                    return "\n%@"
                 default:
                     return nil
                 }
@@ -516,18 +519,20 @@ extension FieldsFormatter {
             case let stringValue as String:
                 return stringValue
             case let dictValue as [String: Any?]:
-                return dictValue.keys.sorted().reduce(into: [String]()) { list, key in
+                let value = dictValue.keys.sorted().reduce(into: [String]()) { list, key in
                     if let value = dictValue[key] {
                         list.append("\t- \(key)=\"\(String(describing: value!))\"")
                     }
                 }.joined(separator: "\n")
+                return "\n\(value)\n"
             case let arrayValue as [Any?]:
-                return arrayValue.compactMap {
+                let value = arrayValue.compactMap {
                     guard let value = $0 else {
                         return nil
                     }
                     return "\t - \(String(describing: value))"
                 }.joined(separator: "\n")
+                return "\n\(value)\n"
             default:
                 return nil
             }
@@ -546,7 +551,7 @@ extension FieldsFormatter {
                 
                 for key in dictValue.keys.sorted() {
                     if let value = dictValue[key], let value = value {
-                        components.append("\(key)=\"\(String(describing: value))\"")
+                        components.append("\(key)=\(String(describing: value))")
                     }
                 }
                 
