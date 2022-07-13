@@ -223,9 +223,13 @@ final class FormattersTest: XCTestCase {
         let formatter = FieldsFormatter(fields: [
             .message(),
             .delimiter(style: .spacedPipe),
-            .tags(keys: nil),
+            .tags(keys: nil, {
+                $0.format = .queryString
+            }),
             .delimiter(style: .spacedPipe),
-            .extra(keys: nil)
+            .extra(keys: nil, {
+                $0.format = .queryString
+            })
         ])
         
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -253,8 +257,8 @@ final class FormattersTest: XCTestCase {
             
             let components = line.components(separatedBy: " | ")
             XCTAssertEqual(components[0], "Event message \(i)")
-            XCTAssertEqual(components[1], "tags={t1=\"v1\"}")
-            XCTAssertEqual(components[2], "extra={e1=\"\(i)\"}")
+            XCTAssertEqual(components[1], "tags={t1=v1}")
+            XCTAssertEqual(components[2], "extra={e1=\(i)}")
         }
     }
     
@@ -275,7 +279,7 @@ final class FormattersTest: XCTestCase {
             log.error?.write(msg: "Event message \(i)")
         }
         
-        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").filter({
+        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\r\n").filter({
             $0.isEmpty == false
         })
         
@@ -292,11 +296,17 @@ final class FormattersTest: XCTestCase {
         let fieldFormatter = FieldsFormatter(fields: [
             .message(),
             .delimiter(style: .spacedPipe),
-            .userData(keys: nil),
+            .userData(keys: nil, {
+                $0.format = .queryString
+            }),
             .delimiter(style: .spacedPipe),
-            .extra(keys: nil),
+            .extra(keys: nil, {
+                $0.format = .queryString
+            }),
             .delimiter(style: .spacedPipe),
-            .tags(keys: nil)
+            .tags(keys: nil, {
+                $0.format = .queryString
+            })
         ])
 
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -315,8 +325,8 @@ final class FormattersTest: XCTestCase {
             $0.scope.user = User(userId: "id", data: ["ukey":"val"])
         })
         
-        let writtenLine = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").first
-        let expectedLine = "test message one | userData={ukey=val} | extra={key1=val1&key2=val2&key3=val3} | tags={tag1=v1}"
+        let writtenLine = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\r\n").first!
+        let expectedLine = "test message one | user data={ukey=val} | extra={key1=val1&key2=val2&key3=val3} | tags={tag1=v1}"
         XCTAssertEqual(writtenLine, expectedLine)
     }
     
@@ -335,11 +345,17 @@ final class FormattersTest: XCTestCase {
             .delimiter(style: .custom(": ")),
             .message(),
             .delimiter(style: .space),
-            .extra(keys: ["key1","key2"]),
+            .extra(keys: ["key1","key2"], {
+                $0.format = .queryString
+            }),
             .delimiter(style: .space),
-            .tags(keys: ["tag0","tag1","tag3"]),
+            .tags(keys: ["tag0","tag1","tag3"], {
+                $0.format = .queryString
+            }),
             .delimiter(style: .space),
-            .userData(keys: ["ukey"]),
+            .userData(keys: ["ukey"], {
+                $0.format = .queryString
+            }),
             .delimiter(style: .space),
             .userId({
                 $0.padding = .left(columns: 15)
@@ -369,13 +385,13 @@ final class FormattersTest: XCTestCase {
             $0.tags = ["tag1": "valtag1", "tag2": "valtag2"]
         })
         
-        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").filter({
+        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\r\n").filter({
             $0.isEmpty == false
         })
         
         let expectedLines = [
-            "      INFO: test message one extra={{\"key1\":\"val1\",\"key2\":\"val2\"}} tags={{\"tag0\":\"valtag0\"}} userData={{\"ukey\":\"val\"}} 12…kd           username",
-            "      ERRR: another message  tags={{\"tag0\":\"valtag0\",\"tag1\":\"valtag1\"}} userData={{\"ukey\":\"val\"}} 12…kd           username"
+            "      INFO: test message one extra={key1=val1&key2=val2} tags={tag0=valtag0} user data={ukey=val} 12…kd           username",
+            "      ERRR: another message  tags={tag0=valtag0&tag1=valtag1} user data={ukey=val} 12…kd           username"
         ]
         
         for i in 0..<writtenLogLines.count {

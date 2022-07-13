@@ -44,15 +44,15 @@ final class FileTransportTests: XCTestCase {
             })
         }
 
-        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\n").filter({
+        let writtenLogLines = try! String(contentsOfFile: fileURL.path).components(separatedBy: "\r\n").filter({
             $0.isEmpty == false
         })
         
         for i in 0..<writtenLogLines.count {
             if i < 10 {
-                XCTAssertTrue(writtenLogLines[i] == "…message \(i)!-----extra={{\"index\":\"\(i)\"}}")
+                XCTAssertEqual(writtenLogLines[i], "…message \(i)!-----{\"index\":\"\(i)\"}")
             } else {
-                XCTAssertTrue(writtenLogLines[i] == "…essage \(i)!-----extra={{\"index\":\"\(i)\"}}")
+                XCTAssertEqual(writtenLogLines[i], "…essage \(i)!-----{\"index\":\"\(i)\"}")
             }
         }
     }
