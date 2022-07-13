@@ -62,7 +62,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
                 
         for i in 0..<numberOfEvents {
             log.info?.write({
-                $0.message = "test message \(i)!"
+                $0.message = "test message \(i, privacy: .public)!"
             })
         }
         
@@ -127,7 +127,7 @@ class ThrottledTransportTestsFlush: XCTestCase, ThrottledTransportDelegate {
                 
         emitTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true, block: { _ in
             log.info?.write({
-                $0.message = "test message \(sentMessages)!"
+                $0.message = "test message \(sentMessages, privacy: .public)!"
             })
             
             sentMessages += 1
@@ -192,7 +192,7 @@ class ThrottledTransportTestsFlush: XCTestCase, ThrottledTransportDelegate {
         
         for i in 0..<99 {
             log.info?.write({
-                $0.message = "test message \(i)!"
+                $0.message = "test message \(i, privacy: .public)!"
             })
         }
         

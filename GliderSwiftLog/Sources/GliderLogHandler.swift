@@ -89,7 +89,7 @@ public struct GliderSwiftLogHandler: LogHandler {
                     metadata: Logger.Metadata?,
                     source: String, file: String, function: String, line: UInt) {
         logger[level.asGlider()]?.write({
-            $0.message = "\(message)"
+            $0.message = "\(message, privacy: .public)"
             $0.tags = [
                 "label": self.label,
                 "source": source,

@@ -39,7 +39,7 @@ final class FileTransportTests: XCTestCase {
         
         for i in 0..<100 {
             log.info?.write({
-                $0.message = "test message \(i)!"
+                $0.message = "test message \(i, privacy: .public)!"
                 $0.extra = ["index": "\(i)"]
             })
         }
