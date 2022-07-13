@@ -17,13 +17,27 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
-    func test_extraFieldListFormatting() async throws {
+    func test_dateFormatting() throws {
+        let log = Log {
+            $0.subsystem = "com.myapp"
+            $0.category = "network"
+            $0.transports = [
+                TestTransport(formatters: [FieldsFormatter.default()], onReceiveEvent: { event, msg in
+                    print(msg)
+                })
+            ]
+        }
+        
+        log.info?.write(msg: "Hello guys")
+    }
+    
+    func test_extraFieldListFormatting() throws {
         createTestWithExtraFormattingOfType(.list) { _, message in
             XCTAssertTrue(message.contains("extra={\n\t- key1=\"a_simple_value\"\n\t- key2=\"another_value\"\n}"))
         }
     }
     
-    func test_extraFieldQueryStringFormatting() async throws {
+    func test_extraFieldQueryStringFormatting() throws {
         createTestWithExtraFormattingOfType(.queryString) { _, message in
             XCTAssertTrue(message.contains("""
             key1=a_simple_value&key2=another_value
@@ -31,7 +45,7 @@ final class FormattersTest: XCTestCase {
         }
     }
     
-    func test_extraFieldsTableFormatting() async throws {
+    func test_extraFieldsTableFormatting() throws {
         createTestWithExtraFormattingOfType(.table) { _, message in
             XCTAssertTrue(message.contains("""
             ┌───────┬────────────────┐
@@ -44,7 +58,7 @@ final class FormattersTest: XCTestCase {
         }
     }
     
-    func test_xcodeLogFormatter() async throws {
+    func test_xcodeLogFormatter() throws {
         let xcodeFormatter = XCodeLogFormatter()
         
         let console = ConsoleTransport {
@@ -63,7 +77,7 @@ final class FormattersTest: XCTestCase {
         
     }
     
-    func test_sysLogFormatter() async throws {
+    func test_sysLogFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
         let sysLog = SysLogFormatter(hostname: "myhost", extraFields: [.callingThread(style: .integer), .eventUUID()])
@@ -80,7 +94,7 @@ final class FormattersTest: XCTestCase {
     }
     
     /// Test the MsgPack formatter.
-    func test_msgPackFormatter() async throws {
+    func test_msgPackFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
         let msgPack = MsgPackFormatter.default()
@@ -128,7 +142,7 @@ final class FormattersTest: XCTestCase {
     }
     
     /// This tests check the `JSONFormatter`.
-    func test_jsonFormatter() async throws {
+    func test_jsonFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
         let jsonFormatter = JSONFormatter.default()
@@ -179,7 +193,7 @@ final class FormattersTest: XCTestCase {
     }
     
     /// This test the `JSONFormatter` encoding an `UIImage` and checking the result along with the metadata associated.
-    func test_jsonFormatterWithBase64ImageEncoded() async throws {
+    func test_jsonFormatterWithBase64ImageEncoded() throws {
         let fileURL = URL.temporaryFileURL()
 
         let jsonFormatter = JSONFormatter.default()
@@ -214,7 +228,7 @@ final class FormattersTest: XCTestCase {
         XCTAssertEqual(imageHeight, "\(size.height)")
     }
 
-    func test_defaultFieldsBasedFormatterWithCustomFields() async throws {
+    func test_defaultFieldsBasedFormatterWithCustomFields() throws {
         let fileURL = URL.temporaryFileURL()
 
         GliderSDK.shared.scope.extra = [:]
@@ -263,7 +277,7 @@ final class FormattersTest: XCTestCase {
     }
     
     /// Test the default human readable format using `FileTransport` transport layer.
-    func test_defaultFieldsBasedFormatter() async throws {
+    func test_defaultFieldsBasedFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -290,7 +304,7 @@ final class FormattersTest: XCTestCase {
     
     /// The following test check if structures like extra, tags and userData are correctly encoded
     /// using `queryString` option.
-    func test_fieldBasedFormatterWithQueryStringEncodedStructures() async throws {
+    func test_fieldBasedFormatterWithQueryStringEncodedStructures() throws {
         let fileURL = URL.temporaryFileURL()
 
         let fieldFormatter = FieldsFormatter(fields: [
@@ -331,7 +345,7 @@ final class FormattersTest: XCTestCase {
     }
     
     /// The following test validate how the `FieldsFormatter` works.
-    func test_fieldsBasedFormatter() async throws {
+    func test_fieldsBasedFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
         GliderSDK.shared.scope.tags = ["tag0": "valtag0"]

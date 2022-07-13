@@ -72,6 +72,27 @@ public struct Event: Codable, Equatable {
     /// Date when the event has occurred.
     public let timestamp = Date()
     
+    /// Full label of the log.
+    ///
+    /// NOTE:
+    /// It's composed by the subsystem and category
+    /// separated by a comma trimming whitespaces and newlines.
+    public var label: String? {
+        let composed = [subsystem, category]
+            .compactMap({
+                $0?.wipeCharacters(characters: "\n\r ")
+            })
+            .filter({
+                $0.isEmpty == false
+            })
+        
+        guard composed.isEmpty == false else {
+            return nil
+        }
+        
+        return composed.joined(separator: ":")
+    }
+    
     /// Associated subsystem.
     public internal(set) var subsystem: String? = nil
     

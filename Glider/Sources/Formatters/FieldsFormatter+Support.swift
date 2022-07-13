@@ -66,7 +66,9 @@ extension FieldsFormatter {
         internal init(_ field: FieldIdentifier, _ configure: Configure?) {
             self.field = field
             configure?(&self)
-            self.stringFormat = self.format.defaultStringFormatForField(field)
+            if self.stringFormat == nil {
+                self.stringFormat = self.format.defaultStringFormatForField(field)
+            }
         }
         
         public static func field(_ field: FieldIdentifier, _ configure: Configure? = nil) -> Field {
@@ -259,10 +261,12 @@ extension FieldsFormatter {
     /// The timestamp style used to format dates.
     /// - `iso8601`: Specifies a timestamp style that uses the date format string "yyyy-MM-dd HH:mm:ss.SSS zzz".
     /// - `unix`: Specifies a UNIX timestamp indicating the number of seconds elapsed since January 1, 1970.
+    /// - `xcode`· XCode format (`2009-08-30 04:54:48.128`)
     /// - `custom`: Specifies a custom date format.
     public enum TimestampStyle {
         case iso8601
         case unix
+        case xcode
         case custom(String)
     }
     
@@ -337,6 +341,13 @@ extension DateFormatter {
         return formatter
     }()
     
+    /// Date formatter for xcode styles
+    fileprivate static var xcodeDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        return formatter
+    }()
+    
     /// Internal ISO8601 date formatter.
     fileprivate static var iso8601Formatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -356,6 +367,9 @@ extension Date {
             return DateFormatter.iso8601Formatter.string(from: self)
         case .unix:
             return String(self.timeIntervalSince1970)
+        case .xcode:
+            return DateFormatter.xcodeDateFormatter.string(from: self)
+
         }
     }
     
@@ -382,15 +396,16 @@ extension Level {
 
     internal var emoji: String {
         switch self {
-        case .trace:        return "▫️"
-        case .debug:        return "▫️"
-        case .info:         return "▪️"
-        case .notice:       return "🔷"
-        case .warning:      return "🔶"
-        case .error:        return "✴️"
-        case .critical:     return "❌"
-        case .alert:        return "✴️"
-        case .emergency:    return "🆘"
+        case .debug, .trace:
+            return "⚪️"
+        case .info:
+            return "🔵"
+        case .notice:
+            return "🟡"
+        case .warning:
+            return "🟠"
+        case .alert, .emergency, .critical, .error:
+            return "🔴"
         }
     }
     

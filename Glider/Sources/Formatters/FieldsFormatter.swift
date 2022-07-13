@@ -43,14 +43,15 @@ public class FieldsFormatter: EventFormatter {
     /// - Returns: `FieldsFormatter`
     open class func `default`() -> FieldsFormatter {
         FieldsFormatter(fields: [
-            .timestamp(style: .iso8601, {
-                $0.padding = .right(columns: 20)
+            .timestamp(style: .xcode, {
+                $0.padding = .left(columns: 22)
             }),
-            .delimiter(style: .spacedPipe),
-            .level(style: .short, {
-                $0.padding = .left(columns: 3)
+            .custom({
+                " [\($0.label ?? Bundle.appName)]"
             }),
-            .delimiter(style: .space),
+            .level(style: .emoji, {
+                $0.stringFormat = " %@ "
+            }),
             .message()
         ])
     }
