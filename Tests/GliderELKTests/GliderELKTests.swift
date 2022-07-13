@@ -17,7 +17,7 @@ import NIO
 import NIOConcurrencyHelpers
 
 final class GliderELKTests: XCTestCase, GliderELKTransportDelegate {
-    
+    /*
     /// You can use <https://github.com/deviantony/docker-elk> to test the implementation.
     func test_elkTest() async throws {
         let exp = expectation(description: "test")
@@ -39,11 +39,11 @@ final class GliderELKTests: XCTestCase, GliderELKTransportDelegate {
         
         wait(for: [exp], timeout: 70)
     }
-    
+    */
     // MARK: - GliderELKTransportDelegate
     
     func elkTransport(_ transport: GliderELKTransport, didFailSendingEvent event: Event, error: Error) {
         XCTFail("Failed to send event: \(event.message.content) {error=\(error.localizedDescription)}")
     }
-
+    
 }

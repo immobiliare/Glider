@@ -4,10 +4,10 @@ import XCTest
 
 final class GliderSentryTests: XCTestCase {
    
-    
+    /*
     func testSentryTransport() async throws {
         
-        let exp = expectation(description: "test")
+        /let exp = expectation(description: "test")
         
         let ff = FieldsFormatter(fields: [
             .message()
@@ -30,5 +30,6 @@ final class GliderSentryTests: XCTestCase {
         wait(for: [exp], timeout: 60)
         
     }
+    */
     
 }

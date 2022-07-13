@@ -51,8 +51,10 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         self.delegate = delegate
         self.configuration = configuration
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
+        self.queue = configuration.queue
         self.asyncTransport = try AsyncTransport(delegate: self,
                                                  configuration: configuration.asyncTransportConfiguration)
+        self.asyncTransport?.queue = self.queue
                 
         defer {
             self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentRequests

@@ -87,27 +87,23 @@ public class AsyncTransport: Transport {
     
     // MARK: - Conformance
     
-    public func record(event: Event) -> Bool {        
-        queue!.async { [weak self] in
-            guard let self = self else { return }
+    public func record(event: Event) -> Bool {
+        do {
+            let message = self.configuration.formatters.format(event: event)
+            _ = try self.store(event: event, withMessage: message, retryAttempt: 0)
             
-            do {
-                let message = self.configuration.formatters.format(event: event)
-                _ = try self.store(event: event, withMessage: message, retryAttempt: 0)
-                
-                if self.configuration.flushOnRecord,
-                   let countStoredItems = try? self.db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
-                   countStoredItems > self.configuration.maxEntries {
-                    self.flush()
-                }
-            } catch {
-                self.delegate?.asyncTransport(self, didFailWithError: error)
+            if self.configuration.flushOnRecord,
+               let countStoredItems = try? self.db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
+               countStoredItems > self.configuration.maxEntries {
+                self.flush()
             }
+        } catch {
+            self.delegate?.asyncTransport(self, didFailWithError: error)
         }
         
         return true
     }
-        
+    
     /// Perform manual flush on buffer data.
     public func flush() {
         queue!.async {
