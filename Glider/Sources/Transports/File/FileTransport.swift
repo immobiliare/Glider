@@ -155,7 +155,7 @@ extension FileTransport {
         /// non-`nil` value will be recorded. If every formatter returns `nil`,
         /// the log entry is silently ignored and not recorded.
         public var formatters: [EventFormatter] = [
-            FieldsFormatter.default()
+            FieldsFormatter.standard()
         ]
         
         /// the GCD queue that will be used when executing tasks related to

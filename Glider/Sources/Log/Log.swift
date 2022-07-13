@@ -22,6 +22,9 @@ public class Log: Equatable {
     /// Full label of the log.
     public private(set) var label: String
     
+    /// Icon (emoji) representation of the log, if set.
+    public private(set) var subsystemIcon: String?
+    
     /// Subsystem helps you to track and identify the logger. Typically this is
     /// the bundle identifier of the package which produce the log messages.
     ///
@@ -129,6 +132,7 @@ public class Log: Equatable {
         self.category = config.category
         self.subsystem = config.subsystem
         self.label = config.label
+        self.subsystemIcon = config.subsystemIcon
         setLevel(config.level)
     }
     

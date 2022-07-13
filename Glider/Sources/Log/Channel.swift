@@ -53,6 +53,7 @@ public class Channel {
         
         // Generate the event and decorate it with the current scope and runtime attributes
         var event = Event()
+        event.log = self.log
         eventBuilder(&event)
         return write(event: &event, function: function, filePath: filePath, fileLine: fileLine)
     }
@@ -80,7 +81,8 @@ public class Channel {
         event.subsystem = log.subsystem.id
         event.category = log.category.id
         event.scope.attach(function: function, filePath: filePath, fileLine: fileLine)
-        
+        event.log = self.log
+
         log.transporter.write(&event)
         return event
     }

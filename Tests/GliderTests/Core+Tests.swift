@@ -603,7 +603,7 @@ public class TestTransport: Transport {
     /// `nil` means every passing message level is accepted.
     public var minimumAcceptedLevel: Level? = nil
     
-    init(formatters: [EventFormatter] = [FieldsFormatter.default()], onReceiveEvent: @escaping OnReceiveEvent) {
+    init(formatters: [EventFormatter] = [FieldsFormatter.standard()], onReceiveEvent: @escaping OnReceiveEvent) {
         self.formatters = formatters
         self.onReceiveEvent = onReceiveEvent
     }

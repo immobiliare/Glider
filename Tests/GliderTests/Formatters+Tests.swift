@@ -17,17 +17,37 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
-    func test_dateFormatting() throws {
+    /// The following test check the default formatter used for console.
+    func test_logFormattingStandardWithIcon() throws {
+        let expectedMsgs = [
+            "[🌎:general] 🔵 Hello guys",
+            "[com.indomionetwork:general] INFO Hello guys",
+            "[🌎:general] INFO Hello guys",
+            "[com.indomionetwork:general] INFO Hello guys"
+        ]
+        
+        var indexToCheck = 0
+        
+        let transport = TestTransport(formatters: [FieldsFormatter.standard(useSubsystemIcon: true)], onReceiveEvent: { _, msg in
+            print(msg)
+            XCTAssertTrue(msg.contains(expectedMsgs[indexToCheck]))
+            indexToCheck += 1
+        })
+        
+        
         let log = Log {
-            $0.subsystem = "com.myapp"
-            $0.category = "network"
-            $0.transports = [
-                TestTransport(formatters: [FieldsFormatter.default()], onReceiveEvent: { event, msg in
-                    print(msg)
-                })
-            ]
+            $0.subsystem = "com.indomionetwork"
+            $0.category = "general"
+            $0.subsystemIcon = "🌎"
+            $0.transports = [transport]
         }
         
+        log.info?.write(msg: "Hello guys")
+        transport.formatters = [FieldsFormatter.standard(useSubsystemIcon: false, severityIcon: false)]
+        log.info?.write(msg: "Hello guys")
+        transport.formatters = [FieldsFormatter.standard(useSubsystemIcon: true, severityIcon: false)]
+        log.info?.write(msg: "Hello guys")
+        transport.formatters = [FieldsFormatter.standard(useSubsystemIcon: false, severityIcon: false)]
         log.info?.write(msg: "Hello guys")
     }
     
@@ -97,7 +117,7 @@ final class FormattersTest: XCTestCase {
     func test_msgPackFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
-        let msgPack = MsgPackFormatter.default()
+        let msgPack = MsgPackFormatter.standard()
         let fileTransport = try FileTransport(fileURL: fileURL, {
             $0.formatters = [msgPack]
         })
@@ -145,7 +165,7 @@ final class FormattersTest: XCTestCase {
     func test_jsonFormatter() throws {
         let fileURL = URL.temporaryFileURL()
 
-        let jsonFormatter = JSONFormatter.default()
+        let jsonFormatter = JSONFormatter.standard()
         let fileTransport = try FileTransport(fileURL: fileURL, {
             $0.formatters = [jsonFormatter]
         })
@@ -196,7 +216,7 @@ final class FormattersTest: XCTestCase {
     func test_jsonFormatterWithBase64ImageEncoded() throws {
         let fileURL = URL.temporaryFileURL()
 
-        let jsonFormatter = JSONFormatter.default()
+        let jsonFormatter = JSONFormatter.standard()
         jsonFormatter.fields.append(.extra(keys: nil))
         jsonFormatter.encodeDataAsBase64 = true
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -281,7 +301,7 @@ final class FormattersTest: XCTestCase {
         let fileURL = URL.temporaryFileURL()
 
         let fileTransport = try FileTransport(fileURL: fileURL, {
-            $0.formatters = [FieldsFormatter.default()]
+            $0.formatters = [FieldsFormatter.standard()]
         })
         
         let log = Log {

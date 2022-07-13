@@ -42,7 +42,7 @@ final class SizeRotationTransportTests: XCTestCase, SizeRotationFileTransportDel
             $0.maxFilesCount = maxFileCount
             $0.maxFileSize = maxFileSize
             $0.filePrefix = filePrefix
-            $0.formatters = [JSONFormatter.default()]
+            $0.formatters = [JSONFormatter.standard()]
             $0.delegate = self
         }
         

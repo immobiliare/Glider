@@ -28,6 +28,9 @@ public struct Event: Codable, Equatable {
     /// It will be set automatically on init.
     public private(set) var id: String
     
+    /// A weak reference to the log who generated the message.
+    public internal(set) weak var log: Log?
+    
     /// Message to record.
     public var message: Message
     

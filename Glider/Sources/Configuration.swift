@@ -19,6 +19,12 @@ extension Log {
         
         // MARK: - Log Initial Configuration
         
+        /// You can assign an emoji to your log and use it instead of printing
+        /// the `subsystem` for a better overlook.
+        /// 
+        /// By default is set to `nil`.
+        public var subsystemIcon: String?
+        
         /// Subsystem of the log.
         public var subsystem: LoggerIdentifiable = ""
         

@@ -221,6 +221,7 @@ extension FieldsFormatter.FieldIdentifier {
     /// Table's ID title.
     internal var tableTitle: String? {
         switch self {
+        case .icon:             return "ID"
         case .message:          return "Message"
         case .callSite:         return "Call site"
         case .callingThread:    return "Thread"

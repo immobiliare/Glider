@@ -48,9 +48,10 @@ public class JSONFormatter: FieldsFormatter {
             }
     
     /// Use the default JSON formatter message.
+    /// (`useIcon` and `severityIcon` are ignored).
     ///
     /// - Returns: `JSONFormatter`
-    public override class func `default`() -> JSONFormatter {
+    public override class func standard(useSubsystemIcon: Bool = false, severityIcon: Bool = true) -> JSONFormatter {
         JSONFormatter(jsonOptions: [],
                       encodeDataAsBase64: false,
                       fields: [

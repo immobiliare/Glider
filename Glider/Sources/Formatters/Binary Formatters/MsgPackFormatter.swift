@@ -22,8 +22,10 @@ public class MsgPackFormatter: FieldsFormatter {
     /// - object metadata
     /// - object serialized
     ///
-    /// - Returns: MsgPackFormatter
-    public override class func `default`() -> MsgPackFormatter {
+    /// (`useIcon` and `severityIcon` are ignored).
+    ///
+    /// - Returns: `MsgPackFormatter`
+    public override class func standard(useSubsystemIcon: Bool = false, severityIcon: Bool = true) -> MsgPackFormatter {
         MsgPackFormatter(fields: [
             .timestamp(style: .iso8601),
             .level(style: .numeric),

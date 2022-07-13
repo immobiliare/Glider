@@ -31,25 +31,24 @@ public class FieldsFormatter: EventFormatter {
     }
     
     /// Return the default log formatter.
-    /// It's composed by:
-    ///     - timestamp as ISO8601 padded right with 20 chars
-    ///     - a pipe
-    ///     - short event's severity level
-    ///     - delimiter with space
-    ///     - message
-    ///
-    /// Example:
-    ///     `2022-05-24T13:20:52Z | INFO test message one`
+    /// - Parameters:
+    ///   - useSubsystemIcon: `true` to use parent log's `icon` (if available) instead of the label of the log (`subsystem` + `category`).
+    ///                       When unavailable the application's name is used as label of the log.
+    ///   - severityIcon: `true` to use emoji representation for severity levels in events instead of short description (like `ERR`).
     /// - Returns: `FieldsFormatter`
-    open class func `default`() -> FieldsFormatter {
+    open class func standard(useSubsystemIcon: Bool = false, severityIcon: Bool = true) -> FieldsFormatter {
         FieldsFormatter(fields: [
             .timestamp(style: .xcode, {
                 $0.padding = .left(columns: 22)
             }),
             .custom({
-                " [\($0.label ?? Bundle.appName)]"
+                if useSubsystemIcon, let icon = $0.log?.subsystemIcon {
+                    return " [\(icon):\($0.category ?? Bundle.appName)]"
+                }
+                
+                return " [\($0.label ?? Bundle.appName)]"
             }),
-            .level(style: .emoji, {
+            .level(style: (severityIcon ? .emoji : .short), {
                 $0.stringFormat = " %@ "
             }),
             .message()
@@ -123,6 +122,9 @@ internal extension Event {
             
         case .object:
             return serializedObjectData
+            
+        case .icon:
+            return log?.subsystemIcon
             
         case .objectMetadata(let keys):
             return serializedObjectMetadata?.filteredByKeys(keys)

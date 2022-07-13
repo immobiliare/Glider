@@ -71,6 +71,10 @@ extension FieldsFormatter {
             }
         }
         
+        public static func icon(_ configure: Configure? = nil) -> Field {
+            self.init(.icon, configure)
+        }
+        
         public static func field(_ field: FieldIdentifier, _ configure: Configure? = nil) -> Field {
             self.init(field, configure)
         }
@@ -179,6 +183,7 @@ extension FieldsFormatter {
     /// Represent the individual key of a formatted log when using
     /// the `FieldsFormatter` formatter.
     ///
+    /// - `icon`: icon representation of the log as emoji character(s).
     /// - `category`: category identifier of the parent's log.
     /// - `subsystem`: subsystem identifier of the parent's log.
     /// - `eventUUID`: identifier of the event, autoassigned.
@@ -203,6 +208,7 @@ extension FieldsFormatter {
     /// - `extra`: `keys` values for given `keys` found in event's `extra`.
     /// - `custom`: apply custom tranformation function which receive the `event` instance.
     public enum FieldIdentifier {
+        case icon
         case category
         case subsystem
         case eventUUID

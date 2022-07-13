@@ -203,7 +203,7 @@ extension SizeRotationFileTransport {
         
         /// Formatters used for data.
         public var formatters: [EventFormatter] = [
-            FieldsFormatter.default()
+            FieldsFormatter.standard()
         ]
         
         /// Maximum size per single file.
