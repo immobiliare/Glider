@@ -603,17 +603,13 @@ public class TestTransport: Transport {
     /// `nil` means every passing message level is accepted.
     public var minimumAcceptedLevel: Level? = nil
     
-    init(formatters: [EventFormatter] = [], onReceiveEvent: @escaping OnReceiveEvent) {
+    init(formatters: [EventFormatter] = [FieldsFormatter.default()], onReceiveEvent: @escaping OnReceiveEvent) {
         self.formatters = formatters
         self.onReceiveEvent = onReceiveEvent
     }
     
     public func record(event: Event) -> Bool {
-        guard let message = formatters.format(event: event)?.asString(),
-              message.isEmpty == false else {
-            return false
-        }
-        
+        let message = formatters.format(event: event)?.asString() ?? ""
         onReceiveEvent?(event, message)
         return true
     }
