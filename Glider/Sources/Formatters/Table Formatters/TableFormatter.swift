@@ -163,7 +163,7 @@ public class TableFormatter: EventFormatter {
                 }
                 for index in 0..<keys.count {
                     contents.append(keys[index])
-                    contents.append(postProcessValue(arrayValue[index], forField: field))
+                    contents.append(arrayValue[index].applyFormattingOfField(field))
                 }
                 
             case let dictionaryValue as [String: Any]:
@@ -175,12 +175,12 @@ public class TableFormatter: EventFormatter {
                     }
                     
                     contents.append(key)
-                    contents.append(postProcessValue(value.asString() ?? "", forField: field))
+                    contents.append(value.asString()?.applyFormattingOfField(field) ?? "")
                 }
                 
             case let customKeyValue as (key: String, value: String):
                 contents.append(customKeyValue.key)
-                contents.append(postProcessValue(customKeyValue.value, forField: field))
+                contents.append(customKeyValue.value.applyFormattingOfField(field))
                 
             default:
                 // Just report the row with value
@@ -189,27 +189,11 @@ public class TableFormatter: EventFormatter {
                 }
                 
                 contents.append(tableTitle)
-                contents.append(postProcessValue(stringifiedValue, forField: field))
+                contents.append(stringifiedValue.applyFormattingOfField(field))
             }
         }
         
         return contents
-    }
-    
-    private func postProcessValue(_ value: String, forField field: FieldsFormatter.Field) -> String {
-        var stringifiedValue = value
-        
-        // Custom text transform
-        for transform in field.transforms ?? [] {
-            stringifiedValue = transform(stringifiedValue)
-        }
-        
-        var stringValue = stringifiedValue.trunc(field.truncate).padded(field.padding)
-        if let format = field.stringFormat {
-            stringValue = String.format(format, value: stringValue)
-        }
-        
-        return stringifiedValue
     }
     
 }

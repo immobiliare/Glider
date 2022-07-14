@@ -85,7 +85,7 @@ extension ConsoleTransport {
         ///
         /// - Parameter builder: builder configuration.
         public init(_ builder: ((inout Configuration) -> Void)?) {
-            self.formatters = [FieldsFormatter.standard()]
+            self.formatters = [XCodeFormatter.init()]
             builder?(&self)
         }
         

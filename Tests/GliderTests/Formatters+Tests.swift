@@ -12,10 +12,33 @@
 
 import Foundation
 
+#if os(iOS) || os(tvOS) || os(watchOS)
+import UIKit
+#endif
+
 import XCTest
 @testable import Glider
 
 final class FormattersTest: XCTestCase {
+    
+    func test_xCodeColorized() throws {
+        let formatter = XCodeFormatter(showCallSite: true,
+                                       colorize: .onlyImportant,
+                                       colorizeFields: [.level])
+        let transport = TestTransport(formatters: [formatter], onReceiveEvent: { _, msg in
+            print(msg)
+        })
+        
+        let log = Log {
+            $0.subsystem = "com.indomionetwork"
+            $0.category = "general"
+            $0.subsystemIcon = "🌎"
+            $0.transports = [transport]
+        }
+        
+        log.error?.write(msg: "Hello guys")
+        
+    }
     
     /// The following test check the default formatter used for console.
     func test_logFormattingStandardWithIcon() throws {
@@ -79,7 +102,7 @@ final class FormattersTest: XCTestCase {
     }
     
     func test_xcodeLogFormatter() throws {
-        let xcodeFormatter = XCodeLogFormatter()
+        let xcodeFormatter = XCodeFormatter()
         
         let console = ConsoleTransport {
             $0.formatters = [xcodeFormatter]
@@ -212,6 +235,7 @@ final class FormattersTest: XCTestCase {
         XCTAssertEqual(globalTagsValue, "valueTag")
     }
     
+    #if os(iOS) || os(tvOS) || os(watchOS)
     /// This test the `JSONFormatter` encoding an `UIImage` and checking the result along with the metadata associated.
     func test_jsonFormatterWithBase64ImageEncoded() throws {
         let fileURL = URL.temporaryFileURL()
@@ -247,6 +271,7 @@ final class FormattersTest: XCTestCase {
         XCTAssertEqual(imageWidth, "\(size.width)")
         XCTAssertEqual(imageHeight, "\(size.height)")
     }
+    #endif
 
     func test_defaultFieldsBasedFormatterWithCustomFields() throws {
         let fileURL = URL.temporaryFileURL()
@@ -475,6 +500,8 @@ fileprivate struct UserTest: SerializableObject, Codable {
     public var role: String?
 }
 
+#if os(iOS) || os(tvOS) || os(watchOS)
+
 fileprivate extension UIImage {
     
      static func imageWithSize(size : CGSize, color : UIColor = UIColor.white) -> UIImage? {
@@ -492,6 +519,8 @@ fileprivate extension UIImage {
     
     
 }
+
+#endif
 
 extension Dictionary {
     

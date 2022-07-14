@@ -35,8 +35,10 @@ public class FieldsFormatter: EventFormatter {
     ///   - useSubsystemIcon: `true` to use parent log's `icon` (if available) instead of the label of the log (`subsystem` + `category`).
     ///                       When unavailable the application's name is used as label of the log.
     ///   - severityIcon: `true` to use emoji representation for severity levels in events instead of short description (like `ERR`).
+    ///   - colorizeText: `true` to apply color to the text.
     /// - Returns: `FieldsFormatter`
-    open class func standard(useSubsystemIcon: Bool = false, severityIcon: Bool = true) -> FieldsFormatter {
+    open class func standard(useSubsystemIcon: Bool = false,
+                             severityIcon: Bool = true) -> FieldsFormatter {
         FieldsFormatter(fields: [
             .timestamp(style: .xcode, {
                 $0.padding = .left(columns: 22)
@@ -67,23 +69,14 @@ public class FieldsFormatter: EventFormatter {
     
     open func valuesForEvent(event: Event) -> [String?] {
         fields.map { field in
-            guard let value = event.valueForFormatterField(field),
-                  var stringifiedValue = field.format.stringify(value, forField: field) else {
-                return nil
-            }
+            var transformedField = field
+            field.onCustomizeForEvent?(event, &transformedField)
             
-            // Custom text transform
-            for transform in field.transforms ?? [] {
-                stringifiedValue = transform(stringifiedValue)
-            }
-            
-            var stringValue = stringifiedValue.trunc(field.truncate).padded(field.padding)
-            if let format = field.stringFormat {
-                stringValue = String.format(format, value: stringValue)
-            }
-            return stringValue
+            let value = event.valueForFormatterField(transformedField)
+            return transformedField.format
+                .stringify(value, forField: transformedField)?
+                .applyFormattingOfField(transformedField)
         }
-        
     }
     
 }

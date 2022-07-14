@@ -39,6 +39,9 @@ extension FieldsFormatter {
         /// Some formatters (like the `JSONFormatter`= uses this value to print the field's readable label.
         public var label: String?
         
+        /// Color to apply to the string.
+        public var color: FieldsFormatterColor?
+        
         /// For array and dictionaries (like extra or tags) you can specify a format to write the content.
         ///
         /// By default is set to `auto`.
@@ -46,6 +49,12 @@ extension FieldsFormatter {
         
         /// When encoding a field which contains array or dictionary the item separator is used to compose the string.
         public var separator: String = ","
+        
+        /// Allows you to further customize the `Field` options per single message received.
+        /// You can, for example, customize the message color based upon severity level
+        /// (see `XCodeFormatter` for an example).
+        /// You can customize the received `Field` instance which is a copy of self.
+        public var onCustomizeForEvent: ((Event, inout Field) -> Void)?
         
         // MARK: - Internal Properties
         
@@ -654,5 +663,27 @@ extension FieldsFormatter {
         
     }
     
+}
+
+extension String {
+    
+    public func applyFormattingOfField(_ field: FieldsFormatter.Field) -> String {        
+        var value = self
+        // Custom text transform
+        for transform in field.transforms ?? [] {
+            value = transform(value)
+        }
+        
+        value = value.trunc(field.truncate).padded(field.padding)
+        if let format = field.stringFormat {
+            value = String.format(format, value: stringValue)
+        }
+        
+        if let color = field.color {
+            value = color.colorize(value)
+        }
+        
+        return value
+    }
     
 }

@@ -13,6 +13,11 @@
 import Foundation
 import Network
 
+#if os(iOS) || os(tvOS) || os(watchOS)
+import CoreGraphics
+import UIKit
+
+
 import XCTest
 @testable import Glider
 import CloudKit
@@ -79,7 +84,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
         transport.disconnect(closeCode: .protocolCode(.normalClosure))
         server?.stop()
     }
-    
+
     override func tearDown() async throws {
         try await super.tearDown()
         
@@ -183,3 +188,5 @@ extension UIImage {
 
 
 }
+
+#endif

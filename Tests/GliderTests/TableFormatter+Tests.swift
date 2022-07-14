@@ -15,7 +15,43 @@ import Foundation
 import XCTest
 @testable import Glider
 
+extension String {
+    
+    
+    func failureColor() -> String {
+        return Array(self).map({ "\($0)\u{fe06}"}).joined()
+    }
+    
+    func successColor() -> String {
+        return Array(self).map({ "\($0)\u{fe07}"}).joined()
+    }
+    
+    func warningColor() -> String {
+        return Array(self).map({ "\($0)\u{fe08}"}).joined()
+    }
+    
+    func anothe() -> String {
+        return Array(self).map({ "\($0)\u{fe09}"}).joined()
+    }
+    
+    func anothe2() -> String {
+        return Array(self).map({ "\($0)\u{fe0A}"}).joined()
+    }
+    
+    func anothe23() -> String {
+        return Array(self).map({ "\($0)\u{fe05}"}).joined()
+    }
+}
+
+
+
 final class TableFormattersTest: XCTestCase {
+    
+    func test_d() {
+        print("They're all dead. Everybody's dead, Dave.".failureColor() + " come vA".anothe23())
+        print("Hello World!".successColor())
+        print("Houston we have a problem.".warningColor())
+    }
 
     /// The following test check if the `TableFormatter` return valid values
     /// when printed to the console.

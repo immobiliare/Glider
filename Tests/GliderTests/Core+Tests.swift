@@ -426,6 +426,7 @@ final class CoreTests: XCTestCase {
         
     }
     
+#if os(iOS) || os(tvOS) || os(watchOS)
     /// The following tests check if automatic encoding of `UIImage` works properly.
     func test_eventObjectSerializationWithUIImage() async throws {
         let imageData = try! Data(contentsOf: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Wikisource-logo.png/360px-Wikisource-logo.png")!)
@@ -450,6 +451,7 @@ final class CoreTests: XCTestCase {
         })
         
     }
+#endif
     
     /// The following test check if custom serialization for `SerializableObject` objects works properly.
     func test_eventObjectSerializationWithCustomSerializeFunction() async throws {
