@@ -399,7 +399,7 @@ extension Level {
         case .numeric:
             return String(describing: rawValue)
         case .simple:
-            return description
+            return description.uppercased()
         case .emoji:
             return emoji
         case .short:

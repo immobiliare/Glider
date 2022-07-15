@@ -60,12 +60,21 @@ public class XCodeFormatter: FieldsFormatter {
     ///   setup the environment to show colors!
     public init(showCallSite: Bool = false,
                 colorize: ColorizeMode = .onlyImportant,
-                colorizeFields: ColorizeFields = [.level]) {
+                colorizeFields: ColorizeFields = [.level, .message]) {
         let fields: [FieldsFormatter.Field] = [
             .timestamp(style: .iso8601),
             .literal(" "),
-            .level(style: .short, {
+            (showCallSite == false ? nil : .callSite({
+                $0.stringFormat = "(%@) "
+                if colorizeFields.contains(.callSite) {
+                    $0.onCustomizeForEvent = { event, tField in
+                        tField.color = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
+                    }
+                }
+            })),
+            .level(style: .simple, {
                 $0.padding = .right(columns: 4)
+                $0.stringFormat = "[%@] "
                 if colorizeFields.contains(.level) {
                     $0.onCustomizeForEvent = { event, tField in
                         // change the formatting field based upon the serverity of the log.
@@ -73,15 +82,6 @@ public class XCodeFormatter: FieldsFormatter {
                     }
                 }
             }),
-            (showCallSite == false ? nil : .callSite({
-                $0.stringFormat = " (%@) "
-                if colorizeFields.contains(.callSite) {
-                    $0.onCustomizeForEvent = { event, tField in
-                        tField.color = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
-                    }
-                }
-            })),
-            .literal(": "),
             .message({
                 if colorizeFields.contains(.message) {
                     $0.onCustomizeForEvent = { event, tField in

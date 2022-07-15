@@ -24,7 +24,7 @@ final class FormattersTest: XCTestCase {
     func test_xCodeColorized() throws {
         let formatter = XCodeFormatter(showCallSite: true,
                                        colorize: .onlyImportant,
-                                       colorizeFields: [.level])
+                                       colorizeFields: [.level, .message])
         let transport = TestTransport(formatters: [formatter], onReceiveEvent: { _, msg in
             print(msg)
         })
@@ -36,8 +36,7 @@ final class FormattersTest: XCTestCase {
             $0.transports = [transport]
         }
         
-        log.error?.write(msg: "Hello guys")
-        
+        log.error?.write(msg: "Some error has occurred")
     }
     
     /// The following test check the default formatter used for console.
