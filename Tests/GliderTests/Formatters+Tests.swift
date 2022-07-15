@@ -54,6 +54,55 @@ final class FormattersTest: XCTestCase {
             .filter({ $0.isEmpty == false })
         XCTAssertEqual(readFileLines.count, eventsToPrint)
         
+        let isoFormatter = ISO8601DateFormatter()
+        
+        for line in readFileLines {
+            guard let space = line.firstIndex(of: " ") else {
+                XCTFail()
+                return
+            }
+            let date = String(line[line.startIndex..<space])
+            XCTAssertNotNil(isoFormatter.date(from: date))
+            
+            let text = String(line[space...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            var messageText = ""
+            
+            if let range = text.range(of: "] ") {
+                messageText = String(text[range.upperBound...])
+            }
+
+            XCTAssertEqual("\u{1B}", text[0])
+            XCTAssertEqual("\u{1B}", messageText[0..<1])
+            
+            var colorCode = ""
+            
+            if text.contains("[INFO]") {
+                colorCode = "36"
+            } else if text.contains("[ERROR]") {
+                colorCode = "31"
+            } else if text.contains("[WARNING]") {
+                colorCode = "35"
+            } else if text.contains("[TRACE]") {
+                colorCode = "32"
+            } else if text.contains("[NOTICE]") {
+                colorCode = "35"
+            } else if text.contains("[ALERT]") {
+                colorCode = "31"
+            } else if text.contains("[EMERGENCY]") {
+                colorCode = "31"
+            } else if text.contains("[DEBUG]") {
+                colorCode = "36"
+            } else if text.contains("[CRITICAL]") {
+                colorCode = "31"
+            } else {
+                XCTFail("Unexpected message")
+            }
+            
+            XCTAssertEqual(text[1..<6], "[\(colorCode)m[")
+            XCTAssertEqual(messageText[1..<9], "[0m\u{1B}[\(colorCode)m")
+            XCTAssertEqual(messageText[messageText.count-3..<messageText.count], "[0m")
+        }
+        
     }
     
     /// Test the `XCodeFormatter` to format colorized/non colorized messages into the IDE debug console.
@@ -556,27 +605,3 @@ fileprivate extension UIImage {
 }
 
 #endif
-
-extension Dictionary {
-    
-    public func valueAtKeyPath<T>(_ keyPath: String) -> T? {
-        var keys = keyPath.components(separatedBy: ".")
-        guard let first = keys.first as? Key else {
-            debugPrint("Unable to use string as key on type: \(Key.self)")
-            return nil
-        }
-        
-        guard let value = self[first] else {
-            return nil
-        }
-        
-        keys.remove(at: 0)
-        if !keys.isEmpty, let subDict = value as? [String : Any?] {
-            let rejoined = keys.joined(separator: ".")
-            
-            return subDict.valueAtKeyPath(rejoined)
-        }
-        return value as? T
-    }
-    
-}
