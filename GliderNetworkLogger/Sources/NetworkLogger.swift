@@ -12,7 +12,7 @@
 
 import Foundation
 import Glider
-
+/*
 /// The `NetworkLogger` class is used to perform networking monitoring of your app.
 /// It will intercepts any call coming from a third party library like RealHTTP or Alamofire
 /// and URLSession too. It allows to specify a `Log` instance where the logs are redirected to.
@@ -93,11 +93,11 @@ public final class NetworkLogger: NSObject {
     ///   - enabled: `true` to enable capture, `false` to disable.
     ///   - destinationLog: destination log, if `nil` a default console-based log instance is created for you.
     public static func captureGlobalTraffic(enabled: Bool, toLog destinationLog: Log? = nil) {
-      /*  if enabled {
+        if enabled {
             URLProtocol.registerClass(CustomHTTPProtocol.self)
         } else {
             URLProtocol.unregisterClass(CustomHTTPProtocol.self)
-        }*/
+        }
     }
     
     // MARK: - Private Functions (Helper)
@@ -190,3 +190,4 @@ extension NetworkLogger: URLSessionDataDelegate {
     }
     
 }
+*/

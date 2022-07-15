@@ -9,7 +9,7 @@
 //  Copyright ©2022 Daniele Margutti. All rights reserved.
 //  Licensed under MIT License.
 //
-
+/*
 import Foundation
 import Glider
 
@@ -52,3 +52,4 @@ extension NetworkEvent {
     }
     
 }
+*/

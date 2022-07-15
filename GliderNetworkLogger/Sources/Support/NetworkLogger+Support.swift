@@ -11,7 +11,7 @@
 //
 
 import Foundation
-
+/*
 internal extension URLSession {
     
     /// Swizzle URLSession to intercept network request.
@@ -26,3 +26,4 @@ internal extension URLSession {
     }
     
 }
+*/
