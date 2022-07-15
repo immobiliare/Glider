@@ -23,7 +23,7 @@ import Darwin.C.stdio
 /// Messages having a severity of `.verbose`, `.debug` and `.info` will be
 /// directed to `stdout`, while those with a severity of `.warning` and `.error`
 /// are directed to `stderr`.
-public class StdStreamsTransport: Transport {
+open class StdStreamsTransport: Transport {
     
     // MARK: - Public Properties
     
@@ -37,10 +37,10 @@ public class StdStreamsTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level? = nil
     
     /// Transport is enabled.
-    public var isEnabled: Bool = true
+    open var isEnabled: Bool = true
     
     // MARK: - Private Properties
     

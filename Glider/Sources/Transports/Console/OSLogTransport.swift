@@ -17,7 +17,7 @@ import os.log
 /// The `OSLogTransport` is an implemention of the `Transport` protocol that
 /// records log entries using the new unified logging system available
 /// as of iOS 10.0, macOS 10.12, tvOS 10.0, and watchOS 3.0.
-public class OSLogTransport: Transport {
+open class OSLogTransport: Transport {
     
     // MARK: - Public Properties
     
@@ -29,13 +29,13 @@ public class OSLogTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level? = nil
     
     // The `OSLog` used to perform logging.
     public let log: OSLog
     
     // The GCD queue used by the receiver to record messages.
-    public var queue: DispatchQueue?
+    open var queue: DispatchQueue?
     
     // MARK: - Initialization
     

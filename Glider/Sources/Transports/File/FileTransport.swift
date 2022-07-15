@@ -22,7 +22,7 @@ import Darwin.C.stdio
 /// file.
 /// Use a `RotatingLogTrasport` instead if you'd rather not have to concern
 /// yourself with such details.
-public class FileTransport: Transport {
+open class FileTransport: Transport {
     
     // MARK: - Public Properties
     
@@ -45,7 +45,7 @@ public class FileTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level? = nil
     
     /// Current file size (expressed in bytes).
     public var size: UInt64 {
@@ -53,7 +53,7 @@ public class FileTransport: Transport {
     }
     
     /// Newline characters, by default `\n` are used.
-    public var newlines = "\r\n" {
+    open var newlines = "\r\n" {
         didSet {
             self.newLinesData = newlines.data(using: .utf8)
         }
@@ -110,7 +110,7 @@ public class FileTransport: Transport {
     
     // MARK: - Public Functions
     
-    public func record(event: Event) -> Bool {        
+    open func record(event: Event) -> Bool {
         guard let message = configuration.formatters.format(event: event)?.asData(),
               message.isEmpty == false else {
             return false
@@ -127,7 +127,7 @@ public class FileTransport: Transport {
     }
     
     /// Close pointer to file handler.
-    internal func close() {
+    open func close() {
         try? fileHandle?.close()
         fileHandle = nil
     }

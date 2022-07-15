@@ -13,22 +13,22 @@
 import Foundation
 
 /// `ConsoleTransport` is used to print log directly on Xcode or other IDE console.
-public class ConsoleTransport: Transport {
+open class ConsoleTransport: Transport {
     
     // MARK: - Public Properties
     
     /// GCD queue.
-    public var queue: DispatchQueue? = nil
+    open var queue: DispatchQueue? = nil
     
     /// Transport is enabled.
-    public var isEnabled: Bool = true
+    open var isEnabled: Bool = true
     
     /// Configuration.
     public let configuration: Configuration
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level? = nil
     
     // MARK: - Initialization
     

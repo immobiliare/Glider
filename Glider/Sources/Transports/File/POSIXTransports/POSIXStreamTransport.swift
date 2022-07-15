@@ -14,7 +14,7 @@ import Foundation
 import Darwin.C.stdio
 
 /// This transport  output that can output text messages to POSIX stream.
-public class POSIXStreamTransport: Transport {
+open class POSIXStreamTransport: Transport {
     
     // MARK: - Public Properties
     
@@ -22,14 +22,14 @@ public class POSIXStreamTransport: Transport {
     public let configuration: Configuration
     
     /// Dispatch queue.
-    public var queue: DispatchQueue?
+    open var queue: DispatchQueue?
     
     /// Transport is enabled.
-    public var isEnabled: Bool = true
+    open var isEnabled: Bool = true
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level? = nil
     
     // MARK: - Initialization
     
