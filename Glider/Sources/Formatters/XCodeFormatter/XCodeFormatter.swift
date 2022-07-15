@@ -68,7 +68,7 @@ public class XCodeFormatter: FieldsFormatter {
                 callSiteCfg.stringFormat = "(%@) "
                 if colorizeFields.contains(.callSite) {
                     callSiteCfg.onCustomizeForEvent = { event, tField in
-                        tField.colors = [XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)]
+                        tField.colors = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
                     }
                 }
             })),
@@ -78,14 +78,14 @@ public class XCodeFormatter: FieldsFormatter {
                 if colorizeFields.contains(.level) {
                     levelCfg.onCustomizeForEvent = { event, tField in
                         // change the formatting field based upon the serverity of the log.
-                        tField.colors = [XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)]
+                        tField.colors = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
                     }
                 }
             }),
             .message({ msgCfg in
                 if colorizeFields.contains(.message) {
                     msgCfg.onCustomizeForEvent = { event, tField in
-                        tField.colors = [XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)]
+                        tField.colors = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
                     }
                 }
             })

@@ -84,20 +84,20 @@ extension XCodeFormatter {
         ///   - level: level of the event.
         ///   - mode: colorization mode to follow.
         /// - Returns: `XCodeConsoleColor?`
-        internal static func bestColorForEventLevel(_ level: Level, mode: ColorizeMode) -> XCodeConsoleColor? {
+        internal static func bestColorForEventLevel(_ level: Level, mode: ColorizeMode) -> [XCodeConsoleColor]? {
             if mode == .none { return nil }
             
             switch level {
             case .emergency, .alert, .critical, .error:
-                return .red
+                return [.red]
             case .warning, .notice:
-                return .ochre
+                return [.ochre]
             case .info, .debug:
                 guard case .all = mode else { return nil }
-                return .cyan
+                return [.cyan]
             case .trace:
                 guard case .all = mode else { return nil }
-                return .green
+                return [.green]
             }
         }
         

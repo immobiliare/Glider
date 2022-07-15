@@ -45,14 +45,14 @@ open class TerminalFormatter: FieldsFormatter {
                 if colorizeFields.contains(.level) {
                     levelCfg.onCustomizeForEvent = { event, tField in
                         // change the formatting field based upon the serverity of the log.
-                        tField.colors = [ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)]
+                        tField.colors = ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)
                     }
                 }
             }),
             .message({ msgConfig in
                 if colorizeFields.contains(.message) {
                     msgConfig.onCustomizeForEvent = { event, tField in
-                        tField.colors = [ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)]
+                        tField.colors = ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)
                     }
                 }
             })
@@ -70,20 +70,20 @@ open class TerminalFormatter: FieldsFormatter {
 
 fileprivate extension ANSITerminalStyles {
     
-    static func bestColorForEventLevel(_ level: Level, mode: XCodeFormatter.ColorizeMode) -> ANSITerminalStyles? {
+    static func bestColorForEventLevel(_ level: Level, mode: XCodeFormatter.ColorizeMode) -> [ANSITerminalStyles]? {
         if mode == .none { return nil }
         
         switch level {
         case .emergency, .alert, .critical, .error:
-            return .fg(.red)
+            return [.fg(.red)]
         case .warning, .notice:
-            return .fg(.magenta)
+            return [.fg(.magenta)]
         case .info, .debug:
             guard case .all = mode else { return nil }
-            return .fg(.cyan)
+            return [.fg(.cyan)]
         case .trace:
             guard case .all = mode else { return nil }
-            return .fg(.green)
+            return [.fg(.green)]
         }
     }
     
