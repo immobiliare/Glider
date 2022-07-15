@@ -439,6 +439,18 @@ extension Level {
     
 }
 
+// MARK: - Colorization
+
+public protocol FieldsFormatterColor {
+    
+    /// Colorize string with self.
+    ///
+    /// - Parameter string: string to colorize.
+    /// - Returns: `String`
+    func colorize(_ string: String) -> String
+    
+}
+
 // MARK: - FieldsFormatter.CallingThreadStyle
 
 extension FieldsFormatter.CallingThreadStyle {
