@@ -12,6 +12,14 @@
 
 import Foundation
 
+/// The`XCodeFormatter` is used to print messages directly on XCode debug console.
+/// It mimics the typical structure of debug messages and also add colorization
+/// to the output.
+///
+/// NOTE:
+/// Colorization was implemented by using font's variants. See the `colorize`
+/// property documentation to learn how to properly setup the environment in order
+/// to see colors.
 public class XCodeFormatter: FieldsFormatter {
     
     // MARK: - Public Properties
@@ -58,7 +66,6 @@ public class XCodeFormatter: FieldsFormatter {
             .literal(" "),
             .level(style: .short, {
                 $0.padding = .right(columns: 4)
-                
                 if colorizeFields.contains(.level) {
                     $0.onCustomizeForEvent = { event, tField in
                         // change the formatting field based upon the serverity of the log.
@@ -68,7 +75,6 @@ public class XCodeFormatter: FieldsFormatter {
             }),
             (showCallSite == false ? nil : .callSite({
                 $0.stringFormat = " (%@) "
-                
                 if colorizeFields.contains(.callSite) {
                     $0.onCustomizeForEvent = { event, tField in
                         tField.color = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
@@ -99,7 +105,7 @@ public class XCodeFormatter: FieldsFormatter {
     
 }
 
-// MARK: - XCodeLogFormatter.LogElements
+// MARK: - XCodeLogFormatter Helper
 
 extension XCodeFormatter {
     
@@ -145,7 +151,8 @@ extension XCodeFormatter {
         case cyan
         case violet
         
-        /// Apply escape codes to colorize the text.
+        /// Apply unicode variant codes to colorize the text.
+        /// `ColoredConsole-Bold` fonts must be active in console to see the result.
         ///
         /// - Parameter string: string message.
         /// - Returns: `String`
