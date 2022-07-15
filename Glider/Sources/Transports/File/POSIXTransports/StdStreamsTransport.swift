@@ -94,10 +94,7 @@ extension StdStreamsTransport {
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
         /// Formatter used to transform a payload into a string.
-        /// By default is set to `FieldsFormatter.defaultStdStreamFormatter`.
-        public var formatters: [EventFormatter] = [
-            FieldsFormatter.defaultStdStreamFormatter()
-        ]
+        public var formatters: [EventFormatter]
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -107,8 +104,12 @@ extension StdStreamsTransport {
         
         /// initialize a new `StdStreamsTransport`.
         ///
-        /// - Parameter builder: configuration callback.
-        public init(_ builder: ((inout Configuration) -> Void)?) {
+        /// - Parameters:
+        ///   - formatters: formatters to set, by default the `TerminalFormatter` is used.
+        ///   - builder: builder configuration callabck.
+        public init(formatters: [EventFormatter] = [TerminalFormatter()],
+                    _ builder: ((inout Configuration) -> Void)?) {
+            self.formatters = formatters
             builder?(&self)
         }
         

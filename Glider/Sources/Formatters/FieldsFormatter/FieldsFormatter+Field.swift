@@ -384,7 +384,6 @@ extension Date {
             return String(self.timeIntervalSince1970)
         case .xcode:
             return DateFormatter.xcodeDateFormatter.string(from: self)
-
         }
     }
     
@@ -665,20 +664,29 @@ extension FieldsFormatter {
     
 }
 
+// MARK: - String Extension
+
 extension String {
     
+    /// Apply transformations specified by the field to the receiver.
+    ///
+    /// - Parameter field: field.
+    /// - Returns: `String`
     public func applyFormattingOfField(_ field: FieldsFormatter.Field) -> String {        
         var value = self
-        // Custom text transform
+        
+        // Custom text transforms
         for transform in field.transforms ?? [] {
             value = transform(value)
         }
         
+        // Formatting with pad and trucation
         value = value.trunc(field.truncate).padded(field.padding)
         if let format = field.stringFormat {
             value = String.format(format, value: stringValue)
         }
         
+        // Apply colorazation (for terminal or xcode if available)
         if let color = field.color {
             value = color.colorize(value)
         }

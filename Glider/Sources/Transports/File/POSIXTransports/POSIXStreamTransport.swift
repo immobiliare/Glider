@@ -51,10 +51,10 @@ public class POSIXStreamTransport: Transport {
     
     /// Create a `stdout` transport formatter.
     /// - Parameters:
-    ///   - formatters: formatters to use. When not specificed `defaultStdStreamFormatter` is used.
+    ///   - formatters: formatters to use. When not specificed `TerminalFormatter` is used.
     ///   - queue: queue to use for dispatch. When not specified a new queue is created.
     /// - Returns: `StdStreamTransport`
-    public static func stdOut(formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
+    public static func stdOut(formatters: [EventFormatter] = [TerminalFormatter()],
                               queue: DispatchQueue = DispatchQueue(label: "Glider.\(UUID().uuidString)")) -> POSIXStreamTransport {
         POSIXStreamTransport {
             $0.stream = Darwin.stdout
@@ -65,10 +65,10 @@ public class POSIXStreamTransport: Transport {
     
     /// Create a `stderr` transport formatter.
     /// - Parameters:
-    ///   - formatters: formatters to use. When not specificed `defaultStdStreamFormatter` is used.
+    ///   - formatters: formatters to use. When not specificed `TerminalFormatter` is used.
     ///   - queue: queue to use for dispatch. When not specified a new queue is created.
     /// - Returns: `StdStreamTransport`
-    public static func stdErr(formatters: [EventFormatter] = [FieldsFormatter.defaultStdStreamFormatter()],
+    public static func stdErr(formatters: [EventFormatter] = [TerminalFormatter()],
                               queue: DispatchQueue = DispatchQueue(label: "Glider.\(UUID().uuidString)")) -> POSIXStreamTransport {
         POSIXStreamTransport {
             $0.stream = Darwin.stderr
@@ -107,7 +107,7 @@ extension POSIXStreamTransport {
         
         /// Formatter used to transform a payload into a string.
         public var formatters: [EventFormatter] = [
-            FieldsFormatter.defaultStdStreamFormatter()
+            TerminalFormatter()
         ]
         
         /// Minumum accepted level for this transport.
@@ -122,30 +122,6 @@ extension POSIXStreamTransport {
             builder?(&self)
         }
         
-    }
-    
-}
-
-// MARK: - FieldsFormatter
-
-extension FieldsFormatter {
-    
-    /// Instantiate a new formatter for payload which will be recorder on a file or console.
-    ///
-    /// - Returns: `FieldPayloadFormatter`
-    public static func defaultStdStreamFormatter() -> FieldsFormatter {
-        let fields: [FieldsFormatter.Field] = [
-            .timestamp(style: .iso8601, {
-                $0.padding = .right(columns: 20)
-            }),
-            .delimiter(style: .spacedPipe),
-            .level(style: .short, {
-                $0.padding = .left(columns: 3)
-            }),
-            .literal(" "),
-            .message()
-        ]
-        return FieldsFormatter(fields: fields)
     }
     
 }

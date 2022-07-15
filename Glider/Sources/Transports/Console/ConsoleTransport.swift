@@ -81,11 +81,14 @@ extension ConsoleTransport {
         
         // MARK: - Initialization
         
-        /// Initialize a new builder.
+        /// Initialize a new configuration for `ConsoleTransport`.
         ///
-        /// - Parameter builder: builder configuration.
-        public init(_ builder: ((inout Configuration) -> Void)?) {
-            self.formatters = [XCodeFormatter.init()]
+        /// - Parameters:
+        ///   - formatters: formatters to use. Ignore to use the default `XCodeFormatter`.
+        ///   - builder: builder configuration function.
+        public init(formatters: [EventFormatter] = [XCodeFormatter.init()],
+                    _ builder: ((inout Configuration) -> Void)?) {
+            self.formatters = formatters
             builder?(&self)
         }
         
