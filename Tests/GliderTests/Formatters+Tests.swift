@@ -21,6 +21,42 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
+    /// Test the output of the formatter for colored consoles.
+    func test_terminalFormatter() throws {
+        let eventsToPrint = 100
+        
+        let outputFileURL = URL.temporaryFileURL(fileName: "output-log", fileExtension: "log", removeIfExists: true)
+        let formatter = TerminalFormatter(colorize: .all, colorizeFields: [.level, .message])
+        let fileTransport = try FileTransport(fileURL: outputFileURL) {
+            $0.formatters = [formatter]
+        }
+
+        let xcodeFormatter = XCodeFormatter(showCallSite: false, colorize: .none, colorizeFields: [])
+        let consoleTransport = TestTransport(formatters: [xcodeFormatter], onReceiveEvent: { _, msg in
+            print(msg)
+        })
+        
+        let log = Log {
+            $0.level = .trace
+            $0.transports = [
+                consoleTransport,
+                fileTransport
+            ]
+        }
+        
+        for i in 0..<eventsToPrint {
+            let level = Level.allCases.randomElement() ?? .debug
+            log[level]?.write(msg: "Some event happened \(i)!")
+        }
+        
+        let readFileLines = try String(contentsOf: outputFileURL, encoding: .ascii)
+            .components(separatedBy: "\r\n")
+            .filter({ $0.isEmpty == false })
+        XCTAssertEqual(readFileLines.count, eventsToPrint)
+        
+    }
+    
+    /// Test the `XCodeFormatter` to format colorized/non colorized messages into the IDE debug console.
     func test_xCodeColorized() throws {
         let formatter = XCodeFormatter(showCallSite: true,
                                        colorize: .onlyImportant,

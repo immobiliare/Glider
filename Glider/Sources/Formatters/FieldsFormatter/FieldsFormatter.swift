@@ -14,12 +14,12 @@ import Foundation
 
 /// `FieldsFormatter` is used to format log messages using specified fields you can
 /// compose in a custom format.
-public class FieldsFormatter: EventFormatter {
+open class FieldsFormatter: EventFormatter {
     
     // MARK: - Public Properties
     
     /// Formatted fields used to create the string.
-    public var fields: [Field]
+    open var fields: [Field]
     
     // MARK: - Initialization
     
