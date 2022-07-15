@@ -97,6 +97,10 @@ extension FieldsFormatter {
             self.init(field, configure)
         }
         
+        public static func label(_ configure: Configure? = nil) -> Field {
+            self.init(.label, configure)
+        }
+        
         public static func timestamp(style: TimestampStyle, _ configure: Configure? = nil) -> Field {
             self.init(.timestamp(style), configure)
         }
@@ -201,6 +205,7 @@ extension FieldsFormatter {
     /// Represent the individual key of a formatted log when using
     /// the `FieldsFormatter` formatter.
     ///
+    /// - `label`: combination of `subsystem` and `category` which identify a log (or app name if not set).
     /// - `icon`: icon representation of the log as emoji character(s).
     /// - `category`: category identifier of the parent's log.
     /// - `subsystem`: subsystem identifier of the parent's log.
@@ -226,6 +231,7 @@ extension FieldsFormatter {
     /// - `extra`: `keys` values for given `keys` found in event's `extra`.
     /// - `custom`: apply custom tranformation function which receive the `event` instance.
     public enum FieldIdentifier {
+        case label
         case icon
         case category
         case subsystem
@@ -255,6 +261,7 @@ extension FieldsFormatter {
         
         internal var defaultLabel: String? {
             switch self {
+            case .label: return "label"
             case .category: return "category"
             case .subsystem: return "subsystem"
             case .eventUUID: return "uuid"

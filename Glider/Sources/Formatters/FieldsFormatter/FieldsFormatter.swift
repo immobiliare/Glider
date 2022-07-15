@@ -110,6 +110,9 @@ internal extension Event {
         case .processID:
             return String(ProcessIdentification.shared.processID)
             
+        case .label:
+            return label
+            
         case .message:
             return message.description
             
