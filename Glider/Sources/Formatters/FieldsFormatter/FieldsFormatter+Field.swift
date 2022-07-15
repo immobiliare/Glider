@@ -36,11 +36,18 @@ extension FieldsFormatter {
         /// Optional string transform functions, evaluated in prder.
         public var transforms: [String.Transform]?
         
+        /// Readable label for field.
+        ///
+        /// NOTE:
         /// Some formatters (like the `JSONFormatter`= uses this value to print the field's readable label.
         public var label: String?
         
-        /// Color to apply to the string.
-        public var color: FieldsFormatterColor?
+        /// Colors to apply to the string.
+        ///
+        /// NOTE:
+        /// It works only for certain formatters (like `XCodeFormatter` and `TerminalFormatter` where
+        /// colorization is supported. Some formatters may ignore this value.
+        public var colors: [FieldsFormatterColor]? = nil
         
         /// For array and dictionaries (like extra or tags) you can specify a format to write the content.
         ///
@@ -51,6 +58,8 @@ extension FieldsFormatter {
         public var separator: String = ","
         
         /// Allows you to further customize the `Field` options per single message received.
+        ///
+        /// DISCUSSION:
         /// You can, for example, customize the message color based upon severity level
         /// (see `XCodeFormatter` for an example).
         /// You can customize the received `Field` instance which is a copy of self.
@@ -62,7 +71,7 @@ extension FieldsFormatter {
         /// For example (`extra = { %@ }` uses the format and replace the placeholder with the value formatted.
         ///
         /// By default is set to `nil`•
-        internal var stringFormat: String? = nil
+        public var stringFormat: String? = nil
         
         // MARK: - Initialization
                
@@ -699,8 +708,10 @@ extension String {
         }
         
         // Apply colorazation (for terminal or xcode if available)
-        if let color = field.color {
-            value = color.colorize(value)
+        if let colors = field.colors {
+            for color in colors {
+                value = color.colorize(value)
+            }
         }
         
         return value

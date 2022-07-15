@@ -39,20 +39,20 @@ open class TerminalFormatter: FieldsFormatter {
         let fields: [FieldsFormatter.Field] = [
             .timestamp(style: .iso8601),
             .literal(" "),
-            .level(style: .simple, {
-                $0.padding = .right(columns: 4)
-                $0.stringFormat = "[%@] "
+            .level(style: .simple, { levelCfg in
+                levelCfg.padding = .right(columns: 4)
+                levelCfg.stringFormat = "[%@] "
                 if colorizeFields.contains(.level) {
-                    $0.onCustomizeForEvent = { event, tField in
+                    levelCfg.onCustomizeForEvent = { event, tField in
                         // change the formatting field based upon the serverity of the log.
-                        tField.color = ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)
+                        tField.colors = [ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)]
                     }
                 }
             }),
-            .message({
+            .message({ msgConfig in
                 if colorizeFields.contains(.message) {
-                    $0.onCustomizeForEvent = { event, tField in
-                        tField.color = ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)
+                    msgConfig.onCustomizeForEvent = { event, tField in
+                        tField.colors = [ANSITerminalStyles.bestColorForEventLevel(event.level, mode: colorize)]
                     }
                 }
             })

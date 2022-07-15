@@ -64,28 +64,28 @@ public class XCodeFormatter: FieldsFormatter {
         let fields: [FieldsFormatter.Field] = [
             .timestamp(style: .iso8601),
             .literal(" "),
-            (showCallSite == false ? nil : .callSite({
-                $0.stringFormat = "(%@) "
+            (showCallSite == false ? nil : .callSite({ callSiteCfg in
+                callSiteCfg.stringFormat = "(%@) "
                 if colorizeFields.contains(.callSite) {
-                    $0.onCustomizeForEvent = { event, tField in
-                        tField.color = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
+                    callSiteCfg.onCustomizeForEvent = { event, tField in
+                        tField.colors = [XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)]
                     }
                 }
             })),
-            .level(style: .simple, {
-                $0.padding = .right(columns: 4)
-                $0.stringFormat = "[%@] "
+            .level(style: .simple, { levelCfg in
+                levelCfg.padding = .right(columns: 4)
+                levelCfg.stringFormat = "[%@] "
                 if colorizeFields.contains(.level) {
-                    $0.onCustomizeForEvent = { event, tField in
+                    levelCfg.onCustomizeForEvent = { event, tField in
                         // change the formatting field based upon the serverity of the log.
-                        tField.color = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
+                        tField.colors = [XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)]
                     }
                 }
             }),
-            .message({
+            .message({ msgCfg in
                 if colorizeFields.contains(.message) {
-                    $0.onCustomizeForEvent = { event, tField in
-                        tField.color = XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)
+                    msgCfg.onCustomizeForEvent = { event, tField in
+                        tField.colors = [XCodeConsoleColor.bestColorForEventLevel(event.level, mode: colorize)]
                     }
                 }
             })
