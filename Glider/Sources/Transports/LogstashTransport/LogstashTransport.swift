@@ -55,6 +55,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration, delegate: LogstashTransportDelegate? = nil) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
         self.queue = configuration.queue
@@ -180,6 +181,11 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
 extension LogstashTransport {
     
     public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// Allow untrusted connection to server.
         /// By default is set to `false`.

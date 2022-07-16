@@ -20,6 +20,9 @@ extension RemoteTransport {
         
         // MARK: - Public Properties
         
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
+        
         /// The GCD dispatch queue to use.
         /// If not specified a queue is created for you.
         public var queue: DispatchQueue?

@@ -38,6 +38,7 @@ open class POSIXStreamTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.queue = configuration.queue
     }
@@ -98,6 +99,9 @@ extension POSIXStreamTransport {
     public struct Configuration {
         
         // MARK: - Configuration
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// Dispatch queue.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")

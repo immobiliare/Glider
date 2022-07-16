@@ -38,6 +38,7 @@ open class GliderSentryTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         
         if let sdkConfiguration = configuration.sdkConfiguration {

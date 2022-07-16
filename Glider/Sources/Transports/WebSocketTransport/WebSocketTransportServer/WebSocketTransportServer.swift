@@ -53,6 +53,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     ///   - delegate: delegate.
     public init(configuration: Configuration, delegate: WebSocketTransportServerDelegate? = nil) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
         self.server = WebSocketServer(port: configuration.port,
@@ -218,6 +219,11 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
 extension WebSocketTransportServer {
     
     public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// When set the WebSocketTransportServer service will be also
         /// published over the local network via Bonjour services.

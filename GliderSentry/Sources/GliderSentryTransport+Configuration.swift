@@ -18,6 +18,11 @@ extension GliderSentryTransport {
     
     public struct Configuration {
         
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
+        
         /// This is the SDK configuration object. You should set a non `nil` value here if you want
         /// Glider's `SentryTransport` needs to initialize the SDK for you.
         /// If you have the SDK already initialized at this time leave this `nil`.
@@ -40,6 +45,11 @@ extension GliderSentryTransport {
         /// More on <https://docs.sentry.io/product/sentry-basics/environments/>.
         public var environment: String?
         
+        // MARK: - Initialixation
+        
+        /// Initialize a new Sentry transport configuration.
+        ///
+        /// - Parameter builder: builder configuration callback.
         public init(_ builder: ((inout Configuration) -> Void)?) {
             builder?(&self)
         }

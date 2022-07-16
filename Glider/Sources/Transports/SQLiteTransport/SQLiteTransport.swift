@@ -61,6 +61,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         
         let fileExists = configuration.databaseLocation.fileExists
@@ -368,6 +369,11 @@ fileprivate extension SQLiteTransport {
 extension SQLiteTransport {
     
     public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// Dispatch queue.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")

@@ -62,6 +62,7 @@ public class SizeRotationFileTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         
         var isDirectory = ObjCBool(false)
         if fManager.fileExists(atPath: configuration.directoryURL.path, isDirectory: &isDirectory) == false {
@@ -183,6 +184,11 @@ public class SizeRotationFileTransport: Transport {
 extension SizeRotationFileTransport {
     
     public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// Delegate to listen relevant events of the transport layer.
         public weak var delegate: SizeRotationFileTransportDelegate?

@@ -20,7 +20,7 @@ import Foundation
 /// Colorization was implemented by using font's variants. See the `colorize`
 /// property documentation to learn how to properly setup the environment in order
 /// to see colors.
-public class XCodeFormatter: FieldsFormatter {
+open class XCodeFormatter: FieldsFormatter {
     
     // MARK: - Public Properties
     
@@ -61,7 +61,25 @@ public class XCodeFormatter: FieldsFormatter {
     public init(showCallSite: Bool = false,
                 colorize: ColorizeMode = .onlyImportant,
                 colorizeFields: ColorizeFields = [.level, .message]) {
-        let fields: [FieldsFormatter.Field] = [
+        
+        self.colorize = colorize
+        self.colorizeFields = colorizeFields
+        self.showCallSite = showCallSite
+        let fields = XCodeFormatter.defaultFields(showCallSite: showCallSite, colorize: colorize, colorizeFields: colorizeFields)
+        
+        super.init(fields: fields)
+    }
+    
+    /// Return the default fields of the default `TerminalFormatter` configuration.
+    ///
+    /// - Parameters:
+    ///   - colorize: colorize mode.
+    ///   - colorizeFields: colorized fields.
+    /// - Returns: `[FieldsFormatter.Field]`
+    open class func defaultFields(showCallSite: Bool = false,
+                                  colorize: ColorizeMode = .onlyImportant,
+                                  colorizeFields: ColorizeFields = [.level, .message]) -> [FieldsFormatter.Field] {
+        [
             .timestamp(style: .iso8601),
             .literal(" "),
             (showCallSite == false ? nil : .callSite({ callSiteCfg in
@@ -90,12 +108,6 @@ public class XCodeFormatter: FieldsFormatter {
                 }
             })
         ].compactMap({ $0 })
-        
-        self.colorize = colorize
-        self.colorizeFields = colorizeFields
-        self.showCallSite = showCallSite
-        
-        super.init(fields: fields)
     }
     
     @available(*, unavailable)

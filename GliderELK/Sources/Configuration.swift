@@ -21,6 +21,11 @@ extension GliderELKTransport {
     
     public struct Configuration {
         
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
+        
         /// The host where a Logstash instance is running
         public var hostname: String
  
@@ -88,6 +93,8 @@ extension GliderELKTransport {
             )
             return encoder
         }()
+        
+        // MARK: - Initialization
         
         /// Initialize a new configuration for ELK transport service.
         ///

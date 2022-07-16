@@ -36,7 +36,22 @@ open class TerminalFormatter: FieldsFormatter {
     ///   - colorizeFields: fields to colorize.
     public init(colorize: XCodeFormatter.ColorizeMode = .onlyImportant,
                 colorizeFields: XCodeFormatter.ColorizeFields = [.level, .message]) {
-        let fields: [FieldsFormatter.Field] = [
+        self.colorize = colorize
+        self.colorizeFields = colorizeFields
+        let fields = TerminalFormatter.defaultFields(colorize: colorize, colorizeFields: colorizeFields)
+        
+        super.init(fields: fields)
+    }
+    
+    /// Return the default fields of the default `TerminalFormatter` configuration.
+    ///
+    /// - Parameters:
+    ///   - colorize: colorize mode.
+    ///   - colorizeFields: colorized fields.
+    /// - Returns: `[FieldsFormatter.Field]`
+    open class func defaultFields(colorize: XCodeFormatter.ColorizeMode = .onlyImportant,
+                                  colorizeFields: XCodeFormatter.ColorizeFields = [.level, .message]) -> [FieldsFormatter.Field] {
+        [
             .timestamp(style: .iso8601),
             .literal(" "),
             .level(style: .simple, { levelCfg in
@@ -57,11 +72,6 @@ open class TerminalFormatter: FieldsFormatter {
                 }
             })
         ].compactMap({ $0 })
-        
-        self.colorize = colorize
-        self.colorizeFields = colorizeFields
-        
-        super.init(fields: fields)
     }
     
 }

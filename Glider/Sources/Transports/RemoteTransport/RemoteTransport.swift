@@ -108,6 +108,7 @@ public class RemoteTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration, delegate: RemoteTransportDelegate? = nil) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.isEnabled = true
         self.queue = configuration.queue
         
@@ -117,9 +118,9 @@ public class RemoteTransport: Transport {
 
         // The buffer is used to cover the time between the app launch and the
         // iniitial (automatic) connection to the server.
-        /*queue?.asyncAfter(deadline: .now() + .seconds(2)) { [weak self] in
+        queue?.asyncAfter(deadline: .now() + .seconds(2)) { [weak self] in
             self?.buffer = nil
-        }*/
+        }
     }
     
     public convenience init(serviceType: String = Configuration.defaultServiceType,

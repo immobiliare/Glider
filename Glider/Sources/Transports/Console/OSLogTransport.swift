@@ -48,6 +48,7 @@ open class OSLogTransport: Transport {
         }
         
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.log = OSLog(subsystem: configuration.subsystem, category: configuration.category)
         self.queue = configuration.queue
@@ -96,6 +97,9 @@ extension OSLogTransport {
     public struct Configuration {
         
         // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// The name of the subsystem performing the logging.
         /// Defaults to `Glider`.

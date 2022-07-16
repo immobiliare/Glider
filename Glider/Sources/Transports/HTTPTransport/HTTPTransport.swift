@@ -50,6 +50,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     public init(delegate: HTTPTransportDelegate, configuration: Configuration) throws {
         self.delegate = delegate
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.queue = configuration.queue
         self.asyncTransport = try AsyncTransport(delegate: self,
@@ -135,6 +136,9 @@ extension HTTPTransport {
     public struct Configuration {
         
         // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// The value in this property affects only the operations that
         /// the current queue has executing at the same time.

@@ -78,7 +78,7 @@ open class FileTransport: Transport {
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) throws {
         self.configuration = configuration
-        
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         
         let fileHandler = fopen(configuration.fileURL.path, "a")
@@ -139,6 +139,11 @@ open class FileTransport: Transport {
 extension FileTransport {
     
     public struct Configuration {
+        
+        // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// URL of the local file where the data is stored.
         /// The containing directory must exist and be writable by the process.

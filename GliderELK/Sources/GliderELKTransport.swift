@@ -84,6 +84,7 @@ public class GliderELKTransport: Transport {
     ///   - delegate: delegate to monitor events.
     public init(configuration: Configuration, delegate: GliderELKTransportDelegate? = nil) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
         self.httpClient = HTTPClient(

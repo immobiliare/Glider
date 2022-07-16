@@ -36,6 +36,7 @@ open class ConsoleTransport: Transport {
     ///
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) {
+        self.isEnabled = configuration.isEnabled
         self.configuration = configuration
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
     }
@@ -68,6 +69,9 @@ extension ConsoleTransport {
     public struct Configuration {
         
         // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// GCD queue. If not set a default one is created for you.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")

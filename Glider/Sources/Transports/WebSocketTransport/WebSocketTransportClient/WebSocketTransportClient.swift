@@ -57,6 +57,7 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     ///   - delegate: delegate.
     public init(configuration: Configuration, delegate: WebSocketTransportClientDelegate? = nil) throws {
         self.configuration = configuration
+        self.isEnabled = configuration.isEnabled
         self.queue = configuration.queue
         self.delegate = delegate
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
@@ -186,6 +187,9 @@ extension WebSocketTransportClient {
     public struct Configuration {
         
         // MARK: - Public Properties
+        
+        /// Is the transport enabled. By default is set to `true`.
+        public var isEnabled = true
         
         /// URL of the server side.
         public var url: URL
