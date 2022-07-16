@@ -21,29 +21,6 @@ import XCTest
 
 final class FormattersTest: XCTestCase {
     
-    func test_terminalFormatter2() throws {
-        let formatter = FieldsFormatter(fields: [
-            .label({
-                $0.stringFormat = "[%@]"
-            })
-        ])
-        
-        let consoleTransport = TestTransport(formatters: [formatter], onReceiveEvent: { _, msg in
-            print(msg)
-        })
-        
-        let log = Log {
-            $0.subsystem = "com.indomionetwork"
-            $0.category = "general"
-            $0.level = .trace
-            $0.transports = [
-                consoleTransport
-            ]
-        }
-
-        log.info?.write(msg: "Some event happened!")
-    }
-    
     /// Test the output of the formatter for colored consoles.
     func test_terminalFormatter() throws {
         let eventsToPrint = 100
