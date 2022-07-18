@@ -94,7 +94,7 @@ internal extension Event {
             return level.format(style: style)
             
         case .callSite:
-            let file = (scope.fileName as NSString?)?.pathComponents.last ?? "redacted"
+            let file = (scope.fileName as NSString?)?.pathComponents.last?.deletingFilePathExtension() ?? "redacted"
             let line = (scope.fileLine != nil ? "\(scope.fileLine!)" : "-")
             return "\(file):\(line)"
             

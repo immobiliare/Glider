@@ -89,6 +89,10 @@ extension String {
         return components.joined(separator: toSeparator)
     }
     
+    internal func deletingFilePathExtension() -> String {
+        return (self as NSString).deletingPathExtension
+    }
+    
 }
 
 extension String.PaddingStyle {

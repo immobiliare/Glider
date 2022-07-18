@@ -341,7 +341,7 @@ extension FieldsFormatter {
         case `repeat`(Character,Int)
         case custom(String)
         
-        internal var delimiter: String {
+        public var delimiter: String {
             switch self {
             case .spacedPipe:
                 return " | "
@@ -389,7 +389,7 @@ extension DateFormatter {
 
 extension Date {
     
-    internal func format(style: FieldsFormatter.TimestampStyle) -> String? {
+    public func format(style: FieldsFormatter.TimestampStyle) -> String? {
         switch style {
         case .custom(let format):
             DateFormatter.dateFormatter.dateFormat = format
@@ -409,7 +409,7 @@ extension Date {
 
 extension Level {
     
-    internal func format(style: FieldsFormatter.LevelStyle) -> String? {
+    public func format(style: FieldsFormatter.LevelStyle) -> String? {
         switch style {
         case .numeric:
             return String(describing: rawValue)
@@ -424,7 +424,7 @@ extension Level {
         }
     }
 
-    internal var emoji: String {
+    public var emoji: String {
         switch self {
         case .debug, .trace:
             return "⚪️"
@@ -439,7 +439,7 @@ extension Level {
         }
     }
     
-    internal var shortDescription: String {
+    public var shortDescription: String {
         switch self {
         case .emergency: return "EMRG"
         case .alert:     return "ALRT"
@@ -475,7 +475,7 @@ extension FieldsFormatter.CallingThreadStyle {
     ///
     /// - Parameter callingThreadID: thread id to format.
     /// - Returns: String
-    internal func format(_ callingThreadID: UInt64) -> String {
+    public func format(_ callingThreadID: UInt64) -> String {
         switch self {
         case .hex:      return String(format: "%08X", callingThreadID)
         case .integer:  return String(describing: callingThreadID)
