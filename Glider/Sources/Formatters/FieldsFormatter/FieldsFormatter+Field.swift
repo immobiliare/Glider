@@ -700,7 +700,7 @@ extension String {
     ///
     /// - Parameter field: field.
     /// - Returns: `String`
-    public func applyFormattingOfField(_ field: FieldsFormatter.Field) -> String {        
+    public func applyFormattingOfField(_ field: FieldsFormatter.Field) -> String {
         var value = self
         
         // Custom text transforms
@@ -709,10 +709,11 @@ extension String {
         }
         
         // Formatting with pad and trucation
-        value = value.trunc(field.truncate).padded(field.padding)
+        value = value.trunc(field.truncate)
         if let format = field.stringFormat {
             value = String.format(format, value: stringValue)
         }
+        value = value.padded(field.padding)
         
         // Apply colorazation (for terminal or xcode if available)
         if let colors = field.colors {
