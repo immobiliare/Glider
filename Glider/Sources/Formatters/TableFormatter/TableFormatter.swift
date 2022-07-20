@@ -46,6 +46,12 @@ public class TableFormatter: EventFormatter {
     /// by the formatter.
     public var structureFormatStyle: FieldsFormatter.StructureFormatStyle = .queryString
     
+    /// When formatting table keys if values are `nil` the row is not printed.
+    /// Set it to `true` to allows `nil` values to be present.
+    ///
+    /// By default is set to `false`.
+    public var includeNilKeys: Bool = false
+    
     // MARK: - Private Properties
     
     /// Formatter used to format the message part of the log.
@@ -184,7 +190,7 @@ public class TableFormatter: EventFormatter {
                 
             default:
                 // Just report the row with value
-                guard let stringifiedValue = structureFormatStyle.stringify(value, forField: field) else {
+                guard let stringifiedValue = structureFormatStyle.stringify(value, forField: field, includeNilKeys: includeNilKeys) else {
                     continue
                 }
                 

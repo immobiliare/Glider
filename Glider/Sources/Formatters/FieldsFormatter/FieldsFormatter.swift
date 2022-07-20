@@ -21,6 +21,12 @@ open class FieldsFormatter: EventFormatter {
     /// Formatted fields used to create the string.
     open var fields: [Field]
     
+    /// When formatting table keys if values are `nil` the row is not printed.
+    /// Set it to `true` to allows `nil` values to be present.
+    ///
+    /// By default is set to `false`.
+    open var includeNilKeys: Bool = false
+    
     // MARK: - Initialization
     
     /// Initialize with a list of given fields used to format the event.
@@ -74,7 +80,7 @@ open class FieldsFormatter: EventFormatter {
             
             let value = event.valueForFormatterField(transformedField)
             return transformedField.format
-                .stringify(value, forField: transformedField)?
+                .stringify(value, forField: transformedField, includeNilKeys: includeNilKeys)?
                 .applyFormattingOfField(transformedField)
         }
     }

@@ -532,24 +532,24 @@ extension FieldsFormatter {
         ///   - value: value to format.
         ///   - field: field target.
         /// - Returns: `String?`
-        internal func stringify(_ value: Any?, forField field: Field) -> String? {
+        internal func stringify(_ value: Any?, forField field: Field, includeNilKeys: Bool) -> String? {
             guard let value = value else { return nil }
 
             switch self {
             case .serializedJSON:
                 return stringifyAsSerializedJSON(value, forField: field)
             case .list:
-                return stringifyAsList(value, forField: field)
+                return stringifyAsList(value, forField: field, includeNilKeys: includeNilKeys)
             case .table:
-                return stringifyAsTable(value, forField: field)
+                return stringifyAsTable(value, forField: field, includeNilKeys: includeNilKeys)
             case .queryString:
-                return stringifyAsQueryString(value, forField: field)
+                return stringifyAsQueryString(value, forField: field, includeNilKeys: includeNilKeys)
             }
         }
         
         // MARK: - Private Functions
         
-        private func stringifyAsTable(_ value: Any, forField field: Field) -> String? {
+        private func stringifyAsTable(_ value: Any, forField field: Field, includeNilKeys: Bool) -> String? {
             let keyColumnTitle = field.field.tableTitle?.uppercased() ?? "KEY"
             
             switch value {
@@ -558,8 +558,13 @@ extension FieldsFormatter {
             case let dictValue as [String: Any?]:
                 let rows: [String] = dictValue.keys.sorted().reduce(into: [String]()) { list, key in
                     if let value = dictValue[key] {
-                        list.append(key)
-                        list.append(String(describing: value!))
+                        if value.isNil == false { // unwrapped has a value
+                            list.append(key)
+                            list.append(String(describing: value!))
+                        } else if includeNilKeys {
+                            list.append(key)
+                            list.append("nil")
+                        }
                     }
                 }
                 return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
@@ -571,14 +576,18 @@ extension FieldsFormatter {
             }
         }
         
-        private func stringifyAsList(_ value: Any, forField field: Field) -> String? {
+        private func stringifyAsList(_ value: Any, forField field: Field, includeNilKeys: Bool) -> String? {
             switch value {
             case let stringValue as String:
                 return stringValue
             case let dictValue as [String: Any?]:
                 let value = dictValue.keys.sorted().reduce(into: [String]()) { list, key in
                     if let value = dictValue[key] {
-                        list.append("\t- \(key)=\"\(String(describing: value!))\"")
+                        if value.isNil == false {
+                            list.append("\t- \(key)=\"\(String(describing: value!))\"")
+                        } else if includeNilKeys {
+                            list.append("\t- \(key)=nil")
+                        }
                     }
                 }.joined(separator: "\n")
                 return "\n\(value)\n"
@@ -595,7 +604,7 @@ extension FieldsFormatter {
             }
         }
         
-        private func stringifyAsQueryString(_ value: Any, forField field: Field) -> String? {
+        private func stringifyAsQueryString(_ value: Any, forField field: Field, includeNilKeys: Bool) -> String? {
             switch value {
             case let stringValue as String:
                 return stringValue
@@ -607,8 +616,12 @@ extension FieldsFormatter {
                 var components = [String]()
                 
                 for key in dictValue.keys.sorted() {
-                    if let value = dictValue[key], let value = value {
-                        components.append("\(key)=\(String(describing: value))")
+                    if let value = dictValue[key]  {
+                        if value.isNil == false {
+                            components.append("\(key)=\(String(describing: value!))")
+                        } else if includeNilKeys {
+                            components.append("\(key)=nil")
+                        }
                     }
                 }
                 
