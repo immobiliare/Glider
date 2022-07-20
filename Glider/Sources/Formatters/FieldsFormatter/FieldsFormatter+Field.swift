@@ -709,10 +709,10 @@ extension String {
         }
         
         // Formatting with pad and trucation
-        value = value.trunc(field.truncate)
         if let format = field.stringFormat {
-            value = String.format(format, value: stringValue)
+            value = String.format(format, value: value)
         }
+        value = value.trunc(field.truncate)
         value = value.padded(field.padding)
         
         // Apply colorazation (for terminal or xcode if available)
