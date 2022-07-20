@@ -20,7 +20,7 @@ public class GliderSDK {
     public static let shared = GliderSDK()
     
     /// SDK Current Version.
-    public static let version = "0.9.20"
+    public static let version = "0.9.21"
 
     /// Identifier of the package
     public static let identifier = "com.glider-logger"
