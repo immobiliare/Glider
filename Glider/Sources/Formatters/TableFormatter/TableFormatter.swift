@@ -169,7 +169,8 @@ public class TableFormatter: EventFormatter {
                 }
                 for index in 0..<keys.count {
                     contents.append(keys[index])
-                    contents.append(arrayValue[index].applyFormattingOfField(field))
+                    contents.append(arrayValue[index].applyFormattingOfField(field)
+                        .split(toWidth: self.maxColumnWidths.values))
                 }
                 
             case let dictionaryValue as [String: Any]:
@@ -181,12 +182,14 @@ public class TableFormatter: EventFormatter {
                     }
                     
                     contents.append(key)
-                    contents.append(value.asString()?.applyFormattingOfField(field) ?? "")
+                    contents.append(value.asString()?.applyFormattingOfField(field)
+                        .split(toWidth: self.maxColumnWidths.values) ?? "")
                 }
                 
             case let customKeyValue as (key: String, value: String):
                 contents.append(customKeyValue.key)
-                contents.append(customKeyValue.value.applyFormattingOfField(field))
+                contents.append(customKeyValue.value.applyFormattingOfField(field)
+                    .split(toWidth: self.maxColumnWidths.values))
                 
             default:
                 // Just report the row with value
@@ -195,7 +198,8 @@ public class TableFormatter: EventFormatter {
                 }
                 
                 contents.append(tableTitle)
-                contents.append(stringifiedValue.applyFormattingOfField(field))
+                contents.append(stringifiedValue.applyFormattingOfField(field)
+                    .split(toWidth: self.maxColumnWidths.values))
             }
         }
         

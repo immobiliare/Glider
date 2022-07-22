@@ -40,6 +40,26 @@ extension String {
 
 extension String {
     
+    /// Split a string with a given column width.
+    ///
+    /// - Parameter width: max width.
+    /// - Returns: `String`
+    internal func split(toWidth width: Int, separator: String = "\n") -> String {
+        guard count > width else {
+            return self
+        }
+        
+        var result = [String]()
+        
+        for i in stride(from: 0, to: self.count, by: width) {
+            let endIndex = self.index(self.endIndex, offsetBy: -i)
+            let startIndex = self.index(endIndex, offsetBy: -width, limitedBy: self.startIndex) ?? self.startIndex
+            result.insert(String(self[startIndex..<endIndex]), at: 0)
+        }
+        
+        return result.joined(separator: separator)
+    }
+    
     /// Truncate string at given limit.
     ///
     /// - Parameters:
