@@ -174,7 +174,7 @@ public class TableFormatter: EventFormatter {
                 
             case let dictionaryValue as [String: Any]:
                 // Split each <key,value> in a dictionary in a separate row
-                for key in field.field.keysToRetrive ?? [] {
+                for key in field.field.keysToRetrive ?? Array(dictionaryValue.keys) {
                     let value = dictionaryValue[key]
                     guard let value = value as? SerializableData else {
                         continue
