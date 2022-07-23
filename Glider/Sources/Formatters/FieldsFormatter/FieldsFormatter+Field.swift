@@ -641,12 +641,20 @@ extension FieldsFormatter {
             switch value {
             case let stringValue as String:
                 return stringValue
-            case let dictValue as [String: Any?]:
-                guard dictValue.isEmpty == false else {
+            case let dictValue as [String: Any?]:                
+                let serializableDictionary: [String: SerializableData] = dictValue.compactMapValues({
+                    guard let serializable = $0 as? SerializableData else {
+                        return nil
+                    }
+                    
+                    return serializable.asString() ?? serializable.asData()
+                })
+                
+                guard serializableDictionary.isEmpty == false else {
                     return nil
                 }
                 
-                let json = try? JSONSerialization.data(withJSONObject: dictValue, options: .sortedKeys)
+                let json = try? JSONSerialization.data(withJSONObject: serializableDictionary, options: .sortedKeys)
                 return json?.asString()
             case let arrayValue as [Any?]:
                 guard arrayValue.isEmpty == false else {
