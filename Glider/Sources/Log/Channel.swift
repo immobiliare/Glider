@@ -107,7 +107,7 @@ public class Channel {
     ///   - fileLine: file line of the caller (filled automatically)
     /// - Returns: Event
     @discardableResult
-    public func write(msg message: @autoclosure @escaping () -> Event.Message,
+    public func write(msg message: @autoclosure @escaping () -> Message,
                       object: SerializableObject? = nil,
                       extra: Metadata? = nil,
                       tags: Tags? = nil,
