@@ -43,6 +43,9 @@ extension GliderSentryTransport {
         /// Generally, the tag accepts any value, but it's intended to refer to your code deployments'
         /// naming convention, such as development, testing, staging, or production.
         /// More on <https://docs.sentry.io/product/sentry-basics/environments/>.
+        ///
+        /// NOTE:
+        /// You can use `setEnvironment()` into the transport instance in order to override this value later after init.
         public var environment: String?
         
         // MARK: - Initialixation

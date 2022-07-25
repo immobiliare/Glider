@@ -18,7 +18,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
         .package(url: "https://github.com/swift-server/async-http-client.git", .upToNextMinor(from: "1.5.0")),
-        .package(url: "https://github.com/getsentry/sentry-cocoa.git", .upToNextMinor(from: "7.17.0"))
+        .package(url: "https://github.com/getsentry/sentry-cocoa.git", .upToNextMinor(from: "7.21.1"))
     ],
     targets: [
         // TARGETS

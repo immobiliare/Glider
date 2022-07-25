@@ -14,6 +14,8 @@ import Foundation
 import Glider
 import Sentry
 
+/// The `GliderSentryTransport` is used to forward the messages coming from `Glider` logging
+/// system to the Sentry official SDK.
 open class GliderSentryTransport: Transport {
     
     // MARK: - Public Properties
@@ -30,6 +32,10 @@ open class GliderSentryTransport: Transport {
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
     public var minimumAcceptedLevel: Level? = nil
+    
+    // MARK: - Private Properties
+    
+    private var environment: String?
     
     // MARK: - Initialization
     
@@ -53,13 +59,25 @@ open class GliderSentryTransport: Transport {
         self.init(configuration: Configuration(builder))
     }
     
+    // MARK: - Public Functions
+    
+    /// Ovveride and set the environment string.
+    ///
+    /// - Parameter newEnvironment: new environment to set.
+    public func setEnvironment(_ newEnvironment: String?) {
+        self.environment = newEnvironment
+        SentrySDK.configureScope {
+            $0.setEnvironment(newEnvironment)
+        }
+    }
+    
     // MARK: - Conformance
     
     public func record(event: Glider.Event) -> Bool {        
         let message = configuration.formatters.format(event: event)
         let sentryEvent = event.toSentryEvent(withMessage: message)
         
-        sentryEvent.environment = configuration.environment
+        sentryEvent.environment = self.environment ?? configuration.environment
         sentryEvent.logger = configuration.loggerName
         sentryEvent.user = event.scope.user?.toSentryUser()
         
