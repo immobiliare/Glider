@@ -35,7 +35,7 @@ open class GliderSentryTransport: Transport {
     
     // MARK: - Private Properties
     
-    private var environment: String?
+    private static var environment: String?
     
     // MARK: - Initialization
     
@@ -65,7 +65,7 @@ open class GliderSentryTransport: Transport {
     ///
     /// - Parameter newEnvironment: new environment to set.
     public func setEnvironment(_ newEnvironment: String?) {
-        self.environment = newEnvironment
+        Self.environment = newEnvironment
         SentrySDK.configureScope {
             $0.setEnvironment(newEnvironment)
         }
@@ -77,7 +77,7 @@ open class GliderSentryTransport: Transport {
         let message = configuration.formatters.format(event: event)
         let sentryEvent = event.toSentryEvent(withMessage: message)
         
-        sentryEvent.environment = self.environment ?? configuration.environment
+        sentryEvent.environment = configuration.environment ?? Self.environment
         sentryEvent.logger = configuration.loggerName
         sentryEvent.user = event.scope.user?.toSentryUser()
         
