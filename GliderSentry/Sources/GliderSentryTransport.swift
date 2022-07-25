@@ -35,7 +35,16 @@ open class GliderSentryTransport: Transport {
     
     // MARK: - Private Properties
     
-    private static var environment: String?
+    /// Setup the environment of the log.
+    /// It will set by SDK global but you can override at level scope by
+    /// setting the event's `scope.environment` value.
+    public static var environment: String? {
+        didSet {
+            SentrySDK.configureScope {
+                $0.setEnvironment(environment)
+            }
+        }
+    }
     
     // MARK: - Initialization
     
@@ -60,16 +69,6 @@ open class GliderSentryTransport: Transport {
     }
     
     // MARK: - Public Functions
-    
-    /// Ovveride and set the environment string.
-    ///
-    /// - Parameter newEnvironment: new environment to set.
-    public func setEnvironment(_ newEnvironment: String?) {
-        Self.environment = newEnvironment
-        SentrySDK.configureScope {
-            $0.setEnvironment(newEnvironment)
-        }
-    }
     
     // MARK: - Conformance
     
