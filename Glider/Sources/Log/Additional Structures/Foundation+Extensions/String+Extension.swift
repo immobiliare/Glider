@@ -44,8 +44,8 @@ extension String {
     ///
     /// - Parameter width: max width.
     /// - Returns: `String`
-    internal func split(toWidth width: Int, separator: String = "\n") -> String {
-        guard count > width else {
+    internal func split(toWidth width: Int?, separator: String = "\n") -> String {
+        guard let width = width, count > width else {
             return self
         }
         

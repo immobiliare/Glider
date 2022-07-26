@@ -500,7 +500,7 @@ extension FieldsFormatter {
         case table
         case queryString
         
-        public static var tableInfoMaxColumnsWidth: (keyColumn: Int?, valueColumn: Int?)
+        public static var tableInfoMaxColumnsWidth: (keyColumn: Int?, valueColumn: Int?) = (30, 100)
         
         // MARK: - Internal Functions
         
@@ -560,7 +560,9 @@ extension FieldsFormatter {
                     if let value = dictValue[key] {
                         if value.isNil == false { // unwrapped has a value
                             list.append(key)
-                            list.append(String(describing: value!))
+                            
+                            let formattedValue = String(describing: value!).applyFormattingOfField(field)
+                            list.append(formattedValue)
                         } else if includeNilKeys {
                             list.append(key)
                             list.append("nil")
@@ -569,7 +571,9 @@ extension FieldsFormatter {
                 }
                 return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
             case let arrayValue as [Any?]:
-                let rows = arrayValue.map({ String(describing: $0) })
+                let rows = arrayValue.map({
+                    String(describing: $0).applyFormattingOfField(field)
+                })
                 return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
             default:
                 return nil
@@ -584,7 +588,7 @@ extension FieldsFormatter {
                 let value = dictValue.keys.sorted().reduce(into: [String]()) { list, key in
                     if let value = dictValue[key] {
                         if value.isNil == false {
-                            list.append("\t- \(key)=\"\(String(describing: value!))\"")
+                            list.append("\t- \(key)=\"\(String(describing: value!).applyFormattingOfField(field))\"")
                         } else if includeNilKeys {
                             list.append("\t- \(key)=nil")
                         }
@@ -596,7 +600,7 @@ extension FieldsFormatter {
                     guard let value = $0 else {
                         return nil
                     }
-                    return "\t - \(String(describing: value))"
+                    return "\t - \(String(describing: value).applyFormattingOfField(field))"
                 }.joined(separator: "\n")
                 return "\n\(value)\n"
             default:
@@ -618,7 +622,7 @@ extension FieldsFormatter {
                 for key in dictValue.keys.sorted() {
                     if let value = dictValue[key]  {
                         if value.isNil == false {
-                            components.append("\(key)=\(String(describing: value!))")
+                            components.append("\(key)=\(String(describing: value!).applyFormattingOfField(field))")
                         } else if includeNilKeys {
                             components.append("\(key)=nil")
                         }
@@ -631,7 +635,7 @@ extension FieldsFormatter {
                     return nil
                 }
                 
-                return arrayValue.map({ String(describing: $0) }).joined(separator: field.separator)
+                return arrayValue.map({ String(describing: $0).applyFormattingOfField(field) }).joined(separator: field.separator)
             default:
                 return nil
             }
@@ -655,15 +659,15 @@ extension FieldsFormatter {
                 }
                 
                 let json = try? JSONSerialization.data(withJSONObject: serializableDictionary, options: .sortedKeys)
-                return json?.asString()
+                return json?.asString()?.applyFormattingOfField(field)
             case let arrayValue as [Any?]:
                 guard arrayValue.isEmpty == false else {
                     return nil
                 }
                 
-                return arrayValue.map({ String(describing: $0) }).joined(separator: field.separator)
+                return arrayValue.map({ String(describing: $0).applyFormattingOfField(field) }).joined(separator: field.separator)
             default:
-                return String(describing: value)
+                return String(describing: value).applyFormattingOfField(field)
             }
         }
         
@@ -688,7 +692,6 @@ extension FieldsFormatter {
                 col.horizontalAlignment = .leading
             }
             
-            
             let columnValues = ASCIITable.Column { col in
                 col.footer = .init({ footer in
                     footer.border = .boxDraw.heavyHorizontal
@@ -704,9 +707,14 @@ extension FieldsFormatter {
                 col.horizontalAlignment = .leading
             }
             
-            let columns = ASCIITable.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
-            return ASCIITable(columns: columns, content: rows)
+            // split rows in multiple lines when oversize the width of the column
+            let formattedRows: [String] = rows.enumerated().map { row in
+                let maxColumnWidth = (row.offset % 2 == 0 ? columnIdentifier.maxWidth : columnValues.maxWidth)
+                return row.element.split(toWidth: (maxColumnWidth != nil ? maxColumnWidth! - 1 : nil))
+            }
             
+            let columns = ASCIITable.Column.configureBorders(in: [columnIdentifier, columnValues], style: .light)
+            return ASCIITable(columns: columns, content: formattedRows)
         }
         
     }
