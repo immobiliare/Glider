@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
 
   s.module_name = "GliderSentry"
   s.source_files = 'GliderSentry/Sources/**/*'
-  s.dependency 'GliderLogger', '0.9.26'
+  s.dependency 'GliderLogger', '0.9.27'
   s.dependency 'Sentry', "~> 7"
 
 end
