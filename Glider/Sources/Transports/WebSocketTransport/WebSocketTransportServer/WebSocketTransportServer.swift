@@ -56,6 +56,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
         self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
+        self.queue = configuration.queue
         self.server = WebSocketServer(port: configuration.port,
                                       parameters: configuration.parameters,
                                       options: configuration.options,
@@ -248,6 +249,9 @@ extension WebSocketTransportServer {
         
         /// Parameters for NW.
         public var parameters: NWParameters?
+        
+        /// GCD queue. If not set a default one is created for you.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.

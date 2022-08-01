@@ -40,6 +40,9 @@ extension GliderSentryTransport {
         /// `nil` means every passing message level is accepted.
         public var minimumAcceptedLevel: Level? = nil
         
+        /// GCD queue. If not set a default one is created for you.
+        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+
         /// Generally, the tag accepts any value, but it's intended to refer to your code deployments'
         /// naming convention, such as development, testing, staging, or production.
         /// More on <https://docs.sentry.io/product/sentry-basics/environments/>.

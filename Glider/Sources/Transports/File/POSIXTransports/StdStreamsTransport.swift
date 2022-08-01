@@ -59,6 +59,7 @@ open class StdStreamsTransport: Transport {
         self.configuration = configuration
         self.isEnabled = configuration.isEnabled
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
+        self.queue = configuration.queue
                 
         self.stdoutTransport = POSIXStreamTransport.stdOut(formatters: configuration.formatters, queue: configuration.queue)
         self.stderrTransport = POSIXStreamTransport.stdErr(formatters: configuration.formatters, queue: configuration.queue)
