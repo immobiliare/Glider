@@ -28,9 +28,7 @@ open class StdStreamsTransport: Transport {
     // MARK: - Public Properties
     
     /// Dispatch queue.
-    public var queue: DispatchQueue? {
-        configuration.queue
-    }
+    public var queue: DispatchQueue?
     
     /// Configuration settings.
     public let configuration: Configuration

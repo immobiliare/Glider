@@ -38,7 +38,7 @@ open class ConsoleTransport: Transport {
     public init(configuration: Configuration) {
         self.isEnabled = configuration.isEnabled
         self.configuration = configuration
-        self.queue = queue
+        self.queue = configuration.queue
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
     }
     
