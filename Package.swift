@@ -46,7 +46,7 @@ let package = Package(
             name: "GliderSentry",
             dependencies: [
                 "Glider",
-                .product(name: "Sentry", package: "Sentry")
+                .product(name: "Sentry", package: "sentry-cocoa")
             ],
             path:"GliderSentry/Sources"
         ),
