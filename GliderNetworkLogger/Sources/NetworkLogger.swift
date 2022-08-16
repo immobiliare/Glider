@@ -12,182 +12,151 @@
 
 import Foundation
 import Glider
-/*
+
 /// The `NetworkLogger` class is used to perform networking monitoring of your app.
 /// It will intercepts any call coming from a third party library like RealHTTP or Alamofire
 /// and URLSession too. It allows to specify a `Log` instance where the logs are redirected to.
-public final class NetworkLogger: NSObject {
-    
-    // MARK: - Public Properties
-    
-    /// Shared instance.
-    public static var current = NetworkLogger()
-
-    /// By default, empty.
-    public var ignoredHosts = Set<String>()
-    
-    /// Where the network events are redirected.
-    public var destinationLog: Log?
-    
-    /// Your own delegate class where the methods are forwarded after logged.
-    public var delegate: URLSessionDelegate? {
-        set {
-            self.actualDelegate = newValue
-            self.taskDelegate = newValue as? URLSessionTaskDelegate
-        }
-        get {
-            self.actualDelegate
-        }
-    }
-    
+public class NetworkLogger: URLProtocol {
+  
     // MARK: - Private Properties
     
-    private var actualDelegate: URLSessionDelegate?
-    private var taskDelegate: URLSessionTaskDelegate?
-    private var urlSessionDataDelegate: URLSessionDataDelegate? {
-        actualDelegate as? URLSessionDataDelegate
-    }
-    private var interceptedSelectors: Set<Selector> = []
-
-    // MARK: - Initialization
+    private var urlTask: URLSessionDataTask?
     
-    /// Initialize a new instance of the network logger you can use as `URLSessionDelegate`'s' proxy instance.
-    ///
-    /// - Parameters:
-    ///   - destinationLog: destination log, when not specified a default console log with table formatter is used.
-    ///   - delegate: The "actual" session delegate, strongly retained.
-    public init(destinationLog: Log? = nil, delegate: URLSessionDelegate? = nil) {
-        super.init()
+    private var logItem: NetworkLogItem?
 
-        self.destinationLog = destinationLog ?? NetworkLogger.defaultLogDestination()
-        self.delegate = delegate
-        self.interceptedSelectors = [
-            #selector(URLSessionDataDelegate.urlSession(_:dataTask:didReceive:)),
-            #selector(URLSessionTaskDelegate.urlSession(_:task:didCompleteWithError:)),
-            #selector(URLSessionDataDelegate.urlSession(_:dataTask:didReceive:completionHandler:)),
-            #selector(URLSessionTaskDelegate.urlSession(_:task:didFinishCollecting:))
-        ]
+    private let serialQueue = DispatchQueue(label: "com.glider.networklogger.serialqueue")
+
+    private lazy var session: URLSession = URLSession(configuration: URLSessionConfiguration.default,
+                                                      delegate: self, delegateQueue: nil)
+
+    static private var ignoreDomains: [String]?
+
+    // MARK: - Lifecycle
+    
+    deinit {
+        clear()
     }
     
     // MARK: - Public Functions
     
-    /// Enables automatic registration of `NetworkLogger` for any new custom `URLSession` instance created.
-    /// After calling this method, every time you initialize a `URLSession` using `init(configuration:delegate:delegateQueue:))`
-    /// method, the delegate will automatically get replaced with a `NetworkLogger` that logs all the
-    /// needed events and forwards the methods to your original delegate.
-    ///
-    /// - Parameter destinationLog: destination log.
-    public static func captureTrafficFromURLSessions(toLog destinationLog: Log? = nil, delegate: URLSessionDelegate? = nil) {
-        NetworkLogger.current.destinationLog = destinationLog
-        NetworkLogger.current.delegate = delegate
+    public class func enable(in configuration: URLSessionConfiguration) {
+        configuration.protocolClasses?.insert(NetworkLogger.self, at: 0)
+    }
+    
+    public class func register() {
+        URLProtocol.registerClass(self)
+    }
 
-        if let lhs = class_getClassMethod(URLSession.self, #selector(URLSession.init(configuration:delegate:delegateQueue:))),
-           let rhs = class_getClassMethod(URLSession.self, #selector(URLSession.custom_init(configuration:delegate:delegateQueue:))) {
-            method_exchangeImplementations(lhs, rhs)
+    public class func unregister() {
+        URLProtocol.unregisterClass(self)
+    }
+    
+    // MARK: - URLProtocol
+    
+    open override class func canInit(with request: URLRequest) -> Bool {
+        guard let url = request.url, let scheme = url.scheme else {
+            return false
         }
-    }
-    
-    /// Capture global network traffic on `URLSession.default` instance.
-    ///
-    /// - Parameters:
-    ///   - enabled: `true` to enable capture, `false` to disable.
-    ///   - destinationLog: destination log, if `nil` a default console-based log instance is created for you.
-    public static func captureGlobalTraffic(enabled: Bool, toLog destinationLog: Log? = nil) {
-        if enabled {
-            URLProtocol.registerClass(CustomHTTPProtocol.self)
-        } else {
-            URLProtocol.unregisterClass(CustomHTTPProtocol.self)
+        
+        guard !isIgnore(with: url) else {
+            return false
         }
-    }
-    
-    // MARK: - Private Functions (Helper)
-    
-    /// Create the default log destination for networking logs.
-    ///
-    /// - Returns: `Log`
-    private static func defaultLogDestination() -> Log {
-        Log {
-            $0.transports = [
-                ConsoleTransport({ console in
-                    console.formatters = [TableFormatter(messageFields: [
-                        .message()
-                    ], tableFields: [
-                        .extra(keys: ["url"])
-                    ])]
-                })
-            ]
-        }
-    }
-    
-    // MARK: - Private Functions (Logging)
-    
-    fileprivate func logTask(_ task: URLSessionTask, didCompleteWithError error: Error?, session: URLSession? = nil) {
         
+        return ["http", "https"].contains(scheme) && self.property(forKey: Keys.request, in: request)  == nil
     }
     
-    fileprivate func logTask(_ task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        
+    open override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
     }
     
-    fileprivate func logDataTask(_ dataTask: URLSessionDataTask, didReceive response: URLResponse) {
-
-    }
-    
-    fileprivate func logDataTask(_ dataTask: URLSessionDataTask, didReceive data: Data) {
-
-    }
-    
-    // MARK: - Proxy
-    
-    public override func responds(to aSelector: Selector!) -> Bool {
-        if interceptedSelectors.contains(aSelector) {
-            return true
-        }
-        return (actualDelegate?.responds(to: aSelector) ?? false) || super.responds(to: aSelector)
-    }
-
-    public override func forwardingTarget(for selector: Selector!) -> Any? {
-        interceptedSelectors.contains(selector) ? nil : actualDelegate
-    }
-    
-}
-
-// MARK: - URLSessionTaskDelegate
-
-extension NetworkLogger: URLSessionTaskDelegate {
-        
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        logTask(task, didCompleteWithError: error)
-        taskDelegate?.urlSession?(session, task: task, didCompleteWithError: error)
-    }
-
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        logTask(task, didFinishCollecting: metrics)
-        taskDelegate?.urlSession?(session, task: task, didFinishCollecting: metrics)
-    }
-
-}
-
-// MARK: - URLSessionDataDelegate
-
-extension NetworkLogger: URLSessionDataDelegate {
-
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
-                           completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        logDataTask(dataTask, didReceive: response)
-        
-        guard actualDelegate?.responds(to: #selector(URLSessionDataDelegate.urlSession(_:dataTask:didReceive:completionHandler:))) ?? false else {
-            completionHandler(.allow)
+    open override func startLoading() {
+        if let _ = urlTask { return }
+        guard let urlRequest = (request as NSURLRequest).mutableCopy() as? NSMutableURLRequest,
+                logItem == nil else {
             return
         }
+
+        logItem = NetworkLogItem(request: urlRequest as URLRequest)
+        NetworkLogger.setProperty(true, forKey: Keys.request, in: urlRequest)
         
-        urlSessionDataDelegate?.urlSession?(session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler)
+        urlTask = session.dataTask(with: request)
+        urlTask?.resume()
+    }
+
+    open override func stopLoading() {
+        serialQueue.sync { [weak self] in
+            self?.urlTask?.cancel()
+            self?.urlTask = nil
+            self?.session.invalidateAndCancel()
+        }
+    }
+    
+    // MARK: - Private
+    
+    fileprivate func clear() {
+        urlTask = nil
+        logItem = nil
+    }
+    
+    private class func isIgnore(with url: URL) -> Bool {
+        guard let ignoreDomains = ignoreDomains, !ignoreDomains.isEmpty,
+            let host = url.host else {
+            return false
+        }
+        
+        return ignoreDomains.first { $0.range(of: host) != nil } != nil
+    }
+
+    
+}
+
+extension NetworkLogger: URLSessionTaskDelegate, URLSessionDataDelegate {
+
+    // MARK: - NSURLSessionDataDelegate
+    
+    public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        client?.urlProtocol(self, wasRedirectedTo: request, redirectResponse: response)
+    }
+
+    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        logItem?.didReceive(response: response)
+        completionHandler(.allow)
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .allowed)
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        logDataTask(dataTask, didReceive: data)
-        urlSessionDataDelegate?.urlSession?(session, dataTask: dataTask, didReceive: data)
+        logItem?.didReceive(data: data)
+        client?.urlProtocol(self, didLoad: data)
+    }
+
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        logItem?.didCompleteWithError(error)
+        
+        if let error = error {
+            client?.urlProtocol(self, didFailWithError: error)
+        } else {
+            client?.urlProtocolDidFinishLoading(self)
+        }
+
+        serialQueue.sync { [weak self] in
+            self?.clear()
+        }
+        
+        session.finishTasksAndInvalidate()
     }
     
 }
-*/
+
+
+extension NetworkLogger {
+    
+    public enum LogType {
+        case request
+        case response
+    }
+    
+    private enum Keys {
+        static let request = "GliderNetworkLogger.request"
+    }
+
+}
