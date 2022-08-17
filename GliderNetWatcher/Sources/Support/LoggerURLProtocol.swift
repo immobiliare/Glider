@@ -55,15 +55,18 @@ internal class LoggerURLProtocol: URLProtocol {
     
     override public class func canInit(with request: URLRequest) -> Bool {
         guard let url = request.url, let scheme = url.scheme else {
+            didIgnoreRequest(request)
             return false
         }
         
         if let shouldRecord = NetWatcher.shared.delegate?.netWatcher(NetWatcher.shared, shouldRecordRequest: request),
            shouldRecord == false {
+            didIgnoreRequest(request)
             return false
         }
 
         guard !isURLIgnored(url) else {
+            didIgnoreRequest(request)
             return false
         }
         
@@ -102,6 +105,12 @@ internal class LoggerURLProtocol: URLProtocol {
         }
         
         return ignoredHosts.first { $0.range(of: host) != nil } != nil
+    }
+    
+    private static func didIgnoreRequest(_ request: URLRequest) {
+        DispatchQueue.main.async {
+            NetWatcher.shared.delegate?.netWatcher(NetWatcher.shared, didIgnoreRequest: request)
+        }
     }
 
 }

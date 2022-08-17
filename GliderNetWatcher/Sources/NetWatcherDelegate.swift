@@ -22,6 +22,14 @@ public protocol NetWatcherDelegate: AnyObject {
     ///   - event: event captured.
     func netWatcher(_ watcher: NetWatcher, didCaptureEvent event: NetworkEvent)
     
+    /// Called when a request is ignored because it's in `ignoredHosts` list or
+    /// `netWatcher(_:shouldRecordRequest:)` returned `false`.
+    ///
+    /// - Parameters:
+    ///   - watcher: watcher singleton.
+    ///   - request: request ignored.
+    func netWatcher(_ watcher: NetWatcher, didIgnoreRequest request: URLRequest)
+    
     /// Used to allow recording or ignore a particular request.
     /// When not implemented it always return `true`.
     ///

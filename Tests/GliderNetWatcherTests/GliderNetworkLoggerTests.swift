@@ -16,37 +16,60 @@ import XCTest
 
 final class GliderNetworkLoggerTests: XCTestCase, NetWatcherDelegate {
     
-    func test_captureNetworkTraffic() async throws {
-        let exp = expectation(description: "test")
+    private let testURLs = (1...10).map {
+        URL(string: "https://jsonplaceholder.typicode.com/posts/\($0)")!
+    }
+    
+    /*func test_captureNetworkTraffic_archiveFile() async throws {
+        let archiveURL = URL(fileURLWithPath: "/Users/daniele/Desktop/test.sqlite")
+        let archiveConfig = NetArchiveTransport.Configuration(location: .fileURL(archiveURL))
+    }*/
+    
+    func test_captureNetworkTraffic_sparseFiles() async throws {
+        let downloadExp = expectation(description: "test")
+        var downloadedCount = 0
         
-       // let archiveURL = URL(fileURLWithPath: "/Users/daniele/Desktop/test.sqlite")
-       // let archiveConfig = NetArchiveTransport.Configuration(location: .fileURL(archiveURL))
+        let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        let folderURL = temporaryDirectoryURL.appendingPathComponent("network_events_store")
+        try FileManager.default.removeItem(at: folderURL)
         
-        let diURL = URL(fileURLWithPath: "/Users/daniele/Desktop/store")
-        let sparseConfig = NetSparseFilesTransport.Configuration(directoryURL: diURL)
+        let sparseConfig = NetSparseFilesTransport.Configuration(directoryURL: folderURL)
+        let watcherConfig = try NetWatcher.Config(storage: .sparseFiles(sparseConfig))
         
-        //let config = try NetWatcher.Config(storage: .archive(archiveConfig))
-        let config = try NetWatcher.Config(storage: .sparseFiles(sparseConfig))
+        print("Saving reports to \(folderURL.path)")
         
-        NetWatcher.shared.setConfiguration(config)
+        NetWatcher.shared.setConfiguration(watcherConfig)
         NetWatcher.shared.captureGlobally(true)
         NetWatcher.shared.delegate = self
 
-        let requestURL = URL(string: "https://github.com/malcommac/Glider")!
-        let task = URLSession.shared.dataTask(with: requestURL) {(data, response, error) in
-            
+        for url in testURLs {
+            print("Sending request for \(url.absoluteString)...")
+            let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+                downloadedCount += 1
+                if downloadedCount == self.testURLs.count {
+                    downloadExp.fulfill()
+                }
+            }
+            task.resume()
         }
-
-        task.resume()
         
-        wait(for: [exp], timeout: 120)
+        wait(for: [downloadExp], timeout: 120)
 
         NetWatcher.shared.captureGlobally(false)
-        
     }
     
     func netWatcher(_ watcher: NetWatcher, didCaptureEvent event: NetworkEvent) {
         print("Captured new request to \(event.url.absoluteString) with \(event.httpResponse?.statusCode ?? 0)")
+    }
+    
+    func netWatcher(_ watcher: NetWatcher, shouldRecordRequest request: URLRequest) -> Bool {
+        let id = Int(request.url!.lastPathComponent)!
+        return id % 2 == 0
+    }
+    
+    func netWatcher(_ watcher: NetWatcher, didIgnoreRequest request: URLRequest) {
+        let id = Int(request.url!.lastPathComponent)!
+        XCTAssertTrue(id % 2 != 0, "Only non odd request should be ignored")
     }
     
 }
