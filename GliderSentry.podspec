@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "GliderSentry"
-  s.version      = "0.9.29"
+  s.version      = "0.9.30"
   s.summary      = "Sentry Transport service for Glider Logger"
   s.homepage     = "https://github.com/malcommac/Glider.git"
   s.license      = { :type => "MIT", :file => "LICENSE" }
