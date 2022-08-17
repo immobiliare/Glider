@@ -16,147 +16,82 @@ import Glider
 /// The `NetworkLogger` class is used to perform networking monitoring of your app.
 /// It will intercepts any call coming from a third party library like RealHTTP or Alamofire
 /// and URLSession too. It allows to specify a `Log` instance where the logs are redirected to.
-public class NetworkLogger: URLProtocol {
+public class NetworkLogger {
   
-    // MARK: - Private Properties
+    // MARK: - Public Properties
     
-    private var urlTask: URLSessionDataTask?
+    /// Singleton instance.
+    public static let shared = NetworkLogger()
     
-    private var logItem: NetworkLogItem?
-
-    private let serialQueue = DispatchQueue(label: "com.glider.networklogger.serialqueue")
-
-    private lazy var session: URLSession = URLSession(configuration: URLSessionConfiguration.default,
-                                                      delegate: self, delegateQueue: nil)
-
-    static private var ignoreDomains: [String]?
-
-    // MARK: - Lifecycle
+    /// Active configuration.
+    public private(set) var config: Config?
     
-    deinit {
-        clear()
+    /// Return `true` if recording globally or at least one configuration is on.
+    public private(set) var isActive: Bool = false
+    
+    /// Hosts that will be ignored from being recorded.
+    public var ignoredHosts: [String] {
+        get { LoggerURLProtocol.ignoredHosts }
+        set { LoggerURLProtocol.ignoredHosts = newValue }
     }
+    
+    // MARK: - Initialization
+    
+    private init() { }
     
     // MARK: - Public Functions
     
-    public class func enable(in configuration: URLSessionConfiguration) {
-        configuration.protocolClasses?.insert(NetworkLogger.self, at: 0)
-    }
-    
-    public class func register() {
-        URLProtocol.registerClass(self)
-    }
-
-    public class func unregister() {
-        URLProtocol.unregisterClass(self)
-    }
-    
-    // MARK: - URLProtocol
-    
-    open override class func canInit(with request: URLRequest) -> Bool {
-        guard let url = request.url, let scheme = url.scheme else {
+    /// Modify the configuration.
+    ///
+    /// NOTE:
+    /// You should never call it while recording is in progress.
+    /// In this case no changes are applied.
+    ///
+    /// - Parameter configuration: new configuration
+    @discardableResult
+    public func setConfiguration(_ config: Config) -> Bool {
+        guard isActive == false else {
             return false
         }
         
-        guard !isIgnore(with: url) else {
-            return false
-        }
-        
-        return ["http", "https"].contains(scheme) && self.property(forKey: Keys.request, in: request)  == nil
+        self.config = config
+        self.ignoredHosts = config.ignoredHosts
+        return true
     }
     
-    open override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        return request
-    }
-    
-    open override func startLoading() {
-        if let _ = urlTask { return }
-        guard let urlRequest = (request as NSURLRequest).mutableCopy() as? NSMutableURLRequest,
-                logItem == nil else {
-            return
-        }
-
-        logItem = NetworkLogItem(request: urlRequest as URLRequest)
-        NetworkLogger.setProperty(true, forKey: Keys.request, in: urlRequest)
-        
-        urlTask = session.dataTask(with: request)
-        urlTask?.resume()
-    }
-
-    open override func stopLoading() {
-        serialQueue.sync { [weak self] in
-            self?.urlTask?.cancel()
-            self?.urlTask = nil
-            self?.session.invalidateAndCancel()
-        }
-    }
-    
-    // MARK: - Private
-    
-    fileprivate func clear() {
-        urlTask = nil
-        logItem = nil
-    }
-    
-    private class func isIgnore(with url: URL) -> Bool {
-        guard let ignoreDomains = ignoreDomains, !ignoreDomains.isEmpty,
-            let host = url.host else {
-            return false
-        }
-        
-        return ignoreDomains.first { $0.range(of: host) != nil } != nil
-    }
-
-    
-}
-
-extension NetworkLogger: URLSessionTaskDelegate, URLSessionDataDelegate {
-
-    // MARK: - NSURLSessionDataDelegate
-    
-    public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        client?.urlProtocol(self, wasRedirectedTo: request, redirectResponse: response)
-    }
-
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        logItem?.didReceive(response: response)
-        completionHandler(.allow)
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .allowed)
-    }
-
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        logItem?.didReceive(data: data)
-        client?.urlProtocol(self, didLoad: data)
-    }
-
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        logItem?.didCompleteWithError(error)
-        
-        if let error = error {
-            client?.urlProtocol(self, didFailWithError: error)
+    public func captureGlobally(_ enabled: Bool) {
+        if enabled {
+            URLProtocol.registerClass(LoggerURLProtocol.self)
         } else {
-            client?.urlProtocolDidFinishLoading(self)
+            URLProtocol.unregisterClass(LoggerURLProtocol.self)
         }
-
-        serialQueue.sync { [weak self] in
-            self?.clear()
+    }
+    
+    @discardableResult
+    public func capture(_ enabled: Bool, forSessionConfiguration configuration: URLSessionConfiguration) -> Bool {
+        guard isActive == false else {
+            return false
         }
         
-        session.finishTasksAndInvalidate()
+        var urlProtocolClasses = configuration.protocolClasses
+        guard urlProtocolClasses != nil else {
+            return false
+        }
+        
+        let index = urlProtocolClasses?.firstIndex(where: { (obj) -> Bool in
+            if obj == LoggerURLProtocol.self {
+                return true
+            }
+            return false
+        })
+        
+        if enabled && index == nil {
+            urlProtocolClasses!.insert(LoggerURLProtocol.self, at: 0)
+        } else if !enabled && index != nil{
+            urlProtocolClasses!.remove(at: index!)
+        }
+        configuration.protocolClasses = urlProtocolClasses
+        return true
     }
     
-}
-
-
-extension NetworkLogger {
-    
-    public enum LogType {
-        case request
-        case response
-    }
-    
-    private enum Keys {
-        static let request = "GliderNetworkLogger.request"
-    }
-
 }
