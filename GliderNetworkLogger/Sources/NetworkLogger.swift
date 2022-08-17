@@ -24,7 +24,8 @@ public class NetworkLogger {
     public static let shared = NetworkLogger()
     
     /// Active configuration.
-    public private(set) var config: Config?
+    /// The default configuration store data in memory with a limit of the last 100 network calls.
+    public private(set) var config: Config = .init(storage: .inMemory(limit: 100), nil)
     
     /// Return `true` if recording globally or at least one configuration is on.
     public private(set) var isActive: Bool = false
@@ -59,15 +60,27 @@ public class NetworkLogger {
         return true
     }
     
+    /// Capture network traffic globally regardless specified `URLSession` instance.
+    ///
+    /// - Parameter enabled: `true` to activate the configuration
     public func captureGlobally(_ enabled: Bool) {
-        if enabled {
+        if enabled && isActive == false {
             URLProtocol.registerClass(LoggerURLProtocol.self)
-        } else {
+            isActive = true
+        } else if enabled == false && isActive {
             URLProtocol.unregisterClass(LoggerURLProtocol.self)
+            isActive = false
         }
+        
     }
     
     @discardableResult
+    /// Capture the traffic of a specified `URLSessionConfiguration`.
+    ///
+    /// - Parameters:
+    ///   - enabled: `true` to enable, `false` to disable recording.
+    ///   - configuration: configuration to record.
+    /// - Returns: `Bool`
     public func capture(_ enabled: Bool, forSessionConfiguration configuration: URLSessionConfiguration) -> Bool {
         guard isActive == false else {
             return false
@@ -92,6 +105,58 @@ public class NetworkLogger {
         }
         configuration.protocolClasses = urlProtocolClasses
         return true
+    }
+    
+    // MARK: - Internal Function
+    
+    /// Record a new network event.
+    ///
+    /// - Parameter networkLog: event to log.
+    internal func record(_ networkLog: NetworkEvent?) {
+        guard let networkLog = networkLog else {
+            return
+        }
+
+        let event = Event(message: "Network Request \(networkLog.id)", object: networkLog)
+        record(event)
+    }
+    
+    // MARK: - Private Function
+    
+    private func record(_ event: Event) {
+        let isSync = config.isSynchronous
+        let transports = config.transports
+
+        let mainExecutor = executorForQueue(config.queue, synchronous: isSync)
+        mainExecutor { [event, transports] in
+            for recorder in transports{
+                if let queue = recorder.queue {
+                    let recorderExecutor = self.executorForQueue(queue, synchronous: isSync)
+                    recorderExecutor {
+                        recorder.record(event: event)
+                    }
+                } else {
+                    recorder.record(event: event)
+                }
+            }
+        }
+    }
+    
+    /// Create dispatch queue.
+    ///
+    /// - Parameters:
+    ///   - queue: queue
+    ///   - synchronous: `true` for synchronous.
+    /// - Returns: Escaping function.
+    private func executorForQueue(_ queue: DispatchQueue, synchronous: Bool) -> (@escaping () -> Void) -> Void {
+        let executor: (@escaping () -> Void) -> Void = { block in
+            if synchronous {
+                return queue.sync(execute: block)
+            } else {
+                return queue.async(execute: block)
+            }
+        }
+        return executor
     }
     
 }

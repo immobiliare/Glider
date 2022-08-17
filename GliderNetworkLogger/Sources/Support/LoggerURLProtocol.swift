@@ -15,18 +15,26 @@ import Foundation
 /// `LoggerURLProtocol` is a custom implementation of `URLProtocol` used to intercept
 /// and record each request.
 internal class LoggerURLProtocol: URLProtocol {
-    
-    // MARK: - Public Properties
+    private static let RequestHandledKey = "URLProtocolRequestHandled"
+
+    // MARK: - Internal Properties
     
     internal static var ignoredHosts = [String]()
     
+    // MARK: - Fileprivate Properties
+    
+    /// URL Session.
+    fileprivate var session: URLSession?
+    
+    /// URL Session Task.
+    fileprivate var sessionTask: URLSessionDataTask?
+    
+    /// Request payload.
+    fileprivate var currentRequest: NetworkEvent?
+    
     // MARK: - Private Properties
     
-    fileprivate var session: URLSession?
-    fileprivate var sessionTask: URLSessionDataTask?
-    fileprivate var currentRequest: LogNetworkRequest?
-    
-    private static let RequestHandledKey = "URLProtocolRequestHandled"
+    /// Payload.
     private let serialQueue = DispatchQueue(label: "com.glider.networklogger.serialqueue")
     
     // MARK: - URLProtocol
@@ -68,7 +76,7 @@ internal class LoggerURLProtocol: URLProtocol {
         sessionTask = session?.dataTask(with: newRequest as URLRequest)
         sessionTask?.resume()
         
-        currentRequest = LogNetworkRequest(request: newRequest, inSession: session)
+        currentRequest = NetworkEvent(request: newRequest, inSession: session)
     }
     
     override public func stopLoading() {
@@ -122,6 +130,8 @@ extension LoggerURLProtocol: URLSessionDataDelegate {
 
         currentRequest?.didCompleteWithError(error)
         client?.urlProtocol(self, didFailWithError: error)
+        
+        NetworkLogger.shared.record(currentRequest)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask,
