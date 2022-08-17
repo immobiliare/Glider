@@ -16,16 +16,16 @@ import Glider
 /// The `NetworkLogger` class is used to perform networking monitoring of your app.
 /// It will intercepts any call coming from a third party library like RealHTTP or Alamofire
 /// and URLSession too. It allows to specify a `Log` instance where the logs are redirected to.
-public class NetworkLogger {
+public class NetWatcher {
   
     // MARK: - Public Properties
     
     /// Singleton instance.
-    public static let shared = NetworkLogger()
+    public static let shared = NetWatcher()
     
     /// Active configuration.
     /// The default configuration store data in memory with a limit of the last 100 network calls.
-    public private(set) var config: Config = .init(storage: .inMemory(limit: 100), nil)
+    public private(set) var config: Config?
     
     /// Return `true` if recording globally or at least one configuration is on.
     public private(set) var isActive: Bool = false
@@ -124,6 +124,10 @@ public class NetworkLogger {
     // MARK: - Private Function
     
     private func record(_ event: Event) {
+        guard let config = config else {
+            return
+        }
+
         let isSync = config.isSynchronous
         let transports = config.transports
 

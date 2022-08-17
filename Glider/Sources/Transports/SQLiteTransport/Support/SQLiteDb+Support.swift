@@ -82,7 +82,7 @@ extension SQLiteDb {
         }
         
         /// Return `true` if a local file exists when location is `fileURL`. Otherwise it will return always `false`.
-        internal var fileExists: Bool {
+        public var fileExists: Bool {
             switch self {
             case .fileURL(let URL):
                 return FileManager.default.fileExists(atPath: URL.path)

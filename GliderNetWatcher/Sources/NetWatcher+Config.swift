@@ -13,7 +13,7 @@
 import Foundation
 import Glider
 
-extension NetworkLogger {
+extension NetWatcher {
     
     /// Represent the configuration object for network logger request.
     public struct Config {
@@ -52,7 +52,8 @@ extension NetworkLogger {
         /// Initialize a new remote configuration object via builder function.
         ///
         /// - Parameter builder: builder callback.
-        public init(storage: Storage, _ builder: ((inout Config) -> Void)?) {
+        public init(storage: Storage, _ builder: ((inout Config) -> Void)? = nil) throws {
+            self.transports = try [storage.transportInstance()]
             self.queue = DispatchQueue(label: "glider.networklogger.queue.\(UUID().uuidString)")
             builder?(&self)
         }
@@ -61,12 +62,34 @@ extension NetworkLogger {
     
 }
 
-extension NetworkLogger.Config {
+// MARK: - Storage Configuration
+
+extension NetWatcher.Config {
     
+    /// Identify the transport used to store network activities.
+    ///
+    /// - `archive`: a compact archive file powered by SQLite3 where to store each recorded network call.
+    /// - `sparseFiles`: a directory where each file correspond to a single network call.
+    /// - `custom`: a custom transport layer.
     public enum Storage {
-        case inMemory(limit: Int)
-        case database(fileURL: URL)
-        case folder(url: URL)
+        case archive(NetArchiveTransport.Configuration)
+        case sparseFiles(NetSparseFilesTransport.Configuration)
+        case custom(Transport)
+        
+        internal func transportInstance() throws -> Transport {
+            switch self {
+            case .archive(let config):
+                return try NetArchiveTransport(configuration: config)
+                
+            case .sparseFiles(let config):
+                return try NetSparseFilesTransport(configuration: config)
+                
+            case .custom(let transport):
+                return transport
+                
+            }
+        }
+        
     }
     
 }

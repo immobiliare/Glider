@@ -81,7 +81,7 @@ public class ThrottledTransport: Transport {
     /// Initialize `ThrottledTransport` with given configuration.
     ///
     /// - Parameter builder: configuration callback.
-    public convenience init(_ builder: ((inout Configuration) -> Void)) {
+    public convenience init(_ builder: @escaping ((inout Configuration) -> Void)) {
         self.init(configuration: Configuration(builder))
     }
     
@@ -210,8 +210,8 @@ extension ThrottledTransport {
         /// Initialize a new configuration for `ThrottledTransport`.
         ///
         /// - Parameter builder: builder function.
-        public init(_ builder: ((inout Configuration) -> Void)) {
-            builder(&self)
+        public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+            builder?(&self)
         }
         
     }

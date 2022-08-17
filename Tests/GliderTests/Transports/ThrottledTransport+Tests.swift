@@ -49,7 +49,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
         }
         
         let transport = ThrottledTransport {
-            $0.maxEntries = maxEntries
+            $0.maxEntries = self.maxEntries
             $0.autoFlushInterval = 5
             $0.formatters = [format]
             $0.delegate = self

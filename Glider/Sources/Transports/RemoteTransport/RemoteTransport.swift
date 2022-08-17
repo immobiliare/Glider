@@ -81,6 +81,7 @@ public class RemoteTransport: Transport {
     /// Is the connections started.
     private var isStarted = false
     
+    /// Is logging service enabled.
     private var isLoggingPaused = true
     
     /// The browser discovery class.
@@ -109,7 +110,6 @@ public class RemoteTransport: Transport {
     public init(configuration: Configuration, delegate: RemoteTransportDelegate? = nil) throws {
         self.configuration = configuration
         self.isEnabled = configuration.isEnabled
-        self.isEnabled = true
         self.queue = configuration.queue
         
         if isEnabled {

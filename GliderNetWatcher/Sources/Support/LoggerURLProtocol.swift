@@ -124,14 +124,14 @@ extension LoggerURLProtocol: URLSessionDataDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask,
                            didCompleteWithError error: Error?) {
         guard let error = error else {
+            NetWatcher.shared.record(currentRequest)
             client?.urlProtocolDidFinishLoading(self)
             return
         }
 
         currentRequest?.didCompleteWithError(error)
+        NetWatcher.shared.record(currentRequest)
         client?.urlProtocol(self, didFailWithError: error)
-        
-        NetworkLogger.shared.record(currentRequest)
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask,
