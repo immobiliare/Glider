@@ -23,6 +23,9 @@ public class NetWatcher {
     /// Singleton instance.
     public static let shared = NetWatcher()
     
+    /// Delegate to receive events from the singleton.
+    public weak var delegate: NetWatcherDelegate?
+    
     /// Active configuration.
     /// The default configuration store data in memory with a limit of the last 100 network calls.
     public private(set) var config: Config?

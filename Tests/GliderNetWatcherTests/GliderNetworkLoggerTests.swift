@@ -14,7 +14,7 @@ import XCTest
 @testable import Glider
 @testable import GliderNetWatcher
 
-final class GliderNetworkLoggerTests: XCTestCase {
+final class GliderNetworkLoggerTests: XCTestCase, NetWatcherDelegate {
     
     func test_captureNetworkTraffic() async throws {
         let exp = expectation(description: "test")
@@ -27,25 +27,26 @@ final class GliderNetworkLoggerTests: XCTestCase {
         
         //let config = try NetWatcher.Config(storage: .archive(archiveConfig))
         let config = try NetWatcher.Config(storage: .sparseFiles(sparseConfig))
-
         
         NetWatcher.shared.setConfiguration(config)
         NetWatcher.shared.captureGlobally(true)
+        NetWatcher.shared.delegate = self
 
-        for i in 0..<100 {
-        let url = URL(string: "https://github.com/malcommac/Glider")!
-
-        let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-            print("Done!")
+        let requestURL = URL(string: "https://github.com/malcommac/Glider")!
+        let task = URLSession.shared.dataTask(with: requestURL) {(data, response, error) in
+            
         }
 
         task.resume()
-        }
         
         wait(for: [exp], timeout: 120)
 
         NetWatcher.shared.captureGlobally(false)
         
+    }
+    
+    func netWatcher(_ watcher: NetWatcher, didCaptureEvent event: NetworkEvent) {
+        print("Captured new request to \(event.url.absoluteString) with \(event.httpResponse?.statusCode ?? 0)")
     }
     
 }

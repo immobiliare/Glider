@@ -140,7 +140,8 @@ public class NetArchiveTransport: Transport, ThrottledTransportDelegate {
         try stmt?.bind(param: 12, event.statusCode)
         try stmt?.bind(param: 13, event.responseData)
         try stmt?.bind(param: 14, event.responseErrorDescription)
-        
+        try stmt?.bind(param: 15, event.urlRequest?.cURLCommand())
+
         try stmt?.step()
         try stmt?.reset()
     }
@@ -181,7 +182,8 @@ fileprivate extension NetArchiveTransport {
                 cookies TEXT,
                 code TEXT,
                 data BLOB,
-                error TEXT
+                error TEXT,
+                cURL TEXT
             );
         """
         
@@ -190,9 +192,9 @@ fileprivate extension NetArchiveTransport {
         /// Statement compiled to insert payload into db.
         static let recordEvent = """
             INSERT INTO call
-                (id, timestamp, duration, url, host, port, scheme, method, headers, credentials, cookies, code, data, error)
+                (id, timestamp, duration, url, host, port, scheme, method, headers, credentials, cookies, code, data, error, cURL)
             VALUES
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
         
     }

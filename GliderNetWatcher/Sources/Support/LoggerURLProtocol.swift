@@ -58,6 +58,11 @@ internal class LoggerURLProtocol: URLProtocol {
             return false
         }
         
+        if let shouldRecord = NetWatcher.shared.delegate?.netWatcher(NetWatcher.shared, shouldRecordRequest: request),
+           shouldRecord == false {
+            return false
+        }
+
         guard !isURLIgnored(url) else {
             return false
         }
@@ -125,12 +130,14 @@ extension LoggerURLProtocol: URLSessionDataDelegate {
                            didCompleteWithError error: Error?) {
         guard let error = error else {
             NetWatcher.shared.record(currentRequest)
+            didCaptureNewEvent()
             client?.urlProtocolDidFinishLoading(self)
             return
         }
 
         currentRequest?.didCompleteWithError(error)
         NetWatcher.shared.record(currentRequest)
+        didCaptureNewEvent()
         client?.urlProtocol(self, didFailWithError: error)
     }
     
@@ -148,9 +155,9 @@ extension LoggerURLProtocol: URLSessionDataDelegate {
         }
         
         currentRequest?.didCompleteWithError(error)
+        didCaptureNewEvent()
         client?.urlProtocol(self, didFailWithError: error)
     }
-    
     
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
                            completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -160,6 +167,18 @@ extension LoggerURLProtocol: URLSessionDataDelegate {
     
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         client?.urlProtocolDidFinishLoading(self)
+    }
+    
+    // MARK: - Private Functions
+    
+    private func didCaptureNewEvent() {
+        guard let networkEvent = currentRequest else {
+            return
+        }
+        
+        DispatchQueue.main.async {
+            NetWatcher.shared.delegate?.netWatcher(NetWatcher.shared, didCaptureEvent: networkEvent)
+        }
     }
     
 }

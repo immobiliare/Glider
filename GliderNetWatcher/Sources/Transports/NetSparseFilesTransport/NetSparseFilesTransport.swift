@@ -16,6 +16,7 @@ import Glider
 /// The `NetSparseFilesTransport` class is used to store network activity
 /// inside a root folder. Each call is stored with a single textual file
 /// with the id of the network call and its creation date set to the origin call date.
+/// Inside each file you can found `<cURL command for request>\n\n<raw response data>`.
 public class NetSparseFilesTransport: Transport {
     
     // MARK: - Public Properties
@@ -36,6 +37,9 @@ public class NetSparseFilesTransport: Transport {
     
     /// FileManager instance.
     private let fManager = FileManager.default
+    
+    /// New lines separator.
+    private static let newLines = "\n\n"
     
     // MARK: - Initialization
     
@@ -77,9 +81,15 @@ public class NetSparseFilesTransport: Transport {
             let fileHandle = FileHandle(forWritingAtPath: fullURL.path)
             fileHandle?.seekToEndOfFile()
 
-            fileHandle?.write(networkEvent.url.absoluteString.asData()!)
-            fileHandle?.write("\n\n".asData()!)
+            // Section 1: cURL command for request
+            if let curlCommand = networkEvent.urlRequest?.cURLCommand() {
+                fileHandle?.write(curlCommand.asData()!)
+            }
 
+            // Separator
+            fileHandle?.write(Self.newLines.asData()!)
+
+            // Section 2: Complete raw data
             if let data = networkEvent.responseData {
                 fileHandle?.write(data)
             } else if let error = networkEvent.responseErrorDescription {
