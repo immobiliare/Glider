@@ -13,29 +13,35 @@
 import Foundation
 
 /// This class provide the low-level interface for accepting log messages.
+/// You will never interact with this class.
 public class TransportManager {
     
     // MARK: - Private Properties
     
-    /// Identify type of dispatch queue.
+    /// Identify the dispatch queue used to receive messages.
+    ///
     /// Typically you want to set if to `false` in production and `true` in development.
     /// Synchronous mode is helpful while debugging, as it ensures that logs are always up-to-date.
-    /// By default is set to `false`.
-    ///
-    /// DISCUSSION:
     /// when debug breakpoints are hit.
+    ///
     /// However, synchronous mode can have a negative influence on performance and is
     /// therefore not recommended for use in production code.
+    ///
+    /// By default is set to `false`.
     private let isSynchronous: Bool
     
-    /// Serialized strategies. If not set the default's `TransportManager` is used instead.
+    /// Serialized strategies for object encoding.
+    ///
+    /// If not set the default's `TransportManager` is used instead.
     internal private(set) var serializedStrategies: SerializationStrategies
         
     /// This is the dispatch queue which make in order the payload received from different channels.
     private let acceptQueue: DispatchQueue
     
     /// Used to decide whether a given event should be passed along to the receiver
-    /// recorders. If at least one of the filter specified (executed in order) return `false`
+    /// recorders.
+    ///
+    /// If at least one of the filter specified (executed in order) return `false`
     /// from `shouldWrite()` function payload will be silently ignored when being processed.
     internal var filters = [TransportFilter]()
     

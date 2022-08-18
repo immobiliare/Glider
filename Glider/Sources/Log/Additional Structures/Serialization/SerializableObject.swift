@@ -25,13 +25,19 @@ public typealias Tags = [String: String]
 
 // MARK: - SerializableObject
 
-/// An object conforms to this protocol is able to send additional data along with
-/// the events is referring to.
-/// Glider provides the conformance for the most common object types.
+/// In order to attach additional objects to a message payload, these objects must
+/// be conform to the `SerializableObject` protocol.
+/// This protocol defines a list of function used to create a binary representation
+/// of an object.
+///
+/// Glider offers automatically conformance to `SerializableObject` for any object
+/// already conforms to `Codable` protocol and any other of the standard data type
+/// (strings, numbers, dates and so on).
 public protocol SerializableObject {
     
     /// A list of metadata properties you can attach to logged object in order to
     /// better describe it.
+    ///
     /// By default the `class` and `type` properties are filled automatically for you.
     /// For `UIImage` it also includes `scale`, `width` and `height` properties.
     /// - Returns: Metadata
@@ -50,7 +56,7 @@ public protocol SerializableObject {
 
 }
 
-// MARK: - SerializableObject for Encodable objects
+// MARK: - SerializableObject for Codable
 
 public extension SerializableObject where Self: Codable {
     

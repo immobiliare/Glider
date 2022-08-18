@@ -1,26 +1,44 @@
 //
-//  File.swift
-//  
+//  Glider
+//  Fast, Lightweight yet powerful logging system for Swift.
 //
-//  Created by Daniele Margutti on 01/06/22.
+//  Created by Daniele Margutti
+//  Email: <hello@danielemargutti.com>
+//  Web: <http://www.danielemargutti.com>
+//
+//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Licensed under MIT License.
 //
 
 import Foundation
 
+/// A metadata is a container of key,value entries. It's basically a dictionary
+/// where you can store useful informations you can bring along with your event.
+///
+/// You can set a global metadata entries inside the `GliderSDK.shared.scope` variable
+/// or per single event using the `metadata` property.
+///
+/// Each value of metadata must be conform to `SerializableData` in order to be
+/// serialized and stored. All the default Swift data types are conform to this
+/// protocol, but you can also provide an implementation for your custom objects.
+///
 public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
     
     // MARK: - Public Properties
     
-    /// Dictionary.
+    /// Dictionary with values
     public private(set) var values = [String: SerializableData?]()
     
-    /// Keys stored.
+    /// A list of all stored keys
     public var keys: [String] {
         Array(values.keys)
     }
     
     // MARK: - Initialization
     
+    /// Initialize a new metadata dictionary with a list of key values.
+    ///
+    /// - Parameter values: key values dictionary.
     public init(_ values: [String: SerializableData?] = [:]) {
         self.values = values
     }
@@ -42,10 +60,15 @@ public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
         }
     }
     
+    /// Produce a JSON representation of the metadata object.
+    ///
+    /// - Returns: `String`
     public func asString() -> String? {
         let json = try? JSONSerialization.data(withJSONObject: self, options: .sortedKeys)
         return json?.asString()
     }
+    
+    // MARK: - Internal Functions
     
     func merge(with otherMetadata: Metadata?) -> Metadata {
         guard let otherMetadata = otherMetadata else {

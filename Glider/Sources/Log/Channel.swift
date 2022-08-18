@@ -12,6 +12,17 @@
 
 import Foundation
 
+/// A channel is a message receiver for a particular `Log`'s severity level.
+///
+/// Each `Log` instance has nine `Channel` instances, one per `level`.
+/// Only channels equal to or above the current `Log`'s `level`
+/// are initialized and can accept incoming messages; others are `nil`.
+///
+/// Accepted messages are therefore sent to the specified transport instances and recorded.
+/// You can't create a `Channel` instance; it's an internal structure to ensure log functionalities.
+///
+/// `Channel` exposes all the `write()` functions used to compose a payload (`Event`) from a set of parameters
+/// and send them to the underlying transports.
 public class Channel {
     
     // MARK: - Private Properties
@@ -35,14 +46,14 @@ public class Channel {
     
     // MARK: - Public Functions
 
-    /// Write a new event to the current channel.
+    /// Write a new event, created via function builder, to the current channel.
     ///
     /// - Parameters:
     ///   - eventBuilder: builder function for event
-    ///   - function: function name of the caller (filled automastically)
-    ///   - filePath: file path of the caller (filled automatically)
-    ///   - fileLine: file line of the caller (filled automatically)
-    /// - Returns: Event
+    ///   - function: (auto filled) function name of the caller
+    ///   - filePath: (auto filled) file path of the caller
+    ///   - fileLine: (auto filled) file line of the caller
+    /// - Returns: `Event`
     @discardableResult
     public func write(_ eventBuilder: @escaping (inout Event) -> Void,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
@@ -58,17 +69,18 @@ public class Channel {
         return write(event: &event, function: function, filePath: filePath, fileLine: fileLine)
     }
     
-    /// Write a new event to the current channel.
-    /// If parent log is disabled or channel's level is below log's level message is ignored and
+    /// Write a passed `Event` to the current channel.
+    ///
+    /// If parent `log` is disabled or channel's level is below log's level message is ignored and
     /// returned data is `nil`. Otherwise, when event is correctly dispatched to the underlying
     /// transport services it will return the `Event` instance sent.
     ///
     /// - Parameters:
     ///   - event: event to write
-    ///   - function: function name of the caller (filled automastically)
-    ///   - filePath: file path of the caller (filled automatically)
-    ///   - fileLine: file line of the caller (filled automatically)
-    /// - Returns: Event
+    ///   - function: (auto filled) function name of the caller
+    ///   - filePath: (auto filled) file path of the caller
+    ///   - fileLine: (auto filled) file line of the caller
+    /// - Returns: `Event`
     @discardableResult
     public func write(event: inout Event,
                       function: String = #function, filePath: String = #file, fileLine: Int = #line) -> Event? {
@@ -87,25 +99,25 @@ public class Channel {
         return event
     }
     
-    /// Write a new message (both as literal or computed function which return a string)  into the current channel.
+    /// Write a new message (both as literal or computed function which return a string) into the current channel.
+    ///
     /// String's value is evaluated only if channel is active and the level should be included.
     /// This is pretty useful when your message is not a literal string but must be evaluated.
     ///
-    /// NOTE: The underlying `Event` object is created automatically for you.
-    ///
+    /// The underlying `Event` object is created automatically for you.
     /// See the notes on `write()` function for `Event` instance for more infos.
     ///
     /// - Parameters:
-    ///   - messageBuilder: function which generate the message string to send.
-    ///                     this function which will be executed only if the message is actually sent
-    ///                     in order to avoid unnecessary overheads when the generation may result expensive.
+    ///   - message: function which generate the message string to send.
+    ///              this function which will be executed only if the message is actually sent
+    ///              in order to avoid unnecessary overheads when the generation may result expensive.
     ///   - object: object you can send for automatic serialization.
     ///   - extra: extra data to associate.
     ///   - tags: extra indexable tags to associate.
-    ///   - function: function name of the caller (filled automastically)
-    ///   - filePath: file path of the caller (filled automatically)
-    ///   - fileLine: file line of the caller (filled automatically)
-    /// - Returns: Event
+    ///   - function: (auto filled) function name of the caller
+    ///   - filePath: (auto filled) file path of the caller
+    ///   - fileLine: (auto filled) file line of the caller
+    /// - Returns: `Event`
     @discardableResult
     public func write(msg message: @autoclosure @escaping () -> Message,
                       object: SerializableObject? = nil,

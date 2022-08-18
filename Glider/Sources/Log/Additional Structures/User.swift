@@ -12,8 +12,8 @@
 
 import Foundation
 
-/// This struct represent the logged user of the SDK. It will be sent along
-/// each event to the specified transport layers.
+/// This struct represent the logged user of the SDK.
+/// It will be sent along each event to the specified transport layers.
 public struct User: Codable {
     
     // MARK: - Public Properties

@@ -13,40 +13,52 @@
 import Foundation
 import os.log
 
-/// This enum represent the different log levels defined by `syslog`
-/// (standardized by RFC-5424 <https://tools.ietf.org/html/rfc5424> also used by swift-log;
-/// discussion can be found <https://forums.swift.org/t/logging-levels-for-swifts-server-side-logging-apis-and-new-os-log-apis/20365>.
-/// 
-/// The levels also have a numerical code which is standardized by syslog and is listed below.
+/// Represent the different log severity levels defined by the Glider SDK.
+/// Lower level means an higher severity (`emergency` is equal to `0`, `trace` equals to `8`)
 ///
-/// - `emergency`:  Application/system is unusable.
-/// - `alert`:      Action must be taken immediately.
-/// - `critical`:   Logging at this level or higher could have a significant performance cost.
-///                 The logging system may collect and store enough information such as stack shot etc.
-///                 that may help in debugging these critical errors.
-/// - `error`:      Error conditions.
-/// - `warning`:    Abnormal conditions that do not prevent the program from completing a specific task.
-///                 These are meant to be persisted (unless the system runs out of storage quota).
-/// - `notice`:     Conditions that are not error conditions, but that may require special handling
-///                 or that are likely to lead to an error. These messages will be stored by the logging system
-///                 unless it runs out of the storage quota.
-/// - `info`:       Informational messages that are not essential for troubleshooting errors.
-///                 These can be discarded by the logging system, especially if there are resource constraints.
-/// - `debug`:      Messages meant to be useful only during development.
-///                 This is meant to be disabled in shipping code.
-/// - `trace`:      Trace messages.
+/// This is standardized by [RFC-5424](https://tools.ietf.org/html/rfc5424)
+/// also used by Apple's [swift-log](https://github.com/apple/swift-log).
+/// Discussion can be found
+/// [here](https://forums.swift.org/t/logging-levels-for-swifts-server-side-logging-apis-and-new-os-log-apis/20365).
+///
 public enum Level: Int, Comparable, CaseIterable,
                    CustomStringConvertible, Codable {
+    
+    /// Application/system is unusable.
     case emergency = 0
+    
+    /// Action must be taken immediately.
     case alert
+    
+    /// Logging at this level or higher could have a significant performance cost.
+    /// The logging system may collect and store enough information such as stack shot etc.
+    /// that may help in debugging these critical errors.
     case critical
+    
+    /// Error conditions.
     case error
+    
+    /// Abnormal conditions that do not prevent the program from completing a specific task.
+    /// These are meant to be persisted (unless the system runs out of storage quota).
     case warning
+    
+    /// Conditions that are not error conditions, but that may require special handling
+    /// or that are likely to lead to an error. These messages will be stored by the logging system
+    /// unless it runs out of the storage quota.
     case notice
+    
+    /// Informational messages that are not essential for troubleshooting errors.
+    /// These can be discarded by the logging system, especially if there are resource constraints.
     case info
+    
+    /// Messages meant to be useful only during development.
+    /// This is meant to be disabled in shipping code.
     case debug
+    
+    /// Trace messages.
     case trace
     
+    /// Readable description of the level.
     public var description: String {
         switch self {
         case .emergency:    return "emergency"
