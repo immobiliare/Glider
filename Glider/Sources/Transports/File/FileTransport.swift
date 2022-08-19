@@ -17,7 +17,7 @@ import Darwin.C.stdio
 ///
 /// `FileTransport` is a simple log appender that provides no mechanism
 /// for file rotation or truncation. Unless you manually manage the log file when
-/// a `FileLogRecorder` doesn't have it open, you will end up with an ever-growing
+/// a `FileTransport` doesn't have it open, you will end up with an ever-growing
 /// file.
 /// Use a `SizeRotationFileTransport` instead if you'd rather not have to concern
 /// yourself with such details.

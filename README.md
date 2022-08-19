@@ -70,8 +70,15 @@ Click here to read it.
 - [Transports](./Documentation/Transports.md#transports)
   - [Introduction](./Documentation/Transports.md#introduction)
   - [Base Transports](./Documentation/Transports.md#base-transports)
-    - [`AsyncTransport`](./Documentation/Transports.md#asynctransport)
-
+    - [AsyncTransport](./Documentation/Transports.md#asynctransport)
+  - [BufferedTransport](./Documentation/Transports.md#bufferedtransport)
+  - [ThrottledTransport](./Documentation/Transports.md#throttledtransport)
+- [Built-in Transports](./Documentation/Transports.md#built-in-transports)
+  - [ConsoleTransport](./Documentation/Transports.md#consoletransport)
+  - [OSLogTransport](./Documentation/Transports.md#oslogtransport)
+  - [POSIXStreamTransport](./Documentation/Transports.md#posixstreamtransport)
+  - [FileTransport](./Documentation/Transports.md#filetransport)
+  - [SizeRotationFileTransport](./Documentation/Transports.md#sizerotationfiletransport)
 # Installation
 
 ## Swift Package Manager
