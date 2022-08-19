@@ -12,6 +12,12 @@
 
 import Foundation
 
+/// The `HTTPTransport` is used to send log events directly to an http
+/// service by executing network calls to a specific endpoint.
+///
+/// It's up to the delegate (`HTTPTransportDelegate`) to produce a list
+/// of `HTTTransportRequest` requests which will be executed automatically.
+/// It supports retry mechanism on errors.
 open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Public Properties
@@ -47,6 +53,11 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Initialization
     
+    /// Initialize a new `HTTPTransport` with a given configuration.
+    ///
+    /// - Parameters:
+    ///   - delegate: delegate used to receive events from the transport.
+    ///   - configuration: configuration object.
     public init(delegate: HTTPTransportDelegate, configuration: Configuration) throws {
         self.delegate = delegate
         self.configuration = configuration
@@ -62,7 +73,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         }
     }
     
-    /// Initialize a new HTTP Transport for generic HTTP log sends.
+    /// Initialize a new `HTTPTransport` for generic HTTP log sends.
     /// - Parameter builder: configuration builder callback.
     public convenience init(delegate: HTTPTransportDelegate, _ builder: ((inout Configuration) -> Void)? = nil) throws {
         try self.init(delegate: delegate, configuration: Configuration(builder))
@@ -133,6 +144,8 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
 
 extension HTTPTransport {
     
+    
+    /// Represent the configuration settings used to create a new `HTTPTransport` instance.
     public struct Configuration {
         
         // MARK: - Public Properties
@@ -218,6 +231,7 @@ extension HTTPTransport {
 
 // MARK: - HTTPTransportDelegate
 
+/// Delegate used to implement the logic of the `HTTPTransport` for a specific webservice.
 public protocol HTTPTransportDelegate: AnyObject {
     
     /// This method is called when a new chunk of payloads can be sent over the network.

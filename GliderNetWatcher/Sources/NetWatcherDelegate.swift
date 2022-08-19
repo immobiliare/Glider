@@ -12,7 +12,7 @@
 
 import Foundation
 
-/// Delegate for net watcher events.
+/// Delegate for `NetWatcher` class.
 public protocol NetWatcherDelegate: AnyObject {
     
     /// Called when a new network event is captured.

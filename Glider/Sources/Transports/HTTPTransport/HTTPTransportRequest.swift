@@ -12,7 +12,7 @@
 
 import Foundation
 
-/// Represent a single request for `HTTPTransport` transport layer.
+/// Represent a single HTTP request made by the `HTTPTransport`.
 /// It encapsulates a valid `URLRequest` along with extra configuration
 /// attributes like retry mechanism and error handling.
 public struct HTTPTransportRequest {
@@ -34,6 +34,7 @@ public struct HTTPTransportRequest {
     /// Callback called to receive data.
     internal var onComplete: Callback?
     
+    /// Current retry attempt.
     internal var currentRetry = 0
     
     // MARK: - Initialization

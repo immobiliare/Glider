@@ -13,7 +13,7 @@
 import Foundation
 import Network
 
-/// The `WebSocketTransportClient`is used to transport message to a websocket compliant server.
+/// The `WebSocketTransportClient` is used to transport messages to a websocket compliant server.
 /// Each message is transmitted to the server directly on record.
 @available(iOS, introduced: 13)
 public class WebSocketTransportClient: Transport, WebSocketClientDelegate {

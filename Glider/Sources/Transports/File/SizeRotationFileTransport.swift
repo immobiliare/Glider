@@ -12,6 +12,12 @@
 
 import Foundation
 
+/// `SizeRotationFileTransport` maintains a set of daily rotating log
+/// files, kept for a user-specified number of days.
+///
+/// `SizeRotationFileTransport` instance assumes full control over
+/// the log directory specified by its `directoryPath` property.
+/// Please see the configuration documentation for details.
 public class SizeRotationFileTransport: Transport {
     
     // MARK: - Public Properties
@@ -33,7 +39,7 @@ public class SizeRotationFileTransport: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
-    /// Configuration used.
+    /// Configuration used to create the transport.
     public let configuration: Configuration
     
     /// Minumum accepted level for this transport.
@@ -57,7 +63,7 @@ public class SizeRotationFileTransport: Transport {
 
     // MARK: - Initialization
     
-    /// Initialize with configuration.
+    /// Initialize a new `SizeRotationFileTransport` with configuration.
     ///
     /// - Parameter configuration: configuration.
     public init(configuration: Configuration) throws {
@@ -79,7 +85,7 @@ public class SizeRotationFileTransport: Transport {
         self.currentFileTransport?.newlines = configuration.newLines
     }
     
-    /// Initialize a new `SizeRotationFileTransport` instance with given configuration.
+    /// Initialize a new `SizeRotationFileTransport` instance with given configuration callback.
     ///
     /// - Parameters:
     ///   - directoryURL: directory url. If not available it will be created automatically.
@@ -183,6 +189,7 @@ public class SizeRotationFileTransport: Transport {
 
 extension SizeRotationFileTransport {
     
+    /// Represent the configuration settings used to create a new `SizeRotationFileTransport` instance.
     public struct Configuration {
         
         // MARK: - Public Properties
@@ -257,11 +264,16 @@ extension SizeRotationFileTransport {
     
     /// Specify the size of a file.
     public enum FileSize {
+        /// gigabytes unit
         case gigabytes(Int)
+        /// megabytes unit
         case megabytes(Int)
+        /// kilobytes unit
         case kilobytes(Int)
+        /// bytes unit
         case bytes(Int)
         
+        /// Return the bytes converted value.
         internal var bytes: Int64 {
             switch self {
             case .gigabytes(let gb):

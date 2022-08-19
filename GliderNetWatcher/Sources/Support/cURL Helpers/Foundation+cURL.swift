@@ -14,6 +14,7 @@
 
 import Foundation
 
+/// Used to format cURL data.
 private struct CurlParameters {
     static let request = " -X %@ \"%@\""
     static let command = "curl"

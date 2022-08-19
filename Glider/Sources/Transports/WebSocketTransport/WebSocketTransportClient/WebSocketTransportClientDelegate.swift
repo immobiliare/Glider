@@ -13,6 +13,7 @@
 import Foundation
 import Network
 
+/// `WebSocketTransportClientDelegate` allows to receive notifications from a `WebSocketTransportClient`.
 public protocol WebSocketTransportClientDelegate: AnyObject {
     
     // MARK: - Connection Related

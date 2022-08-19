@@ -12,8 +12,9 @@
 
 import Foundation
 
-/// `LoggerURLProtocol` is a custom implementation of `URLProtocol` used to intercept
-/// and record each request.
+/// `LoggerURLProtocol` is a custom implementation
+/// of `URLProtocol` used to intercept and record each request.
+/// You should never use this class directly, it's automatically managed by `NetWatcher`.
 internal class LoggerURLProtocol: URLProtocol {
     private static let RequestHandledKey = "URLProtocolRequestHandled"
 

@@ -14,6 +14,7 @@ import Foundation
 
 extension RemoteTransport {
     
+    /// Represent the configuration settings used to create a new `RemoteTransport` instance.
     public struct Configuration {
         
         public static let defaultServiceType = "_glider._tcp"

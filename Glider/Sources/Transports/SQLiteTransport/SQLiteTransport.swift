@@ -12,9 +12,10 @@
 
 import Foundation
 
-/// `SQLiteTransport` uses a combination of `ThrottledTransport` and SQLite3 database
-/// to perform efficent storage and query for events.
-/// It should be the default choice for all uses.
+/// `SQLiteTransport` uses local sqlite3 database as underlying storage for
+/// received events.
+///
+/// Writes are handled efficently using throttled queries via `ThrottledTransport`.
 open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     // MARK: - Public Properties

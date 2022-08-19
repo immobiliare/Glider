@@ -17,6 +17,7 @@ import NIOConcurrencyHelpers
 import Logging
 import AsyncHTTPClient
 
+/// The delegate used to receive important notifications from a `GliderELKTransport`,
 public protocol GliderELKTransportDelegate: AnyObject {
     
     /// Sent when an event cannot be dispatched due to an error.

@@ -12,6 +12,7 @@
 
 import Foundation
 
+/// The delegate used to receive notifications from a `SQLiteTransport` service.
 public protocol SQLiteTransportDelegate: AnyObject {
     
     /// A new database connection was opened.

@@ -14,11 +14,12 @@ import Foundation
 import Network
 
 /// The `RemoteTransport` is used to send log in a custom binary format to a LAN/WAN destination.
-/// It's used when you want to debug sessions to the GliderViewer client or similar.
+/// It uses Bonjour/ZeroConfig to found active server where tto send data,.
+///
 /// Usually you should use a single instance of this transport for all of yours log.
 /// In this case use the `RemoteTransport.shared` shortcut instead of creating a new one.
 ///
-/// IMPORTANT:
+/// ## Important
 /// Be sure to set the following keys in your app's `Info.plist`:
 ///
 /// ```xml

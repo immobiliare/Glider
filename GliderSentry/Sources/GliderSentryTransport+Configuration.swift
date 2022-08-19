@@ -16,6 +16,7 @@ import Sentry
 
 extension GliderSentryTransport {
     
+    /// Configuration for `GliderSentryTransport`.
     public struct Configuration {
         
         // MARK: - Public Properties

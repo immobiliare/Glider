@@ -13,9 +13,34 @@
 import Foundation
 import Glider
 
-/// The `NetworkLogger` class is used to perform networking monitoring of your app.
-/// It will intercepts any call coming from a third party library like RealHTTP or Alamofire
-/// and URLSession too. It allows to specify a `Log` instance where the logs are redirected to.
+/// The `NetWatcher` class is used to perform networking monitoring inside your app.
+/// It will intercepts any call coming from a third party library and URLSession too.
+/// Events intercepted are classic Glider's `Event` class with attached `object` of type
+/// `NetworkEvent`.
+/// The `NetworkEvent` contains all the relevant information about the request and its response.
+///
+/// The following code allows you to intercept all the traffic of your app saving in a convenient
+/// database SQLite3.
+///
+/// ```swift
+///  // Setup the configuration
+///  let archiveURL = URL(fileURLWithPath: ".../sniffed_network.sqlite")
+///  let archiveConfig = NetArchiveTransport.Configuration(location: .fileURL(archiveURL))
+///  NetWatcher.shared.setConfiguration(watcherConfig)
+///
+///  // Activate global sniffer
+///  NetWatcher.shared.captureGlobally(true)
+/// ```
+///
+/// When you want to stop capturing traffic uses the `NetWatcher.shared.captureGlobally(false)`.
+///
+/// To read an event:
+///
+/// ```swift
+/// if let request = receivedEvent.networkEvent() {
+///     print("Network request to \(request.url) ended as \(request.statusCode)
+/// }
+/// ```
 public class NetWatcher {
   
     // MARK: - Public Properties
@@ -74,16 +99,15 @@ public class NetWatcher {
             URLProtocol.unregisterClass(LoggerURLProtocol.self)
             isActive = false
         }
-        
     }
     
-    @discardableResult
     /// Capture the traffic of a specified `URLSessionConfiguration`.
     ///
     /// - Parameters:
     ///   - enabled: `true` to enable, `false` to disable recording.
     ///   - configuration: configuration to record.
     /// - Returns: `Bool`
+    @discardableResult
     public func capture(_ enabled: Bool, forSessionConfiguration configuration: URLSessionConfiguration) -> Bool {
         guard isActive == false else {
             return false
@@ -126,6 +150,9 @@ public class NetWatcher {
     
     // MARK: - Private Function
     
+    /// Record an event coming from `LoggerURLProtocol` instance.
+    ///
+    /// - Parameter event: event received.
     private func record(_ event: Event) {
         guard let config = config else {
             return

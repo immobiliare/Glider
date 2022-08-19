@@ -12,6 +12,7 @@
 
 import Foundation
 
+/// cURL extension used to print details about intercepted `URLRequest` and `URLResponse`
 public struct CURL {
     
     // MARK: - Public Functions

@@ -15,7 +15,7 @@ import Glider
 
 extension NetArchiveTransport {
     
-    /// Configuration for local storage archive.
+    /// Configuration for `NetArchiveTransport`.
     public struct Configuration {
         
         // MARK: - Public Properties

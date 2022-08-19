@@ -71,6 +71,7 @@ public class GliderSDK {
 
 // MARK: - Glider Error
 
+/// Represent an error object produced by the SDK.
 public struct GliderError: Error, LocalizedError {
     
     // MARK: - Public Properties

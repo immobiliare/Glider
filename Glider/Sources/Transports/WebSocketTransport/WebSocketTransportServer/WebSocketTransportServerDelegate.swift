@@ -13,6 +13,7 @@
 import Foundation
 import Network
 
+/// `WebSocketTransportServerDelegate` allows to receive notifications from a `WebSocketTransportServer`.
 @available(iOS, introduced: 13)
 public protocol WebSocketTransportServerDelegate: AnyObject {
     

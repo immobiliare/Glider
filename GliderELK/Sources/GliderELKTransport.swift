@@ -22,9 +22,11 @@ import AsyncHTTPClient
 /// The log entries are properly formatted, cached, and then uploaded via HTTP/HTTPS to elastic/logstash,
 /// which allows for further processing in its pipeline. The logs can then be stored in elastic/elasticsearch
 /// and visualized in elastic/kibana.
-/// The original inspiration is from <https://github.com/Apodini/swift-log-elk>.
 ///
-/// Features:
+/// The original inspiration is from [swift-log-elk](https://github.com/Apodini/swift-log-elk) project.
+///
+/// # Features
+/// 
 /// - Uploads the log data automatically to Logstash (eg. the ELK stack)
 /// - Caches the created log entries and sends them via HTTP either periodically or when exceeding a certain configurable memory threshold to Logstash
 /// - Converts the logging metadata to a JSON representation, which allows querying after those values (eg. filter after a specific parameter in Kibana)

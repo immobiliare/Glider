@@ -14,7 +14,9 @@ import Foundation
 import Glider
 
 /// The `NetSparseFilesTransport` class is used to store network activity
-/// inside a root folder. Each call is stored with a single textual file
+/// inside a root folder.
+///
+/// Each call is stored with a single textual file
 /// with the id of the network call and its creation date set to the origin call date.
 /// Inside each file you can found `<cURL command for request>\n\n<raw response data>`.
 public class NetSparseFilesTransport: Transport {

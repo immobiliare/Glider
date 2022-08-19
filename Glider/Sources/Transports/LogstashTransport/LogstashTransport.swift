@@ -13,6 +13,8 @@
 import Foundation
 import Network
 
+/// A logging backend that sends logging messages to Logstash.
+/// A more complete and customizable implementation can be found in `GliderELK` package.
 open class LogstashTransport: Transport, AsyncTransportDelegate {
     public typealias FailedPayload = (event: Event, error: Error?)
 
@@ -305,6 +307,7 @@ extension LogstashTransport {
 
 // MARK: - LogstashTransportDelegate
 
+/// The delegate used to listen for events coming from a `LogstashTransport` instance.
 public protocol LogstashTransportDelegate: AnyObject {
     
     /// Event triggered when transport fails to authenticate to remote server.

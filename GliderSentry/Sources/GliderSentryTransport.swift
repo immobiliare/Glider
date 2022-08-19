@@ -14,8 +14,8 @@ import Foundation
 import Glider
 import Sentry
 
-/// The `GliderSentryTransport` is used to forward the messages coming from `Glider` logging
-/// system to the Sentry official SDK.
+/// The `GliderSentryTransport` is used to forward the messages
+///  coming from `Glider` logging system to the [Sentry](https://github.com/getsentry/sentry-cocoa) official SDK.
 open class GliderSentryTransport: Transport {
     
     // MARK: - Public Properties
@@ -26,7 +26,7 @@ open class GliderSentryTransport: Transport {
     /// Is logging enabled.
     public var isEnabled: Bool = true
     
-    /// Configuration.
+    /// Configuration to create `GliderSentryTransport`.
     public let configuration: Configuration
     
     /// Minumum accepted level for this transport.
@@ -36,6 +36,7 @@ open class GliderSentryTransport: Transport {
     // MARK: - Private Properties
     
     /// Setup the environment of the log.
+    /// 
     /// It will set by SDK global but you can override at level scope by
     /// setting the event's `scope.environment` value.
     public static var environment: String? {

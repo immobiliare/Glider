@@ -15,7 +15,7 @@ import Glider
 
 extension NetWatcher {
     
-    /// Represent the configuration object for network logger request.
+    /// Represent the configuration object for `NetWatcher`.
     public struct Config {
         
         // MARK: - Public Properties
@@ -31,7 +31,6 @@ extension NetWatcher {
         /// Typically you want to set if to `false` in production and `true` in development.
         /// The default behaviour - when not specified - uses the `DEBUG` flag to set the the value `true`.
         ///
-        /// DISCUSSION:
         /// In synchronous mode messages are sent directly to the queue and the log function is returned
         /// when recorded is called on each specified transport. This mode is is helpful while debugging,
         /// as it ensures that logs are always up-to-date when debug breakpoints are hit.
@@ -42,7 +41,6 @@ extension NetWatcher {
         
         /// Transport where the `NetworkEvent` instances (encapsulated inside `Event` instances) are stored.
         ///
-        /// NOTE:
         /// This value is automatically filled when specifying `storage` inside the initialization, but you
         /// can customize as you wish.
         public var transports = [Transport]()
@@ -66,14 +64,13 @@ extension NetWatcher {
 
 extension NetWatcher.Config {
     
-    /// Identify the transport used to store network activities.
-    ///
-    /// - `archive`: a compact archive file powered by SQLite3 where to store each recorded network call.
-    /// - `sparseFiles`: a directory where each file correspond to a single network call.
-    /// - `custom`: a custom transport layer.
+    /// Identify the destination used to redirect sniffed network activities.
     public enum Storage {
+        /// a compact archive file powered by SQLite3 where to store each recorded network call.
         case archive(NetArchiveTransport.Configuration)
+        /// a directory where each file correspond to a single network call.
         case sparseFiles(NetSparseFilesTransport.Configuration)
+        /// a custom transport layer.
         case custom(Transport)
         
         internal func transportInstance() throws -> Transport {

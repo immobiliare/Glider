@@ -209,3 +209,14 @@ public struct NetworkEvent: Equatable, Codable, SerializableObject {
     }
     
 }
+
+// MARK: - Glider.Event Extensions
+
+extension Glider.Event {
+    
+    /// Return the network event if the event itself encapsulate a sniffed call.
+    public func networkEvent() -> NetworkEvent? {
+        object as? NetworkEvent
+    }
+    
+}
