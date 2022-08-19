@@ -44,13 +44,56 @@ We loved making this open-source package and would see engineers like you using 
 Those are 5 reasons you will love Glider:
 
 - 🧩 14+ built-in, fully customizable transports to store your data ([ELK](https://github.com/malcommac/Glider/tree/main/GliderELK/Sources), [HTTP](https://github.com/malcommac/Glider/blob/main/Glider/Sources/Transports/HTTPTransport/HTTPTransport.swift), [Logstash](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/LogstashTransport), [SQLite](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/SQLiteTransport), [WebSocket](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/WebSocketTransport), [Console](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/Console), [File/Rotating Files](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File), [POSIX](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File/POSIXTransports), [swift-log](https://github.com/malcommac/Glider/tree/main/GliderSwiftLog/Sources), [sentry.io](https://github.com/malcommac/Glider/tree/main/GliderSentry/Sources)...)
-- ✏️ 7+ customizable formatters for log messages ([JSON])https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/JSONFormatter), [Fields based](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/FieldsFormatter)), [MsgPack](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/MsgPackFormatter), [Syslog](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/SysLogFormatter))...)
+- ✏️ 7+ customizable formatters for log messages ([JSON](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/JSONFormatter), [Fields based](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/FieldsFormatter)), [MsgPack](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/MsgPackFormatter), [Syslog](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/SysLogFormatter))...)
 - 🚀 A simple APIs set with an extensible architecture to suit your need
 - 📚 A fully documented code (check out our DoCC site!)
 - ⚙️ An extensive unit test package
 
+# API Documentation
+
+APIs is fully documented using Apple DoCC.  
+Click here to read it.
 # Documentation
 
 - [Logging](./Documentation/Logger.md#logging)
-    - [The Logger](./Documentation/Logger.md#the-logger)
-    - [Severity Level](./Documentation/Logger.md#severity-levels)
+  - [The Logger](./Documentation/Logger.md#the-logger)
+  - [Writing Messages](./Documentation/Logger.md#writing-messages)
+    - [Write Simple Message](./Documentation/Logger.md#write-simple-message)
+    - [Write with Closure](./Documentation/Logger.md#write-with-closure)
+    - [Write by passing Event](./Documentation/Logger.md#write-by-passing-event)
+  - [Interpolated Message](./Documentation/Logger.md#interpolated-message)
+  - [Disabling a Logger](./Documentation/Logger.md#disabling-a-logger)
+  - [Severity Levels](./Documentation/Logger.md#severity-levels)
+  - [Synchronous and Asynchronous Logging](./Documentation/Logger.md#synchronous-and-asynchronous-logging)
+    - [Synchronous Logging](./Documentation/Logger.md#synchronous-logging)
+    - [Asynchronous Logging](./Documentation/Logger.md#asynchronous-logging)
+- [Transports](./Documentation/Transports.md#transports)
+  - [Introduction](./Documentation/Transports.md#introduction)
+  - [Base Transports](./Documentation/Transports.md#base-transports)
+    - [`AsyncTransport`](./Documentation/Transports.md#asynctransport)
+
+# Installation
+
+## Swift Package Manager
+
+The Swift Package Manager is a tool for automating the distribution of Swift code and is integrated into the swift compiler. It is in early development, but Willow does support its use on supported platforms.
+
+Once you have your Swift package set up, adding Willow as a dependency is as easy as adding it to the dependencies value of your `Package.swift`.
+
+```swift
+dependencies: [
+    .package(url: "")
+]
+```
+## CocoaPods
+
+CocoaPods is a dependency manager for Cocoa projects.  
+To integrate Willow into your project, specify it in your Podfile:
+
+```ruby
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '11.0'
+use_frameworks!
+
+pod 'Glider'
+```

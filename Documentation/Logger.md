@@ -6,7 +6,7 @@
     - [Write Simple Message](#write-simple-message)
     - [Write with Closure](#write-with-closure)
     - [Write by passing Event](#write-by-passing-event)
-  - [Creating a Message](#creating-a-message)
+  - [Interpolated Message](#interpolated-message)
   - [Disabling a Logger](#disabling-a-logger)
   - [Severity Levels](#severity-levels)
   - [Synchronous and Asynchronous Logging](#synchronous-and-asynchronous-logging)
@@ -109,7 +109,7 @@ let event = Event(message: "Message #\($0)", extra: ["idx": $0])
 log.info?.write(event: &events)
 ```
 
-## Creating a Message
+## Interpolated Message
 
 Messages can be simple literals string or may include data coming from variables read at runtime.  
 Glider supports privacy and formatting options allow to manage the visibility of values in log messages and how data is presented, as like the Apple's OSLog.  
