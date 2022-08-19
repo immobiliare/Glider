@@ -3,10 +3,15 @@
 - [Logging](#logging)
   - [The Logger](#the-logger)
   - [Writing Messages](#writing-messages)
-    - [Simple Write](#simple-write)
-    - [Closure Write](#closure-write)
-    - [Passing Event](#passing-event)
+    - [Write Simple Message](#write-simple-message)
+    - [Write with Closure](#write-with-closure)
+    - [Write by passing Event](#write-by-passing-event)
+  - [Creating a Message](#creating-a-message)
+  - [Disabling a Logger](#disabling-a-logger)
   - [Severity Levels](#severity-levels)
+  - [Synchronous and Asynchronous Logging](#synchronous-and-asynchronous-logging)
+    - [Synchronous Logging](#synchronous-logging)
+    - [Asynchronous Logging](#asynchronous-logging)
 
 ## The Logger
 
@@ -57,7 +62,7 @@ When you write a new message you can also customize the following fields.
 
 Glider's offer different `write()` functions. 
 
-### Simple Write
+### Write Simple Message
 
 For simple messages you can use the `write(msg:object:extra:tags:)` where the only required parameter is the message of the event. 
 
@@ -72,7 +77,7 @@ logger.info?.write(msg: "User tapped BUY button",
                    tags: ["productId": productId])
 ```
 
-### Closure Write
+### Write with Closure
 
 Logging a message is easy, but knowing when to add the logic necessary to build a log message and tune it for performance can be a bit tricky. We want to make sure logic is encapsulated and very performant. Glider log level closures allow you to cleanly wrap all the logic to build up the message.
 
@@ -94,7 +99,7 @@ logger.info?.write {
 
 This is the best way to write an event and we suggest using it everytime.
 
-### Passing Event
+### Write by passing Event
 
 Finally there are some situation where you need to create an event in a moment and send it later:
 
@@ -102,6 +107,55 @@ Finally there are some situation where you need to create an event in a moment a
 let event = Event(message: "Message #\($0)", extra: ["idx": $0])
 // somewhere later
 log.info?.write(event: &events)
+```
+
+## Creating a Message
+
+Messages can be simple literals string or may include data coming from variables read at runtime.  
+Glider supports privacy and formatting options allow to manage the visibility of values in log messages and how data is presented, as like the Apple's OSLog.  
+
+When you create set a `message` for an event you can specify several attributes for each interpolated value:
+
+- `privacy`: Because users can have access to log messages that your app generates, use the `.private` or `.partialHide` privacy options to hide potentially sensitive information. For example, you might use it to hide or mask an account information or personal data. By default all data is visible in debug, while in production every variable - when not specified - is `private`.
+- `pad`: value printed consists of an original value that is padded with leading, middle or trailing characters to a specified total length. The padding character can be a space or a specified character. The resulting string appears to be either right-aligned or left-aligned.
+- `trunc`: value is truncated to a max length (lead/trail/middle).
+
+Moreover common data types also support formatting styles.  
+For example you can decide how to print `Bool` values (`true/false`, `1/0`, `yes/no`), `Double`, `Int`, `Date` (ISO8601 or custom format) and so on.
+
+Some examples:
+
+```swift
+// Strings
+logger.info?.write(msg: "Hello \(self.user.fullName), user-id:\(self.user.id, privacy: .private), email:\(self.user.email, privacy: .partiallyHide)") // Hello Mark Ross, user-id:<redacted>, email:hello@dan********
+
+// Boolean
+log.info?.write(msg: "Value is \(boolValue, format: .numeric)") // Value is 1/0
+
+// Float as currency
+let price = 12.555
+log.info?.write(msg: "Price is \(price, format: .currency(symbol: "EUR"))") // Price is 12.5€
+
+// Date
+let date = Date()
+log.info?.write(msg: "Now is \(date, format: .iso8601)") // Now is 2018-09-12T12:11:00Z
+
+let someLongString = "My long string is not enough to represent anything but it will truncate anyway"
+log.alert?.write(msg: "Value is \(someLongString, trunc: .middle(length: 20), privacy: .public)")
+// Value is …nyway
+```
+
+## Disabling a Logger
+
+The `Log` class has an `isEnabled` property to allow you to completely disable logging. This can be helpful for turning off specific logger objects at the app level, or more commonly to disable logging in a third-party library.
+
+```swift
+let logger = Log { ... }
+logger.isEnabled = false
+// No log messages will get sent to the registered transports
+
+logger.isEnabled = true
+// We're back in business...
 ```
 
 ## Severity Levels
@@ -124,4 +178,28 @@ Glider uses the [RFC-5424](https://tools.ietf.org/html/rfc5424) standard with 9 
 | `debug`     | Messages meant to be useful only during development.   This is meant to be disabled in shipping code.                                                                                                                |
 | `trace`     | Trace messages.                                                                                                                                                                                                      |
 
-##
+## Synchronous and Asynchronous Logging
+
+Logging can greatly affect the runtime performance of your application or library. Glider makes it very easy to log messages synchronously or asynchronously.  
+You can define this behavior when creating the `Configuration` for your `Log` instance.
+
+```swift
+let log = Log {
+    $0.isSynchronous = false
+    // ...configure other parameters
+}
+```
+
+### Synchronous Logging
+
+Synchronous logging is very helpful when you are developing your application or library. The log operation will be completed before executing the next line of code. This can be very useful when stepping through the debugger. 
+
+The downside is that this can seriously affect performance if logging on the main thread.
+
+> **Note**
+> Glider automatically set the `isSynchronous` to `true` on `#DEBUG` and `false` in production.
+
+### Asynchronous Logging
+
+Asynchronous logging should be used for deployment builds of your application or library.  
+This will offload the logging operations to a separate dispatch queue that will not affect the performance of the main thread. This allows you to still capture logs in the manner that the Logger is configured, yet not affect the performance of the main thread operations.
