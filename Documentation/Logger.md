@@ -1,5 +1,10 @@
 # Logging
 
+- [Logging](#logging)
+  - [The Logger](#the-logger)
+  - [Sending Messages to logger](#sending-messages-to-logger)
+  - [Severity Levels](#severity-levels)
+
 ## The Logger
 
 Logging is done via a `Log` instance.  
@@ -27,6 +32,23 @@ let logger = Log {
 - `isEnabled`: when `false` any message received by the log is ignored. It's useful to temporary disable reception of data.
 - `isSynchronous`: Identify how the messages must be handled when sent to the logger instance. Typically you want to set if to `false` in production and `true` in development.
 
+## Sending Messages to logger
+
+Sending a message to a logger is pretty simple; simply append the severity level channel to your logger instance and call one of the `write()` functions:
+
+```swift
+logger.error?.write("Something bad has occurred")
+logger.trace?.write("User tapped buy button for item \(item.id)")
+```
+
+> **Warning**
+> The first message is accepted by the logger, but the second one is ignored because message's severity level is below the log's set level.
+
+Glider's offer different `write()` functions.
+
+For simple messages you 
+
+
 ## Severity Levels
 
 Any new message received by a logger is encapsulated in a payload called `Event`; each event has its own severity which allows to identify what kind of data is received (is the event an error? or just a notice?).
@@ -47,3 +69,4 @@ Glider uses the [RFC-5424](https://tools.ietf.org/html/rfc5424) standard with 9 
 | `debug`     | Messages meant to be useful only during development.   This is meant to be disabled in shipping code.                                                                                                                |
 | `trace`     | Trace messages.                                                                                                                                                                                                      |
 
+##
