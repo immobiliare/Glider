@@ -3,7 +3,7 @@
 Glider is the logger for just about everything.  
 You can think of Glider as the [winston](https://github.com/winstonjs/winston) for Swift ages!
 
-Glider is designed to be a simple, performant, universal logging library supporting multiple transports.  
+**Glider is designed to be a simple, performant, universal logging library supporting multiple transports.**  
 A transport is essentially a storage device for your logs.  
 Each logger can have multiple transports configured at different levels; you can also customize how the messages are formatted.
 
@@ -43,10 +43,14 @@ That's it!
 We loved making this open-source package and would see engineers like you using this software.  
 Those are 5 reasons you will love Glider:
 
-- 🧩 14+ built-in transports to store your data ([ELK](https://github.com/malcommac/Glider/tree/main/GliderELK/Sources), [HTTP](https://github.com/malcommac/Glider/blob/main/Glider/Sources/Transports/HTTPTransport/HTTPTransport.swift), [Logstash](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/LogstashTransport), [SQLite](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/SQLiteTransport), [WebSocket](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/WebSocketTransport), [Console](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/Console), [File](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File), [POSIX](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File/POSIXTransports), [Apple's swift-log](https://github.com/malcommac/Glider/tree/main/GliderSwiftLog/Sources)), [Sentry.io](https://github.com/malcommac/Glider/tree/main/GliderSentry/Sources))
-- ✏️ 7+ customizable [formatters](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters)) for messages (JSON, Fields, Msg)
+- 🧩 14+ built-in, fully customizable transports to store your data ([ELK](https://github.com/malcommac/Glider/tree/main/GliderELK/Sources), [HTTP](https://github.com/malcommac/Glider/blob/main/Glider/Sources/Transports/HTTPTransport/HTTPTransport.swift), [Logstash](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/LogstashTransport), [SQLite](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/SQLiteTransport), [WebSocket](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/WebSocketTransport), [Console](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/Console), [File/Rotating Files](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File), [POSIX](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File/POSIXTransports), [swift-log](https://github.com/malcommac/Glider/tree/main/GliderSwiftLog/Sources), [sentry.io](https://github.com/malcommac/Glider/tree/main/GliderSentry/Sources)...)
+- ✏️ 7+ customizable formatters for log messages ([JSON])https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/JSONFormatter), [Fields based](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/FieldsFormatter)), [MsgPack](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/MsgPackFormatter), [Syslog](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/SysLogFormatter))...)
 - 🚀 A simple APIs set with an extensible architecture to suit your need
 - 📚 A fully documented code (check out our DoCC site!)
 - ⚙️ An extensive unit test package
 
-# Quickstart
+# Documentation
+
+- [Logging](./Documentation/Logger.md#logging)
+    - [The Logger](./Documentation/Logger.md#the-logger)
+    - [Severity Level](./Documentation/Logger.md#severity-levels)
