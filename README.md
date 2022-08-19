@@ -42,3 +42,16 @@ logger.error?.write("Unexpected error has occurred!")
 ```
 
 That's it!
+
+# Why Glider will be your next loggin solution?
+
+We loved making this open source package and we would seen engineers like you using this software.  
+Those are 5 reason you will love Glider:
+
+- 🧩 14+ built-in transports to store your data (ELK, HTTP, LogStash, WebSocket, Console, XCode, POSIX...)
+- ✏️ 7+ customizable formatters for messages (JSON, Fields, Msg)
+- 🚀 A simple APIs set with an extensible architecture to suit your need
+- 📚 A fully documented code (check out our DoCC site!)
+- ⚙️ An extensive unit test package
+
+
