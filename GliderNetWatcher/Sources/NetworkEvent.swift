@@ -18,13 +18,6 @@ import Glider
 /// when activated.
 public struct NetworkEvent: Equatable, Codable, SerializableObject {
     
-    enum CodingKeys: String, CodingKey {
-        case id, url, host, port, scheme, method, headers,
-             credentials, cookies,
-             statusCode, startDate,
-             duration, responseData, responseHeaders, responseErrorDescription
-    }
-    
     // MARK: - Public Properties (Request)
     
     /// Unique identifier of the call.
@@ -196,16 +189,25 @@ public struct NetworkEvent: Equatable, Codable, SerializableObject {
         
         // Collect cookies associated with the target host
         // TODO: Add the else branch.
-        // With the condition below, it is handled only the case where session.configuration.httpShouldSetCookies == true.
+        // With the condition below, it is handled only the case where `session.configuration.httpShouldSetCookies == true`.
         // Some developers could opt to handle cookie manually using the "Cookie" header stored in httpAdditionalHeaders
-        // and disabling the handling provided by URLSessionConfiguration (httpShouldSetCookies == false).
+        // and disabling the handling provided by URLSessionConfiguration (`httpShouldSetCookies == false`).
         // See <https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration/1411589-httpshouldsetcookies?language=objc>
         if let session = urlSession, let url = urlRequest?.url, session.configuration.httpShouldSetCookies {
             if let cookieStorage = session.configuration.httpCookieStorage,
                 let cookies = cookieStorage.cookies(for: url), !cookies.isEmpty {
-                self.cookies = cookies.reduce("") { $0 + "\($1.name)=\($1.value);" }
+                self.cookies = cookies.reduce("") {
+                    $0 + "\($1.name)=\($1.value);"
+                }
             }
         }
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, url, host, port, scheme, method, headers,
+             credentials, cookies,
+             statusCode, startDate,
+             duration, responseData, responseHeaders, responseErrorDescription
     }
     
 }
