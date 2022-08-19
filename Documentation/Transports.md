@@ -4,8 +4,8 @@
   - [Introduction](#introduction)
   - [Base Transports](#base-transports)
     - [AsyncTransport](#asynctransport)
-  - [BufferedTransport](#bufferedtransport)
-  - [ThrottledTransport](#throttledtransport)
+    - [BufferedTransport](#bufferedtransport)
+    - [ThrottledTransport](#throttledtransport)
 - [Built-in Transports](#built-in-transports)
   - [ConsoleTransport](#consoletransport)
   - [OSLogTransport](#oslogtransport)
@@ -69,12 +69,12 @@ public func asyncTransport(_ transport: AsyncTransport,
 }
 ```
 
-## BufferedTransport
+### BufferedTransport
 
 The `BufferedTransport` is a generic event recorder that buffers the log messages passed to its `record(event:)` function.
 Construction requires a `bufferedItemBuilder` function, which is responsible for converting the `event` and formatted message `SerializableData` into the generic `BufferItem` type.
 
-## ThrottledTransport
+### ThrottledTransport
 
 The throttled transport is a tiny but thread-safe logger with a buffering and retrying mechanism for iOS.
 Buffer is a limit cap when reached call the flush mechanism.  
