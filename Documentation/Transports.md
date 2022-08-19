@@ -12,6 +12,7 @@
   - [POSIXStreamTransport](#posixstreamtransport)
   - [FileTransport](#filetransport)
   - [SizeRotationFileTransport](#sizerotationfiletransport)
+  - [HTTPTransport](#httptransport)
 
 ## Introduction
 
@@ -186,5 +187,48 @@ let sizeLogTransport = try SizeRotationFileTransport(directoryURL: directoryURL)
 let log = Log {
     $0.level = .trace
     $0.transports = [sizeLogTransport]
+}
+```
+
+## HTTPTransport
+
+The `HTTPTransport` is used to send log events directly to an http service by executing network calls to a specific endpoint.
+
+It's up to the delegate (`HTTPTransportDelegate`) to produce a list of `HTTTransportRequest` requests which will be executed automatically.  
+It supports retry mechanism on errors.
+
+```swift
+let transport = try HTTPTransport(delegate: self) {
+    $0.maxConcurrentRequests = 3 // 3 concurrent network request at max
+    $0.formatters = [SysLogFormatter()] // setup the format of output to syslog
+    $0.maxEntries = 100 // maximum number of events storable (LIFO)
+    $0.chunkSize = 5 // number of events per each request
+    $0.autoFlushInterval = 5 // auto flush interval each 5 seconds
+}
+transport.delegate = self
+
+let log = Log {
+    $0.transports = [transport]
+    $0.level = .trace
+}
+```
+
+The `HTTPTransportDelegate` should implement at least the method to produce the `URLRequest` used to send data to a remote webservice:
+
+```swift
+ // MARK: - HTTPTransportDelegate
+    
+func httpTransport(_ transport: HTTPTransport,
+                   prepareURLRequestsForChunk chunk: AsyncTransport.Chunk) -> [HTTPTransportRequest] {
+        
+    chunk.map { event, message, attempt in
+        var urlRequest = URLRequest(url: URL(string: "http://myendoint:10450/receive.php")!)
+        urlRequest.httpBody = message?.asData()
+        urlRequest.httpMethod = "POST"
+        urlRequest.timeoutInterval = 10
+        return HTTPTransportRequest(urlRequest: urlRequest) {
+            $0.maxRetries = 2 // 2 maximum retry on connection errors
+        }
+    }
 }
 ```

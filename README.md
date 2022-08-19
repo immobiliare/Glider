@@ -79,6 +79,8 @@ Click here to read it.
   - [POSIXStreamTransport](./Documentation/Transports.md#posixstreamtransport)
   - [FileTransport](./Documentation/Transports.md#filetransport)
   - [SizeRotationFileTransport](./Documentation/Transports.md#sizerotationfiletransport)
+  - [HTTPTransport](./Documentation/Transports.md#httptransport)
+
 # Installation
 
 ## Swift Package Manager
