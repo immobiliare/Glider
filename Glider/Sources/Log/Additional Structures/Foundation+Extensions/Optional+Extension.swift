@@ -12,6 +12,7 @@
 
 import Foundation
 
+/// Used to handle safe unwrapping of optional objects.
 protocol AnOptional {
     
     /// Return `true` if optional contains a `nil` value.

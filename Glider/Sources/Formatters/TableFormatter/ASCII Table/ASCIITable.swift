@@ -15,6 +15,7 @@ import Foundation
 
 // MARK: - ASCIITable
 
+/// Represent an ASCII Table printable to terminals and consoles.
 public struct ASCIITable {
     
     // MARK: - Public Properties

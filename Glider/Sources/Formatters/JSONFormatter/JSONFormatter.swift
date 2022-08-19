@@ -12,17 +12,18 @@
 
 import Foundation
 
-/// The `JSONFormatter` formatter is used to write data about an event using the
-/// JSON format.
+/// The `JSONFormatter` formatter is used to write events data
+/// by using the JSON file format.
 ///
-/// NOTE:
-/// Not all properties are expressible in JSON so, for example, `object` cannot be serialized and
-/// when present it's ignored.
+/// Not all properties are expressible in JSON so, for example, `object` cannot be serialized
+/// unless you set the `encodeDataAsBase64` as `true` (with a sensible increment of the final payload size).
+/// Keep in mind you can fix these issue by using more efficent formats [`MessagePack`](https://msgpack.org/index.html)
+/// in `MsgPackFormatter`.
 public class JSONFormatter: FieldsFormatter {
     
     // MARK: - Public Properties
     
-    /// JSON writing settings.
+    /// JSON writing option settings.
     public var jsonOptions: JSONSerialization.WritingOptions
     
     /// Encode Data using base64.
@@ -45,7 +46,7 @@ public class JSONFormatter: FieldsFormatter {
         self.jsonOptions = jsonOptions
         self.encodeDataAsBase64 = encodeDataAsBase64
         super.init(fields: fields)
-            }
+    }
     
     /// Use the default JSON formatter message.
     /// (`useIcon` and `severityIcon` are ignored).

@@ -11,13 +11,13 @@
 //
 
 import Foundation
-import SwiftUI
 import Network
 
 extension FieldsFormatter {
     
-    /// Represent a single elemnt of the formatter strings to produce.
-    /// Each `Field` represent a log attribute to print along with their options and styles.
+    /// Represent a single attribute to ahow in a `FieldFormatter` instance.
+    /// Each `Field` represent an `event` attribute to print according
+    /// to a specific representation and formatting attributes.
     public struct Field {
         public typealias Configure = ((inout Field) -> Void)
     
@@ -44,12 +44,11 @@ extension FieldsFormatter {
         
         /// Colors to apply to the string.
         ///
-        /// NOTE:
-        /// It works only for certain formatters (like `XCodeFormatter` and `TerminalFormatter` where
+        /// Keep in mind: it works only for certain formatters (like `XCodeFormatter` and `TerminalFormatter` where
         /// colorization is supported. Some formatters may ignore this value.
         public var colors: [FieldsFormatterColor]? = nil
         
-        /// For array and dictionaries (like extra or tags) you can specify a format to write the content.
+        /// For array and dictionaries (like `extra` or `tags`) you can specify a format to write the content.
         ///
         /// By default is set to `auto`.
         public var format: StructureFormatStyle = .serializedJSON
@@ -59,7 +58,6 @@ extension FieldsFormatter {
         
         /// Allows you to further customize the `Field` options per single message received.
         ///
-        /// DISCUSSION:
         /// You can, for example, customize the message color based upon severity level
         /// (see `XCodeFormatter` for an example).
         /// You can customize the received `Field` instance which is a copy of self.
@@ -80,7 +78,7 @@ extension FieldsFormatter {
         ///
         /// - Parameters:
         ///   - field: field identifier.
-        ///   - configure: configuration callback.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
         internal init(_ field: FieldIdentifier, _ configure: Configure?) {
             self.field = field
             configure?(&self)
@@ -89,107 +87,211 @@ extension FieldsFormatter {
             }
         }
         
+        /// Create a field to show the `icon` value of an event.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func icon(_ configure: Configure? = nil) -> Field {
             self.init(.icon, configure)
         }
         
+        /// Create a field to show passed field identifier value of an event.
+        /// - Parameters:
+        ///   - field: field identifier to represent.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func field(_ field: FieldIdentifier, _ configure: Configure? = nil) -> Field {
             self.init(field, configure)
         }
         
+        /// Create a field to show the `label` value of an event.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func label(_ configure: Configure? = nil) -> Field {
             self.init(.label, configure)
         }
         
+        /// Create a field to show the event `timestamp` value of an event.
+        /// - Parameters:
+        ///   - style: format of the timestamp value.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func timestamp(style: TimestampStyle, _ configure: Configure? = nil) -> Field {
             self.init(.timestamp(style), configure)
         }
         
+        /// Create a field to show the severity `level` value of an event.
+        /// - Parameters:
+        ///   - style: representation style of the severity level.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func level(style: LevelStyle, _ configure: Configure? = nil) -> Field {
             self.init(.level(style), configure)
         }
         
+        /// Create a field to show the stack trace (caller file, line) of log which produced the event.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func callSite( _ configure: Configure? = nil) -> Field {
             self.init(.callSite, configure)
         }
-        
+
+        /// Create a field to show the calling thread identifier value of an event.
+        /// - Parameters:
+        ///   - style: representation style of the calling thread.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func callingThread(style: CallingThreadStyle,  _ configure: Configure? = nil) -> Field {
             self.init(.callingThread(style), configure)
         }
         
+        /// Create a field to show the process name of the host app.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func processName( _ configure: Configure? = nil) -> Field {
             self.init(.processName, configure)
         }
-
+        
+        /// Create a field to show the process ID of the host app.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func processID( _ configure: Configure? = nil) -> Field {
             self.init(.processID, configure)
         }
         
+        /// Create a field to show a string literal used as delimiter string.
+        /// - Parameters:
+        ///   - style: delimiter to use.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func delimiter(style: DelimiterStyle, _ configure: Configure? = nil) -> Field {
             self.init(.delimiter(style), configure)
         }
         
+        /// Create a field to show passed string literal into the field.
+        /// - Parameters:
+        ///   - value: value of the literal to show.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func literal(_ value: String, _ configure: Configure? = nil) -> Field {
             self.init(.literal(value), configure)
         }
         
+        /// Create a field to show all or a subset of the `tags` of the event.
+        /// Use `format` property to define how the data are represented as string.
+        /// - Parameters:
+        ///   - keys: keys to show, if `nil` all keys are used.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func tags(keys: [String]?, _ configure: Configure? = nil) -> Field {
             self.init(.tags(keys), configure)
         }
         
+        /// Create a field to show all or a subset of the `extra` of the event.
+        /// Use `format` property to define how the data are represented as string.
+        /// - Parameters:
+        ///   - keys: keys to show, if `nil` all keys are used.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func extra(keys: [String]?, _ configure: Configure? = nil) -> Field {
             self.init(.extra(keys), configure)
         }
         
-        public static func custom(_ callback: @escaping CallbackFormatter.Callback, _ configure: Configure? = nil) -> Field {
+        /// Create a field to show a string defined by the return value of passed function.
+        /// - Parameters:
+        ///   - callback: callback producer of the string.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
+        public static func custom(_ callback: @escaping CallbackFormatter.Callback,
+                                  _ configure: Configure? = nil) -> Field {
             let formatter = CallbackFormatter(callback)
             return self.init(.custom(formatter), configure)
         }
         
-        public static func customValue(_ callback: @escaping ((Event?) -> (key: String, value: String)), _ configure: Configure? = nil) -> Field {
+        public static func customValue(_ callback: @escaping ((Event?) -> (key: String, value: String)),
+                                       _ configure: Configure? = nil) -> Field {
             return self.init(.customValue(callback), configure)
         }
         
+        /// Create a field to show the `category` of the parent logger who generated the event.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func category( _ configure: Configure? = nil) -> Field {
             self.init(.category, configure)
         }
-        
+       
+        /// Create a field to show the `subsystem` of the parent logger who generated the event.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func subsystem( _ configure: Configure? = nil) -> Field {
             self.init(.subsystem, configure)
         }
-        
+      
+        /// Create a field to show the event unique identifier created automatically for the event.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func eventUUID( _ configure: Configure? = nil) -> Field {
             self.init(.eventUUID, configure)
         }
         
+        /// Create a field to show the message text of the event.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func message( _ configure: Configure? = nil) -> Field {
             self.init(.message, configure)
         }
         
+        /// Create a field to show the `id` property of the user set into the scope at the time of event's generation.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func userId( _ configure: Configure? = nil) -> Field {
             self.init(.userId, configure)
         }
         
+        /// Create a field to show the `username` property of the user set into the scope at the time of event's generation.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func username( _ configure: Configure? = nil) -> Field {
             self.init(.username, configure)
         }
         
+        /// Create a field to show the machine's ip address.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func ipAddress( _ configure: Configure? = nil) -> Field {
             self.init(.ipAddress, configure)
         }
         
+        /// Create a field to show some additional data from the currently `scope`'s `user` property of an event.
+        /// Use `format` property to define how the data are represented as string.
+        /// - Parameters:
+        ///   - keys: keys to read.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func userData(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
             self.init(.userData(keys), configure)
         }
         
+        /// Create a field to show the fingerprint associated to the event.
+        /// - Parameter configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func fingerprint(_ configure: Configure? = nil) -> Field {
             self.init(.fingerprint, configure)
         }
         
+        
+        /// Create a field to show all/some of the `metadata` associated with the attached `object` of the event.
+        /// Use `format` property to define how the data are represented as string.
+        ///
+        /// - Parameters:
+        ///   - keys: keys to read from `metadata`; `nil` to use all available keys.
+        ///   - configure: optional callback to further configure the representation of the data.
+        /// - Returns: `Field`
         public static func objectMetadata(keys: [String]? = nil, _ configure: Configure? = nil) -> Field {
             self.init(.objectMetadata(keys), configure)
         }
         
+        /// Create a field to show the binary (serialized) representation of the `object` to the event.
+        /// - Returns: `Field`
         public static func object() -> Field {
             self.init(.object, nil)
         }
@@ -204,61 +306,63 @@ extension FieldsFormatter {
     
     /// Represent the individual key of a formatted log when using
     /// the `FieldsFormatter` formatter.
-    ///
-    /// - `label`: combination of `subsystem` and `category` which identify a log (or app name if not set).
-    /// - `icon`: icon representation of the log as emoji character(s).
-    /// - `category`: category identifier of the parent's log.
-    /// - `subsystem`: subsystem identifier of the parent's log.
-    /// - `eventUUID`: identifier of the event, autoassigned.
-    /// - `timestamp`: creation data of the event.
-    /// - `level`: level of severity for the event.
-    /// - `callSite`: line and file of the caller.
-    /// - `stackFrame`: which function called the event.
-    /// - `callingThread`: calling of the thread.
-    /// - `processName`: name of the process.
-    /// - `processID`: PID of the process.
-    /// - `message`: text message of the event.
-    /// - `userId`: when assigned the currently logged user id which generate the event.
-    /// - `userEmail`: when assigned the currently logged user email which generate the event.
-    /// - `username`: when assigned the currently logged username which generate the event.
-    /// - `ipAddress`: if set the assigned logged user's ip address which generate the event.
-    /// - `userData`: `keys` values for given `keys` found in user's data.
-    /// - `fingerprint`: the fingerprint used for event, if not found the `scope`'s fingerprint.
-    /// - `objectMetadata`: a json string representation of the event's associated object metadata.
-    /// - `objectMetadataKeys`: `keys` values for given `keys` found in associated object's metadata.
-    /// - `delimiter`: delimiter.
-    /// - `tags`: `keys` values for given `keys` found in event's `tags`.
-    /// - `extra`: `keys` values for given `keys` found in event's `extra`.
-    /// - `custom`: apply custom tranformation function which receive the `event` instance.
     public enum FieldIdentifier {
+        /// combination of `subsystem` and `category` which identify a log (or app name if not set).
         case label
+        /// icon representation of the log as emoji character(s).
         case icon
+        /// category identifier of the parent's log.
         case category
+        /// subsystem identifier of the parent's log.
         case subsystem
+        /// identifier of the event, autoassigned.
         case eventUUID
+        /// creation data of the event.
         case timestamp(TimestampStyle)
+        /// level of severity for the event.
         case level(LevelStyle)
+        /// line and file of the caller.
         case callSite
+        /// which function called the event.
         case stackFrame
+        /// calling of the thread.
         case callingThread(CallingThreadStyle)
+        /// name of the process.
         case processName
+        /// PID of the process.
         case processID
+        /// text message of the event.
         case message
+        /// when assigned the currently logged user id which generate the event.
         case userId
+        /// when assigned the currently logged user email which generate the event.
         case userEmail
+        /// when assigned the currently logged username which generate the event.
         case username
+        /// if set the assigned logged user's ip address which generate the event.
         case ipAddress
+        /// `keys` values for given `keys` found in user's data.
         case userData([String]?)
+        /// the fingerprint used for event, if not found the `scope`'s fingerprint.
         case fingerprint
+        /// a json string representation of the event's associated object metadata.
         case objectMetadata([String]?)
+        /// binary object representation
         case object
+        /// string literal delimiter
         case delimiter(DelimiterStyle)
+        /// literal string.
         case literal(String)
+        /// values for keys passed found in `tags` property of an event.
         case tags([String]?)
+        /// values for keys passed found in `extra` property of an event.
         case extra([String]?)
-        case custom(EventFormatter)
+        /// apply custom tranformation function which receive the `event` instance.
+        case custom(EventMessageFormatter)
+        /// custom value.
         case customValue((Event?) -> (key: String, value: String)?)
         
+        /// The readable label property of a field.
         internal var defaultLabel: String? {
             switch self {
             case .label: return "label"

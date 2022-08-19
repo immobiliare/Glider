@@ -22,16 +22,19 @@ import AppKit
 
 // MARK: - Context
 
+/// The `Context` struct encapsulate all the relevant information about
+/// the current state of device including Operating System runtime attributes
+/// (memory, disk...) and Device Attributes (like OS version, model, display size).
 public struct Context: Codable {
     public typealias OSAttributes = [OSKeys: String]
     public typealias DeviceAttributes = [DeviceKeys: String]
 
     // MARK: - Public Properties
     
-    /// Device related context attributes
+    /// Device related context attributes.
     public let device: DeviceAttributes?
     
-    /// Operating System related context attributes
+    /// Operating System related context attributes.
     public let os: OSAttributes?
     
     // MARK: - Initialization
@@ -226,19 +229,21 @@ public struct ContextsCaptureOptions: OptionSet {
     }
 }
 
-/// The following enum describe the frequency of updates for context
-/// attributes.
-/// - `strict`: contexts are captured with a semi real-time update. Collected
-///             data are fresh but require additional resources.
-/// - `default`: this is the default options. Data maybe not so fresh but still
-///              relevant for the most type of usage.
-/// - `relaxed`: a relaxed refresh is used when you don't need to strictly updated
-///              data, but you can still use it.
+/// The following enum describe the frequency of updates for context attributes.
 public enum ContextCaptureFrequency {
+    /// contexts are captured with a semi real-time update. Collected
+    /// data are fresh but require additional resources.
     case `strict`
+    
+    /// this is the default options. Data maybe not so fresh but still
+    /// relevant for the most type of usage.
     case `default`
+    
+    /// a relaxed refresh is used when you don't need to strictly updated
+    /// data, but you can still use it.
     case relaxed
     
+    /// Lifetime interval of the context captured session, expressed in seconds.
     fileprivate var lifetimeInterval: TimeInterval {
         switch self {
         case .`strict`:     return 0.3
@@ -246,4 +251,5 @@ public enum ContextCaptureFrequency {
         case .relaxed:      return 20
         }
     }
+    
 }

@@ -208,7 +208,7 @@ extension SizeRotationFileTransport {
         public var directoryURL: URL
         
         /// Formatters used for data.
-        public var formatters: [EventFormatter] = [
+        public var formatters: [EventMessageFormatter] = [
             FieldsFormatter.standard()
         ]
         

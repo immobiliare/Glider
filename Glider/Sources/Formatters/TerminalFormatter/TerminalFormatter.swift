@@ -12,7 +12,7 @@
 
 import Foundation
 
-/// This formatter is used to print log into terminals or stdout/stderr.
+/// This formatter is used to print log into terminals or `stdout`/`stderr`.
 /// It also support colors and styles where the output supports ANSI escape codes for colors and styles.
 /// By default the formatted fields include an ISO8601 timestamp, the level and the message.
 open class TerminalFormatter: FieldsFormatter {

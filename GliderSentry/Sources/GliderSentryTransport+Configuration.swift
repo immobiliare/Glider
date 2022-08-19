@@ -30,7 +30,7 @@ extension GliderSentryTransport {
         public var sdkConfiguration: Sentry.Options?
         
         /// Formatter used to transform a payload into a string.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         /// Matches on the name of the logger, which is useful to combine all messages of a logger together.
         ///  This match is case sensitive.

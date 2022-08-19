@@ -16,10 +16,8 @@ import Foundation
 /// It mimics the typical structure of debug messages and also add colorization
 /// to the output.
 ///
-/// NOTE:
-/// Colorization was implemented by using font's variants. See the `colorize`
-/// property documentation to learn how to properly setup the environment in order
-/// to see colors.
+/// While XCode console does not support colorization anymore you can still use an
+/// hack to show them. Take a look at `colorize` property for more informations.
 open class XCodeFormatter: FieldsFormatter {
     
     // MARK: - Public Properties
@@ -37,9 +35,9 @@ open class XCodeFormatter: FieldsFormatter {
     /// IMPORTANT:
     /// Colorization of the console is no more supported since XCode 8. In order to
     /// works this method uses the technique of the fonts color variants.
-    /// You should therefore download the following custom fonts (based upon FiraCode):
-    /// <https://raw.githubusercontent.com/jjrscott/ColoredConsole/master/ColoredConsole-Bold.ttf>
-    /// and set as the default font for XCode's Console Messages (Preferences > Themes > Console).
+    /// You should therefore download the following custom fonts (based upon FiraCode)
+    /// named [ColoredConsole-Bold.ttf](https://raw.githubusercontent.com/jjrscott/ColoredConsole/master/ColoredConsole-Bold.ttf)
+    /// and set as the default font for XCode's Console Messages (`Preferences > Themes > Console`).
     public let colorize: ColorizeMode
     
     /// What kind of tags should be colorized.

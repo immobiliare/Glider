@@ -203,7 +203,7 @@ extension WebSocketTransportClient {
         public var options: NWProtocolWebSocket.Options = WebSocketClient.defaultOptions
         
         /// Formatters used to transform event in message.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         /// Queue used for socket connection.
         /// By default is set to `.background`

@@ -155,7 +155,7 @@ extension HTTPTransport {
         /// NOTE:
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
-        public var formatters: [EventFormatter] {
+        public var formatters: [EventMessageFormatter] {
             set { asyncTransportConfiguration.formatters = newValue }
             get { asyncTransportConfiguration.formatters }
         }

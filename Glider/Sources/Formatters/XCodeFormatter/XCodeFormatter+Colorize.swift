@@ -17,12 +17,12 @@ extension XCodeFormatter {
     // MARK: - ColorizeMode
     
     /// Rules to colorize a message.
-    /// - `none` does not apply colorization of the message.
-    /// - `onlyImportant`: only important levels (warning, critical, error, emergency, notice) are colored.
-    /// - `all`: all messages are colored based upon their level.
     public enum ColorizeMode {
+        /// does not apply colorization of the message.
         case none
+        /// only important levels (warning, critical, error, emergency, notice) are colored.
         case onlyImportant
+        /// all messages are colored based upon their level.
         case all
     }
     
@@ -43,10 +43,11 @@ extension XCodeFormatter {
     
     /// Allows to colorize the text inside the XCode console which by default
     /// does not support this option since XCode 8.
+    ///
     /// It uses the concept of colored variants of fonts well described in this
-    /// repository <https://github.com/jjrscott/ColoredConsole>.
-    /// Just download the font from here:
-    /// <https://raw.githubusercontent.com/jjrscott/ColoredConsole/master/ColoredConsole-Bold.ttf>
+    /// [repository](https://github.com/jjrscott/ColoredConsole).
+    /// Just download the font from
+    /// [here](https://raw.githubusercontent.com/jjrscott/ColoredConsole/master/ColoredConsole-Bold.ttf)
     /// And set it as the font for Console fonts inside the settings panel of xcode.
     public enum XCodeConsoleColor: FieldsFormatterColor {
         case reset

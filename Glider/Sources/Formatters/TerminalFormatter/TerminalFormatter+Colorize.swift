@@ -13,12 +13,12 @@
 import Foundation
 
 /// Styles you can apply to a text showed inside the terminal console which support ANSI styles.
-/// - `bg`: background color.
-/// - `fg`: foreground text color.
-/// - `style`: styles to apply.
 public enum ANSITerminalStyles: FieldsFormatterColor {
+    /// background color.
     case bg(Color)
+    /// foreground text color.
     case fg(Color)
+    /// styles to apply.
     case style(Style)
     
     // MARK: - Public Functions

@@ -15,12 +15,11 @@ import Darwin.C.stdio
 
 /// A `FileTransport` implementation that appends log entries to a file.
 ///
-/// NOTE:
 /// `FileTransport` is a simple log appender that provides no mechanism
 /// for file rotation or truncation. Unless you manually manage the log file when
 /// a `FileLogRecorder` doesn't have it open, you will end up with an ever-growing
 /// file.
-/// Use a `RotatingLogTrasport` instead if you'd rather not have to concern
+/// Use a `SizeRotationFileTransport` instead if you'd rather not have to concern
 /// yourself with such details.
 open class FileTransport: Transport {
     
@@ -40,7 +39,7 @@ open class FileTransport: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
-    /// Configuration settings.
+    /// Configuration used to create the transport.
     public let configuration: Configuration
     
     /// Minumum accepted level for this transport.
@@ -138,6 +137,7 @@ open class FileTransport: Transport {
 
 extension FileTransport {
     
+    /// Represent the configuration settings used to create a new `FileTransport` instance.
     public struct Configuration {
         
         // MARK: - Public Properties
@@ -159,7 +159,7 @@ extension FileTransport {
         /// and the formatted string returned by the first formatter to yield a
         /// non-`nil` value will be recorded. If every formatter returns `nil`,
         /// the log entry is silently ignored and not recorded.
-        public var formatters: [EventFormatter] = [
+        public var formatters: [EventMessageFormatter] = [
             FieldsFormatter.standard()
         ]
         

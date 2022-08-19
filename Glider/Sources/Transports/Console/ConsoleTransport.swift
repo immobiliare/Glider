@@ -12,7 +12,7 @@
 
 import Foundation
 
-/// `ConsoleTransport` is used to print log directly on Xcode or other IDE console.
+/// `ConsoleTransport` is used to print log directly on Xcode or other IDE consoles.
 open class ConsoleTransport: Transport {
     
     // MARK: - Public Properties
@@ -67,6 +67,7 @@ open class ConsoleTransport: Transport {
 
 extension ConsoleTransport {
     
+    /// Represent the configuration settings used to create a new `ConsoleTransport` instance.
     public struct Configuration {
         
         // MARK: - Public Properties
@@ -77,8 +78,8 @@ extension ConsoleTransport {
         /// GCD queue. If not set a default one is created for you.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
-        /// Formatter used to transform a payload into a string.
-        public var formatters = [EventFormatter]()
+        /// Formatters used to transform a payload into a string.
+        public var formatters = [EventMessageFormatter]()
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -91,7 +92,7 @@ extension ConsoleTransport {
         /// - Parameters:
         ///   - formatters: formatters to use. Ignore to use the default `XCodeFormatter`.
         ///   - builder: builder configuration function.
-        public init(formatters: [EventFormatter] = [XCodeFormatter.init()],
+        public init(formatters: [EventMessageFormatter] = [XCodeFormatter.init()],
                     _ builder: ((inout Configuration) -> Void)?) {
             self.formatters = formatters
             builder?(&self)

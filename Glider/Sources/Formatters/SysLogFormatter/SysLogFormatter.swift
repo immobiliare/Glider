@@ -12,8 +12,7 @@
 
 import Foundation
 
-/// This formatter is used to produce a log in standard RFC5424.
-/// <https://datatracker.ietf.org/doc/html/rfc5424>
+/// This formatter is used to produce a log in standard [RFC5424](https://datatracker.ietf.org/doc/html/rfc5424).
 /// The message is composed of three parts: the header, the structured data part and the named message.
 ///
 /// - header (priority, version, timestamp, host, application, pid, message id)
@@ -22,7 +21,6 @@ import Foundation
 ///
 /// `<priority>VERSION ISOTIMESTAMP HOSTNAME APPLICATION PID MESSAGEID [STRUCTURED-DATA] MESSAGE`
 ///
-/// NOTE:
 /// SysLog formatter does not log `LogScope`.
 public class SysLogFormatter: FieldsFormatter {
 

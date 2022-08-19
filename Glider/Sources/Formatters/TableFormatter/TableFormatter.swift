@@ -12,9 +12,10 @@
 
 import Foundation
 
-/// `TableFormatter` is used to format log messages for console display.
-/// Useful when you need to print complex data using tables rendered via console.
-public class TableFormatter: EventFormatter {
+/// `TableFormatter` is used to format log messages for console display
+/// by presenting data with an ASCII table.
+/// This is useful when you need to print complex data using tables rendered via console.
+public class TableFormatter: EventMessageFormatter {
     
     // MARK: - Public Properties
     

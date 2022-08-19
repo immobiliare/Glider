@@ -12,13 +12,15 @@
 
 import Foundation
 
-/// `FieldsFormatter` is used to format log messages using specified fields you can
-/// compose in a custom format.
-open class FieldsFormatter: EventFormatter {
+/// `FieldsFormatter` is used to format log messages using a set of fields
+/// which represent relevant information attached to an event.
+/// Most of the available formatters uses `FieldsFormatter` as base in order
+/// to compose the text to show and store.
+open class FieldsFormatter: EventMessageFormatter {
     
     // MARK: - Public Properties
     
-    /// Formatted fields used to create the string.
+    /// Ordered fields used to create the message text.
     open var fields: [Field]
     
     /// When formatting table keys if values are `nil` the row is not printed.
@@ -65,6 +67,11 @@ open class FieldsFormatter: EventFormatter {
     
     // MARK: - Public Functions
     
+    /// Create a serializable representation of passed event's message according to the
+    /// specified fields of the formatter.
+    ///
+    /// - Parameter event: target event.
+    /// - Returns: `SerializableData?`
     open func format(event: Event) -> SerializableData? {
         return valuesForEvent(event: event).reduce(into: String()) { partialResult, fieldValue in
             if let fieldValue = fieldValue {
@@ -73,6 +80,10 @@ open class FieldsFormatter: EventFormatter {
         }
     }
     
+    /// Return the ordered list of `fields`'s value by reading the event attributes.
+    ///
+    /// - Parameter event: target event.
+    /// - Returns: `[String?]`
     open func valuesForEvent(event: Event) -> [String?] {
         fields.map { field in
             var transformedField = field
@@ -183,7 +194,7 @@ internal extension Event {
 
 // MARK: - Callback Based Event Formatter
 
-public class CallbackFormatter: EventFormatter {
+public class CallbackFormatter: EventMessageFormatter {
     public typealias Callback = ((Event) -> String?)
 
     // MARK: - Public Properties

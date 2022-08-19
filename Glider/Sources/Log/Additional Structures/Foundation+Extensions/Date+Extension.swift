@@ -14,8 +14,17 @@ import Foundation
 
 extension Date {
     
+    /// The static formatter used for better performace.
     private static let dateFormatter = DateFormatter()
     
+    /// Format the current date to textualrepresentation.
+    ///
+    /// - Parameters:
+    ///   - dateFormat: date format, ISO8601 if not specified.
+    ///   - locale: locale, `en_US_POSIX` when not specified.
+    ///   - timeZone: timezone, empty if not specified.
+    ///
+    /// - Returns: `String`
     internal func formatAs(_ dateFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ",
                          locale: String = "en_US_POSIX",
                          timeZone: String = "") -> String {

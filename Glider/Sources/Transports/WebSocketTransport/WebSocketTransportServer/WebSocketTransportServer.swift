@@ -242,7 +242,7 @@ extension WebSocketTransportServer {
         public var startImmediately: Bool = true
         
         /// Data formatter.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         /// Options for NWProtocol.
         public var options: NWProtocolWebSocket.Options?

@@ -86,6 +86,7 @@ open class StdStreamsTransport: Transport {
 
 extension StdStreamsTransport {
     
+    /// Represent the configuration settings used to create a new `StdStreamsTransport` instance.
     public struct Configuration {
         
         // MARK: - Public Properties
@@ -97,7 +98,7 @@ extension StdStreamsTransport {
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
         /// Formatter used to transform a payload into a string.
-        public var formatters: [EventFormatter]
+        public var formatters: [EventMessageFormatter]
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -110,7 +111,7 @@ extension StdStreamsTransport {
         /// - Parameters:
         ///   - formatters: formatters to set, by default the `TerminalFormatter` is used.
         ///   - builder: builder configuration callabck.
-        public init(formatters: [EventFormatter] = [TerminalFormatter()],
+        public init(formatters: [EventMessageFormatter] = [TerminalFormatter()],
                     _ builder: ((inout Configuration) -> Void)?) {
             self.formatters = formatters
             builder?(&self)

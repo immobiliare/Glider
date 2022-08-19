@@ -17,14 +17,16 @@ import os.log
 /// The `OSLogTransport` is an implemention of the `Transport` protocol that
 /// records log entries using the new unified logging system available
 /// as of iOS 10.0, macOS 10.12, tvOS 10.0, and watchOS 3.0.
+///
+/// Read more [here](https://developer.apple.com/documentation/os/logging).
 open class OSLogTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// Configuration.
+    /// Configuration used by the trasnport.
     public let configuration: Configuration
     
-    /// Transport is enabled.
+    /// Is the transport enabled.
     public var isEnabled: Bool = true
     
     /// Minumum accepted level for this transport.
@@ -39,7 +41,7 @@ open class OSLogTransport: Transport {
     
     // MARK: - Initialization
     
-    /// Initialize with configuration.
+    /// Initialize a new `OSLogTransport` with a given configuration.
     ///
     /// - Parameter configuration: configuration.
     public init?(configuration: Configuration) throws {
@@ -54,16 +56,10 @@ open class OSLogTransport: Transport {
         self.queue = configuration.queue
     }
     
-    /// Initialize a new `OSLogTransport`.
+    /// Initialize a new `OSLogTransport` with a given configuration specified by a callback function..
     ///
-    /// NOTE: The initializer may fail  when OSLog is not supported.
-    ///
-    ///
-    /// - Parameters:
-    ///   - formatters: formatters to use.
-    ///   - subsystem: The name of the subsystem performing the logging.
-    ///                Defaults to the empty string (`""`) if not specified.
-    ///   - queue : The GCD queue that should be used for logging actions related to the receiver.
+    /// The initializer may fail  when `OSLog` is not supported.
+    /// - Parameter builder: configuration function.
     public convenience init?(_ builder: ((inout Configuration) -> Void)? = nil) throws {
         try self.init(configuration: Configuration(builder))
     }
@@ -94,6 +90,7 @@ open class OSLogTransport: Transport {
 
 extension OSLogTransport {
     
+    /// Represent the configuration settings used to create a new `OSLogTransport` instance.
     public struct Configuration {
         
         // MARK: - Public Properties
@@ -114,7 +111,7 @@ extension OSLogTransport {
         public var levelTranslator: LevelTranslator = .`default`
         
         /// Formatters.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         // The GCD queue used by the receiver to record messages.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")

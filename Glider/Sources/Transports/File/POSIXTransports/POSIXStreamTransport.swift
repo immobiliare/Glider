@@ -13,12 +13,12 @@
 import Foundation
 import Darwin.C.stdio
 
-/// This transport  output that can output text messages to POSIX stream.
+/// This transport can output text messages to POSIX stream.
 open class POSIXStreamTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// Configuration.
+    /// Configuration used to create the transport.
     public let configuration: Configuration
     
     /// Dispatch queue.
@@ -55,7 +55,7 @@ open class POSIXStreamTransport: Transport {
     ///   - formatters: formatters to use. When not specificed `TerminalFormatter` is used.
     ///   - queue: queue to use for dispatch. When not specified a new queue is created.
     /// - Returns: `StdStreamTransport`
-    public static func stdOut(formatters: [EventFormatter] = [TerminalFormatter()],
+    public static func stdOut(formatters: [EventMessageFormatter] = [TerminalFormatter()],
                               queue: DispatchQueue = DispatchQueue(label: "Glider.\(UUID().uuidString)")) -> POSIXStreamTransport {
         POSIXStreamTransport {
             $0.stream = Darwin.stdout
@@ -69,7 +69,7 @@ open class POSIXStreamTransport: Transport {
     ///   - formatters: formatters to use. When not specificed `TerminalFormatter` is used.
     ///   - queue: queue to use for dispatch. When not specified a new queue is created.
     /// - Returns: `StdStreamTransport`
-    public static func stdErr(formatters: [EventFormatter] = [TerminalFormatter()],
+    public static func stdErr(formatters: [EventMessageFormatter] = [TerminalFormatter()],
                               queue: DispatchQueue = DispatchQueue(label: "Glider.\(UUID().uuidString)")) -> POSIXStreamTransport {
         POSIXStreamTransport {
             $0.stream = Darwin.stderr
@@ -96,6 +96,7 @@ open class POSIXStreamTransport: Transport {
 
 extension POSIXStreamTransport {
     
+    /// Represent the configuration settings used to create a new `POSIXStreamTransport` instance.
     public struct Configuration {
         
         // MARK: - Configuration
@@ -110,7 +111,7 @@ extension POSIXStreamTransport {
         public var stream: UnsafeMutablePointer<FILE> = Darwin.stdout
         
         /// Formatter used to transform a payload into a string.
-        public var formatters: [EventFormatter] = [
+        public var formatters: [EventMessageFormatter] = [
             TerminalFormatter()
         ]
         

@@ -62,7 +62,8 @@ public class Log: Equatable {
     /// Unique identifier of the log instance.
     public let uuid = UUID()
     
-    /// Readable log identifier. It's a composition of the `subsystem` and `category` properties.
+    /// Readable log identifier.  
+    /// It's a composition of the `subsystem` and `category` properties.
     public private(set) var label: String
     
     /// An emojii representation of the logger instance.

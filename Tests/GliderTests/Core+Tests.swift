@@ -628,13 +628,13 @@ public class TestTransport: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
-    public var formatters: [EventFormatter]
+    public var formatters: [EventMessageFormatter]
 
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
     public var minimumAcceptedLevel: Level? = nil
     
-    init(formatters: [EventFormatter] = [FieldsFormatter.standard()], onReceiveEvent: @escaping OnReceiveEvent) {
+    init(formatters: [EventMessageFormatter] = [FieldsFormatter.standard()], onReceiveEvent: @escaping OnReceiveEvent) {
         self.formatters = formatters
         self.onReceiveEvent = onReceiveEvent
     }

@@ -18,6 +18,8 @@ import Foundation
 /// Construction requires a `bufferedItemBuilder` function, which is responsible
 /// for converting the `event` and formatted message `SerializableData` into the
 /// generic `BufferItem` type.
+///
+/// This is a base transport used to help creating final implementation for other transports.
 public class BufferedTransport<BufferItem>: Transport {
     public typealias BufferItemBuilder = (Event, SerializableData) -> BufferItem
     
@@ -117,7 +119,7 @@ extension BufferedTransport {
         public var bufferedItemBuilder: BufferItemBuilder
         
         /// Formatters used to convert messages to strings.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         /// Dispatch queue where the record happens.
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")

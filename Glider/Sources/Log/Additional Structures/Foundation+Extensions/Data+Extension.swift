@@ -14,6 +14,9 @@ import Foundation
 
 extension Data {
     
+    /// Get the UTF8 representation of the binary data when it represent a text.
+    ///
+    /// - Returns: `String`
     public func asString() throws -> String {
         String(data: self, encoding: .utf8) ?? ""
     }

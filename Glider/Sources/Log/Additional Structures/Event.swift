@@ -12,15 +12,10 @@
 
 import Foundation
 
+/// When a message is sent to a logger a new payload of type `Event` is created automatically.
+/// The `Event` object encapsulates all the relevant information captured when the message is
+/// sent to a logger including the message itself, any attached object, metadata, tags
 public struct Event: Codable, Equatable {
-    
-    /// Identify the kind of the event.
-    /// - `log`: a standard log event.
-    /// - `network`: a network log event.
-    public enum Kind {
-        case log
-        case networkLog
-    }
 
     // MARK: - Public Properties
     
@@ -34,20 +29,19 @@ public struct Event: Codable, Equatable {
     /// Message to record.
     public var message: Message
     
-    /// The type of the event passed.
-    public private(set) var kind: Kind = .log
-    
     /// Object to serialize.
     public var object: SerializableObject?
     
-    /// Sets the fingerprint in the scope.
+    /// Fingerprint of the event.
+    ///
     /// A fingerprint is a way to uniquely identify an error, and all events have one.
     /// Events with the same fingerprint may be grouped together into an issue depending
     /// on the transport service used.
-    /// (For example Sentry group them in a single issue).
+    /// (For example `GliderSentry` group events with the same fingerprint in a single issue).
     public var fingerprint: String?
     
     /// Tags are key/value string pairs.
+    ///
     /// Some transports may index and make them searchable (like sentry).
     /// Values can be overriden by the event's `tags` informations.
     public var tags: Tags?
@@ -56,30 +50,25 @@ public struct Event: Codable, Equatable {
     /// Values can be overriden by the event's `extra` informations.
     public var extra: Metadata?
     
-    /// Return cumulative list of all tags where the base is scope's tags
-    /// merged with event's specific tags
+    /// Return all tags merging scope's `tags` with event's `tags`.
     public var allTags: Tags? {
         Dictionary.merge(baseDictionary: scope.tags, additionalData: tags)
     }
     
-    /// Return cumulative list of all metadata where the base is scope's metadata
-    /// merged with event's specific metadata.
+    /// Return all tags merging scope's `extra` with event's `extra`.
     public var allExtra: Metadata? {
         scope.extra.merge(with: extra)
     }
     
-    /// You can override global SDK serialization strategies here.
-    /// If not specified the global value is used instead.
+    /// Strategy used to encode attached object.
+    /// This value overrides the log's `serializationStrategies`.
     public var serializationStrategies: SerializationStrategies?
     
     /// Date when the event has occurred.
     public let timestamp = Date()
     
-    /// Full label of the log.
-    ///
-    /// NOTE:
-    /// It's composed by the subsystem and category
-    /// separated by a comma trimming whitespaces and newlines.
+    /// Readable log identifier.
+    /// It's a composition of the `subsystem` and `category` properties.
     public var label: String? {
         let composed = [subsystem, category]
             .compactMap({
@@ -102,10 +91,10 @@ public struct Event: Codable, Equatable {
     /// Associated category.
     public internal(set) var category: String? = nil
     
-    /// scope assigned to the event.
+    /// Scope assigned to the event.
     public internal(set) var scope: Scope
     
-    /// Event severity level.
+    /// Associated severity level.
     public internal(set) var level: Level = .debug
     
     // MARK: - Internal Properties

@@ -12,9 +12,33 @@
 
 import Foundation
 
+/// `EventMessageFormatter` is a protocol used to format the message text of the `Event`
+/// when a transport attempt to store according to its settings.
+/// Not all transports may use formatter/s to store data.`
+public protocol EventMessageFormatter {
+    
+    /// Called to create a string representation of the passed-in event.
+    ///
+    /// - Returns: A `String` representation of `entry`, or `nil` if the
+    ///            receiver could not format the `LogEntry`.
+    func format(event: Event) -> SerializableData?
+    
+}
+
+/// `SerializableData` is a protocol used to create serializable representation
+/// of some data, typically `extra` and `tags` values.
 public protocol SerializableData {
+    
+    /// Return the string representation of the value.
+    ///
+    /// - Returns: `String?`
     func asString() -> String?
+    
+    /// Return the data representation of the value.
+    ///
+    /// - Returns: `Data?`
     func asData() -> Data?
+    
 }
 
 extension Data: SerializableData {
@@ -64,19 +88,7 @@ extension String: SerializableData {
     }
 }
 
-/// `EventFormatter`s are used to attempt to create string representations of
-/// `Event` instances.
-public protocol EventFormatter {
-    
-    /// Called to create a string representation of the passed-in event.
-    /// 
-    /// - Returns: A `String` representation of `entry`, or `nil` if the
-    ///            receiver could not format the `LogEntry`.
-    func format(event: Event) -> SerializableData?
-    
-}
-
-extension Array where Element == EventFormatter {
+extension Array where Element == EventMessageFormatter {
     
     public func format(event: Event) -> SerializableData? {
         for formatter in self {

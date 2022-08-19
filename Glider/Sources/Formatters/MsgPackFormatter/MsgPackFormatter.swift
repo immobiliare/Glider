@@ -12,11 +12,13 @@
 
 import Foundation
 
-/// The `MsgPackDataFormatter` allows to transform payload or scopes into message-pack data format.
+/// The `MsgPackDataFormatter` allows to store `Event` data using the [`MessagePack`](https://msgpack.org/index.html) file
+/// format which produce a compact (and faster to read) representation of the data compared to other formats like JSON.
 public class MsgPackFormatter: FieldsFormatter {
     
     /// Return the default formatter for `MsgPackFormatter` with the following fields:
-    /// - iso8601 timestamp
+    ///
+    /// - ISO8601 timestamp
     /// - level of severity as numeric
     /// - message text
     /// - object metadata
@@ -46,6 +48,10 @@ public class MsgPackFormatter: FieldsFormatter {
     
     // MARK: - Private Functions
     
+    /// Create a serializable payload of the event according to the specified fields.
+    ///
+    /// - Parameter event: target event.
+    /// - Returns: `[String: Any?]`
     private func payloadDictionary(forEvent event: Event) -> [String: Any?] {
         var dictionary = [String: Any?]()
         

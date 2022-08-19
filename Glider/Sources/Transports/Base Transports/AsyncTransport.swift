@@ -13,8 +13,11 @@
 import Foundation
 
 /// `AsyncTransport` is a transport specifically made for asynchrouns request.
-/// It store logs locally before sending to the network and can retry unsent payloads.
-/// The underlying storage is an SQLite in memory database by default.
+/// It store logs locally before sending to the network.
+/// It also support automatic retry for unsent payloads.
+/// The underlying storage is an `SQLite` in memory database by default.
+///
+/// This is a base transport used to help creating final implementation for other transports.
 public class AsyncTransport: Transport {
     
     // MARK: - Typealiases
@@ -152,6 +155,7 @@ public class AsyncTransport: Transport {
         return event.id
     }
     
+    /// Create the timer for autoflush if necessary.
     private func setupAutoFlushInterval() {
         guard let flushInterval = configuration.autoFlushInterval else { return }
         
@@ -347,7 +351,7 @@ extension AsyncTransport {
     public struct Configuration {
         
         /// Data formatters.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         /// Number of retries per each payloads to be sent.
         /// After reaching the maximum number payload is discarded automatically.

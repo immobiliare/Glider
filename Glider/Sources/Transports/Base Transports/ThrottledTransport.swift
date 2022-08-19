@@ -13,10 +13,13 @@
 import Foundation
 
 /// The throttled transport is a tiny but thread-safe logger with a buffering and retrying mechanism for iOS.
-/// Buffer is a limit cap when reached call the flush mechanism. You can also set a time interval to
+/// Buffer is a limit cap when reached call the flush mechanism.
+/// You can also set a time interval to
 /// auto flush the content of the buffer regardless the number of currently stored payloads.
 ///
 /// Your own implementation must override the `record(transport:completion:)` to record a group of events.
+///
+/// This is a base transport used to help creating final implementation for other transports.
 public class ThrottledTransport: Transport {
     public typealias Completion = ((Error?) -> Void)
     public typealias Payload = (Event, SerializableData?)
@@ -199,7 +202,7 @@ extension ThrottledTransport {
         public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
 
         /// Formatters used to format events into messages.
-        public var formatters = [EventFormatter]()
+        public var formatters = [EventMessageFormatter]()
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
