@@ -1,7 +1,6 @@
 # Glider
 
-Glider is the logger for just about everything.  
-You can think of Glider as the [winston](https://github.com/winstonjs/winston) for Swift ages!
+Glider is the logger for just about everything; it's like [winston](https://github.com/winstonjs/winston), but for iOS Mobile Apps!
 
 **Glider is designed to be a simple, performant, universal logging library supporting multiple transports.**  
 A transport is essentially a storage device for your logs.  
@@ -11,9 +10,8 @@ Glider offers a comprehensive set of built-in transports, so you can easily plug
 
 # Why Logging?
 
-At Immobiliare, as with any other product company, logging and monitoring are fundamental parts of our job as engineers.  
-Whether you are a backend engineer or a frontend one, you'll often find yourself in a situation where understanding how your software behaves in production is essential.
-That's especially true in the mobile world, where you may encounter different settings, situations, and critical paths.
+Logging and monitoring are fundamental parts of our job as engineers.  
+Especially in mobile world (with very heterogeneous environments), you'll often find yourself in a situation where understanding how your software behaves in production is essential.
 That's the right job for remote logging: logged data provide valuable information that would be difficult to gather otherwise, unveil unexpected behaviors and bugs, and even if the data was adequately anonymized, identify the sequences of actions of singular users.
 
 # What you will get?
@@ -54,31 +52,57 @@ Those are 5 reasons you will love Glider:
 APIs is fully documented using Apple DoCC.  
 Click here to read it.
 # Documentation
+## Introduction
 
-- [Transports](./Documentation/Logger.md#transports)
-  - [Introduction](./Documentation/Logger.md#introduction)
-  - [Apple Swift-Log Integration](./Documentation/Logger.md#apple-swift-log-integration)
-  - [Base Transports](./Documentation/Logger.md#base-transports)
-    - [AsyncTransport](./Documentation/Logger.md#asynctransport)
-    - [BufferedTransport](./Documentation/Logger.md#bufferedtransport)
-    - [ThrottledTransport](./Documentation/Logger.md#throttledtransport)
-- [Built-in Transports](#built-in-transports)
-  - [ConsoleTransport](./Documentation/Logger.md#consoletransport)
-  - [OSLogTransport](./Documentation/Logger.md#oslogtransport)
-  - [POSIXStreamTransport](./Documentation/Logger.md#posixstreamtransport)
-  - [FileTransport](./Documentation/Logger.md#filetransport)
-  - [SizeRotationFileTransport](./Documentation/Logger.md#sizerotationfiletransport)
-  - [HTTPTransport](./Documentation/Logger.md#httptransport)
-  - [RemoteTransport](./Documentation/Logger.md#remotetransport)
-    - [RemoteTransportServer](./Documentation/Logger.md#remotetransportserver)
-  - [SQLiteTransport](./Documentation/Logger.md#sqlitetransport)
-  - [WebSocketTransport](./Documentation/Logger.md#websockettransport)
-    - [WebSocketTransportClient](./Documentation/Logger.md#websockettransportclient)
-    - [WebSocketTransportServer](./Documentation/Logger.md#websockettransportserver)
-- [Other Transports](./Documentation/Logger.md#other-transports)
-  - [GliderSentry](./Documentation/Logger.md#glidersentry)
-  - [GliderELKTransport](./Documentation/Logger.md#gliderelktransport)
-    - [ELK Features](./Documentation/Logger.md#elk-features)
+- [Logging](#logging)
+  - [The Logger](#the-logger)
+  - [Writing Messages](#writing-messages)
+    - [Write Simple Message](#write-simple-message)
+    - [Write with Closure](#write-with-closure)
+    - [Write by passing Event](#write-by-passing-event)
+  - [Interpolated Message](#interpolated-message)
+  - [Disabling a Logger](#disabling-a-logger)
+  - [Severity Levels](#severity-levels)
+  - [Synchronous and Asynchronous Logging](#synchronous-and-asynchronous-logging)
+    - [Synchronous Logging](#synchronous-logging)
+    - [Asynchronous Logging](#asynchronous-logging)
+
+## Formatters
+
+- [Formatters](./Documentation/Formatters.md#formatters)
+- [Built-In Formatters](./Documentation/Formatters#built-in-formatters)
+  - [FieldsFormatter](./Documentation/Formatters#fieldsformatter)
+## Transports
+
+- [Transports](./Documentation/Transports.md#transports)
+  - [Introduction](./Documentation/Transports.md#introduction)
+  - [Apple Swift-Log Integration](./Documentation/Transports.md#apple-swift-log-integration)
+  - [Base Transports](./Documentation/Transports.md#base-transports)
+    - [AsyncTransport](./Documentation/Transports.md#asynctransport)
+    - [BufferedTransport](./Documentation/Transports.md#bufferedtransport)
+    - [ThrottledTransport](./Documentation/Transports.md#throttledtransport)
+- [Built-in Transports](./Documentation/Transports.md#built-in-transports)
+  - [ConsoleTransport](./Documentation/Transports.md#consoletransport)
+  - [OSLogTransport](./Documentation/Transports.md#oslogtransport)
+  - [POSIXStreamTransport](./Documentation/Transports.md#posixstreamtransport)
+  - [FileTransport](./Documentation/Transports.md#filetransport)
+  - [SizeRotationFileTransport](./Documentation/Transports.md#sizerotationfiletransport)
+  - [HTTPTransport](./Documentation/Transports.md#httptransport)
+  - [RemoteTransport](./Documentation/Transports.md#remotetransport)
+    - [RemoteTransportServer](./Documentation/Transports.md#remotetransportserver)
+  - [SQLiteTransport](./Documentation/Transports.md#sqlitetransport)
+  - [WebSocketTransport](./Documentation/Transports.md#websockettransport)
+    - [WebSocketTransportClient](./Documentation/Transports.md#websockettransportclient)
+    - [WebSocketTransportServer](./Documentation/Transports.md#websockettransportserver)
+- [Other Transports](./Documentation/Transports.md#other-transports)
+  - [GliderSentry](./Documentation/Transports.md#glidersentry)
+  - [GliderELKTransport](./Documentation/Transports.md#gliderelktransport)
+    - [ELK Features](./Documentation/Transports.md#elk-features)
+
+## Network Sniffer
+
+- [Network Sniffer](./Documentation/NetWatcher.md#network-sniffer)
+  - [Introduction](./Documentation/NetWatcher.md#introduction)
 
 # Installation
 
