@@ -13,6 +13,7 @@
   - [FileTransport](#filetransport)
   - [SizeRotationFileTransport](#sizerotationfiletransport)
   - [HTTPTransport](#httptransport)
+  - [RemoteTransport](#remotetransport)
 
 ## Introduction
 
@@ -144,21 +145,22 @@ let logger = Log {
 
 ## FileTransport
 
-A `FileTransport` implementation that appends log entries to a file.  
+A `FileTransport` implementation that appends log entries to a local file. 
 `FileTransport` is a simple log appender that provides no mechanism for file rotation or truncation. 
 
 Unless you manually manage the log file when a `FileTransport` doesn't have it open, you will end up with an ever-growing file.
 
-Use a `SizeRotationFileTransport` instead if you'd rather not have to concern yourself with such details.
+> **Note**
+> Use a `SizeRotationFileTransport` instead if you'd rather not have to concern yourself with such details.
 
 ```swift
 // Create a trasnport to save a json formatted version of received events.
 let fileURL = URL.temporaryFileURL()
 let fileTransport = try FileTransport(fileURL: fileURL, {
-    $0.formatters = [ JSONFormatter.standard()]
+    $0.formatters = [ JSONFormatter.standard() ] // output format as JSON payloads
 })
         
-let log = Log {
+let logger = Log {
     $0.level = .trace
     $0.transports = [fileTransport]
 }
@@ -166,8 +168,7 @@ let log = Log {
 
 ## SizeRotationFileTransport
 
-`SizeRotationFileTransport` maintains a set of daily rotating log files, kept for a user-specified number of days.
-
+`SizeRotationFileTransport` is the evolution of `FileTransport`: it maintains a set of daily rotating log files, kept for a user-specified number of days.  
 `SizeRotationFileTransport` instance assumes full control over the log directory specified by its `directoryPath` property.
 
 ```swift
@@ -176,17 +177,16 @@ let log = Log {
 // oldest events.
 // Events are saved in JSON format.
 let directoryURL = try URL.newDirectoryURL()
-let sizeLogTransport = try SizeRotationFileTransport(directoryURL: directoryURL) {
-    $0.maxFilesCount = kilobytes(500)
-    $0.maxFileSize = 4
-    $0.filePrefix = "mylog_"
-    $0.formatters = [JSONFormatter.standard()]
-    $0.delegate = self
+let rotateFilesTransport = try SizeRotationFileTransport(directoryURL: directoryURL) {
+    $0.maxFileSize = kilobytes(500) // maximum size per file
+    $0.maxFilesCount = 4 // max number of logs
+    $0.filePrefix = "mylog_" // custom file name
+    $0.formatters = [JSONFormatter.standard()] // output format for events
 }
         
-let log = Log {
+let logger = Log {
     $0.level = .trace
-    $0.transports = [sizeLogTransport]
+    $0.transports = [rotateFilesTransport]
 }
 ```
 
@@ -194,8 +194,8 @@ let log = Log {
 
 The `HTTPTransport` is used to send log events directly to an http service by executing network calls to a specific endpoint.
 
-It's up to the delegate (`HTTPTransportDelegate`) to produce a list of `HTTTransportRequest` requests which will be executed automatically.  
-It supports retry mechanism on errors.
+It's up to the delegate (`HTTPTransportDelegate`) to produce a list of `HTTTransportRequest` requests which will be then executed and handled automatically by the transport.  
+It also supports retry mechanism in case of networking errors.
 
 ```swift
 let transport = try HTTPTransport(delegate: self) {
@@ -232,3 +232,36 @@ func httpTransport(_ transport: HTTPTransport,
     }
 }
 ```
+
+## RemoteTransport
+
+The `RemoteTransport` is used to send log in a custom binary format to a LAN/WAN destination.
+It uses Bonjour/ZeroConfig to found active server where to send data.
+
+> **Warning**
+> Be sure to set the following keys in your app's `Info.plist`:
+>
+> ```xml
+> <key>NSLocalNetworkUsageDescription</key>
+>    <string>Network usage required for debugging activities</string>
+> <key>NSBonjourServices</key>
+> <array>
+>    <string>_glider._tcp</string>
+> </array>
+> ```
+
+Example:
+
+```swift
+let remoteTransport = try RemoteTransport(serviceType: self.serviceType, delegate: nil, {
+    $0.autoConnectServerName = serverName // automatically search & connect to this server name
+})
+
+let logger = Log {
+    $0.transports = [remoteTransport]
+}
+```
+
+> **Note**
+> We suggest to use a single shared instance of this transport for all of yours loggers.
+> In this case use the `RemoteTransport.shared` shortcut instead of creating a new one.

@@ -14,9 +14,9 @@ import Foundation
 import Network
 
 /// The `RemoteTransport` is used to send log in a custom binary format to a LAN/WAN destination.
-/// It uses Bonjour/ZeroConfig to found active server where tto send data,.
+/// It uses Bonjour/ZeroConfig to found active server where tto send data.
 ///
-/// Usually you should use a single instance of this transport for all of yours log.
+/// Usually you should use a single instance of this transport for all of yours loggers.
 /// In this case use the `RemoteTransport.shared` shortcut instead of creating a new one.
 ///
 /// ## Important
@@ -27,7 +27,7 @@ import Network
 ///    <string>Network usage required for debugging activities</string>
 /// <key>NSBonjourServices</key>
 /// <array>
-///    <string>_pulse._tcp</string>
+///    <string>_glider._tcp</string>
 /// </array>
 /// ```
 /// 
