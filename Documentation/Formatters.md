@@ -42,3 +42,13 @@ You could do this by constructing a `FieldsFormatter` as follows:
 ])
 ```
 
+You can fully customize the format; there are [20+ different event properties](https://github.com/malcommac/Glider/blob/main/Glider/Sources/Formatters/FieldsFormatter/FieldsFormatter%2BField.swift) you can use for your formatted messages; for each property you can also customize how it's visually presented by setting the following properties:
+
+- `truncate`: truncate the output with 3 modes (lead, middle and trail) at a specified length
+- `padding`: pad the output by aligning it on left, center and right
+- `transforms`: specify one or more function to transform the String
+- `colors`: with supported formatters (by default `TerminalFormatter` with ANSII compatible terminals, and `XCodeFormatter` with an hack) you can specify the color attributes of the text
+- `format`: how complex properties of an event should be encoded (`extra`, `tags`, `object` or `user`)
+- `stringFormat`: specify how to decorate the output via string formatting
+
+For example we can sightly 
