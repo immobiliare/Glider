@@ -2,6 +2,7 @@
 
 - [Transports](#transports)
   - [Introduction](#introduction)
+  - [Apple Swift-Log Integration](#apple-swift-log-integration)
   - [Base Transports](#base-transports)
     - [AsyncTransport](#asynctransport)
     - [BufferedTransport](#bufferedtransport)
@@ -14,6 +15,15 @@
   - [SizeRotationFileTransport](#sizerotationfiletransport)
   - [HTTPTransport](#httptransport)
   - [RemoteTransport](#remotetransport)
+    - [RemoteTransportServer](#remotetransportserver)
+  - [SQLiteTransport](#sqlitetransport)
+  - [WebSocketTransport](#websockettransport)
+    - [WebSocketTransportClient](#websockettransportclient)
+    - [WebSocketTransportServer](#websockettransportserver)
+- [Other Transports](#other-transports)
+  - [GliderSentry](#glidersentry)
+  - [GliderELKTransport](#gliderelktransport)
+    - [ELK Features](#elk-features)
 
 ## Introduction
 
@@ -42,6 +52,19 @@ public protocol Transport {
 
 The most important function of the protocol is the `record(event:)` function which receive `Event` instances coming from the parent `Log` instance and implement its own logic to store/send values.
 
+## Apple Swift-Log Integration
+
+Glider can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).  
+
+The `GliderSwiftLogHandler` offer a `LogHandler` object which you can assign to the swift-log settings to use Glider as backend:
+
+```swift
+LoggingSystem.bootstrap {
+    var handler = GliderSwiftLogHandler(label: loggerName, logger: gliderLogger)
+    handler.logLevel = .trace
+    return handler
+}
+```
 ## Base Transports
 
 Glider offers several base transport layers you can use to simplify the creation of your own transport.
@@ -265,3 +288,150 @@ let logger = Log {
 > **Note**
 > We suggest to use a single shared instance of this transport for all of yours loggers.
 > In this case use the `RemoteTransport.shared` shortcut instead of creating a new one.
+
+### RemoteTransportServer
+
+Gliders also offer a server so you can easily capture client connections from `RemoteTransport` instance:
+
+```swift
+let server = RemoteTransportServer(serviceName: serverName, serviceType: serviceType, delegate: self)
+try self.server?.start()
+```
+
+Then you can use the `RemoteTransportServerDelegate` in order to receive events from connected clients:
+
+```swift
+func remoteTransportServer(_ server: RemoteTransportServer,
+                           client: RemoteTransportServer.Client,
+                           didReceiveEvent event: Event) {
+    print("New event received from client: \(event.message)")
+}
+```
+
+## SQLiteTransport
+
+`SQLiteTransport` offer the ability to store events in a compact, searchable local sqlite3 database.  
+We strongly suggest using this database when you need to collect relevant amount of data; it offers a great reliability and it's fast.
+
+```swift
+// create an local database at given url
+let sqliteTransport = try SQLiteTransport(databaseLocation: .fileURL(url), {
+    // this transport used the ThrottledTransport as helper in order to optimize
+    // how the events are stored (we would avoid creating a SQL transaction per each
+    // event, so we connect enough data before making a single atomic transaction).
+    $0.throttledTransport = .init({
+        // Size of the buffer.
+        // Keep in mind: a big size may impact to the memory. 
+        // Tiny sizes may impact on storage service load.
+        $0.maxEntries = 100
+        // if not enough events (maxEntries) are collected in this interval do a transaction and flush data.
+        $0.autoFlushInterval = 5
+    })
+    $0.delegate = self // listen for events
+})
+        
+let logger = Log {
+    $0.level = .trace
+    $0.transports = [sqliteTransport]
+}                
+```
+
+## WebSocketTransport
+
+### WebSocketTransportClient
+
+The `WebSocketTransportClient` is used to transport messages to a websocket compliant server.
+Each message is transmitted to the server directly on record.
+
+> **Note**
+> In order to optimize message transmission we strongly suggest using a binary format
+> like `MsgPackFormatter`.
+
+```swift
+  // We are using a custom textual format for message output.
+  // It just includes the timestamp, severity and message.
+  // (note: we're not sending attached `object` or `extra`/`tags` data, neither other context).
+let customFormat = FieldsFormatter(fields: [
+    .timestamp(),
+    .message({
+        $0.truncate = .head(length: 10)
+    }),
+])
+
+let wsTransport = try WebSocketTransportClient(url: "ws://localhost:1011", delegate: self) {
+    $0.connectAutomatically = true
+    $0.formatters = [customFormat]
+    $0.dataType = .event(encoder: JSONEncoder())
+}
+                
+let logger = Log {
+    $0.level = .trace // send any message, including low priority events like `trace` or `info`.
+    $0.transports = [wsTransport]
+}
+```
+
+### WebSocketTransportServer
+
+You can also create a server and send events directly to any connected client.
+Just create a `WebSocketTransportServer` transport:
+
+```swift
+    let transport = try WebSocketTransportServer(port: port, delegate: self, {
+    $0.startImmediately = true
+    $0.formatters = [customFormat]
+})
+```
+
+and use `delegate` with `WebSocketTransportServerDelegate` to listen for useful events coming from server (connection and/or disconnection by clients, or any other error).
+
+# Other Transports
+
+Glider also offer other transports used to connect and send events to specific destinations.  
+These transports are not part of the core package so you need to install them along with the main library using relative podspecs or SPM packages.
+
+## GliderSentry
+
+The `GliderSentryTransport` is used to forward the messages coming from `Glider` logging system to the [Sentry](https://github.com/getsentry/sentry-cocoa) iOS official SDK.  
+When you install this package `sentry-cocoa` is a dependency.
+
+```swift
+let sentryTransport = GliderSentryTransport {
+    // If you have not initialized the Sentry SDK yet you can pass a valid
+    // `sdkConfiguration` here and the lib will do it for you.
+    $0.sdkConfiguration = { ... }
+    $0.environment = "MyApp-Production" // set the sentry environment
+}
+
+let logger = Log {
+    $0.level = .info
+    $0.transports = [sentryTransport]
+}
+```
+
+## GliderELKTransport
+
+The `GliderELKTransport` library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB) environments.  
+
+The log entries are properly formatted, cached, and then uploaded via HTTP/HTTPS to elastic/logstash, which allows for further processing in its pipeline. The logs can then be stored in elastic/elasticsearch and visualized in elastic/kibana.  
+
+> **Note**
+> The original inspiration is from [swift-log-elk](https://github.com/Apodini/swift-log-elk) project.
+
+### ELK Features
+- Uploads the log data automatically to Logstash (eg. the ELK stack)
+- Caches the created log entries and sends them via HTTP either periodically or when exceeding a certain configurable memory threshold to Logstash
+- Converts the logging metadata to a JSON representation, which allows querying after those values (eg. filter after a specific parameter in Kibana)
+- Logs itself via a background activity logger (including protection against a possible infinite recursion)
+
+```swift
+let elkTransport = try GliderELKTransport(hostname: "127.0.0.1", port: 5000, delegate: self) {
+    $0.uploadInterval = TimeAmount.seconds(10)
+}
+        
+let logger = Log {
+    $0.subsystem = "com.myapp"
+    $0.category = "network"
+    $0.level = .info
+    $0.transports = [elkTransport]
+}
+```
