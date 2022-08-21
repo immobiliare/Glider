@@ -166,3 +166,19 @@ use_frameworks!
 
 pod 'GliderLogger'
 ```
+
+## Powered Apps
+
+Glider was created by the amazing mobile team at [ImmobiliareLabs](http://labs.immobiliare.it), the Tech dept at Immobiliare.it.
+We are currently using Glider for logging in all of our products.
+
+**If you are using Glider in your app [drop us a message](mailto:mobile@immobiliare.it), we'll add below**.
+
+<a href="https://apps.apple.com/us/app/immobiiiare-it-indomio/id335948517"><img src="./Documentation/assets/immobiliare-app.png" alt="Indomio" width="270"/></a>
+
+## Support & Contribute
+
+Made with ❤️ by [ImmobiliareLabs](https://github.com/orgs/immobiliare) & [Contributors](https://github.com/immobiliare/Glider/graphs/contributors)
+
+We'd love for you to contribute to Glider!  
+If you have any questions on how to use Glider, bugs and enhancement please feel free to reach out by opening a [GitHub Issue](https://github.com/immobiliare/Glider/issues).
