@@ -149,10 +149,12 @@ let tableFormatter = TableFormatter(messageFields: [
 
 This is an example of the result:
 
+<p align="left">
+<img src="./assets/table_formatter.png" alt="tableformatter" width="200"/>
+</p>
+
 > **Note**
 > Of course, you should use a monospaced font to have the best rendering.
-
-![]()
 
 ## TerminalFormatter
 
