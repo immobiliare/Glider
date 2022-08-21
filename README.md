@@ -33,15 +33,13 @@ The following logger shows received messages - only warning or more severe - in 
 logger.error?.write("Unexpected error has occurred!", 
                     extra: ["reason": error.localizedDescription, "info": extraInfoDict])
 
-// Logs an event with a set of attached details
-logger.info?.write {
+logger.info?.write { // Logs an event with a set of attached details
   $0.message = "User tapped Buy button"
   $0.object = encodableProduct
   $0.extra = ["price": price, "currency": currency]
   $0.tags: ["productId", pID]
+}
 ```
-
-That's it!
 
 # Why Glider will be your next logging solution?
 
