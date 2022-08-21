@@ -1,4 +1,6 @@
-# Glider
+<p align="center">
+<img src="./Documentation/assets/glider.png" alt="Glider" width="350"/>
+</p>
 
 Glider is the logger for just about everything; *it's like [winston.js](https://github.com/winstonjs/winston) but for mobile!*
 
