@@ -6,13 +6,11 @@ Glider is the logger for just about everything; it's like [winston](https://gith
 A transport is essentially a storage device for your logs.  
 Each logger can have multiple transports configured at different levels; you can also customize how the messages are formatted.
 
-Glider offers a comprehensive set of built-in transports, so you can easily plug and play the best solution for your application.
-
 # Why Logging?
 
 Logging and monitoring are fundamental parts of our job as engineers.  
 Especially in mobile world (with very heterogeneous environments), you'll often find yourself in a situation where understanding how your software behaves in production is essential.
-That's the right job for remote logging: logged data provide valuable information that would be difficult to gather otherwise, unveil unexpected behaviors and bugs, and even if the data was adequately anonymized, identify the sequences of actions of singular users.
+That's the right job for logging: logged data provide valuable information that would be difficult to gather otherwise, unveil unexpected behaviors and bugs, and even if the data was adequately anonymized, identify the sequences of actions of singular users.
 
 # What you will get?
 
@@ -21,9 +19,9 @@ Each logger is an instance of `Log` class; typically, you need to specify one or
 
 ```swift
 let logger = Log {
- $0.subsystem = "com.myawesomeapp"
- $0.category = "storage"
- $0.level = .warning
+ $0.subsystem = "com.my-awesome-app"
+ $0.category = "ui-events"
+ $0.level = .info
  $0.transports = [ConsoleTransport()]
 }
 ```
@@ -31,7 +29,16 @@ let logger = Log {
 The following logger shows received messages - only warning or more severe - in the console.
 
 ```swift
-logger.error?.write("Unexpected error has occurred!")
+// Logs an error (including stack trace)
+logger.error?.write("Unexpected error has occurred!", 
+                    extra: ["reason": error.localizedDescription, "info": extraInfoDict])
+
+// Logs an event with a set of attached details
+logger.info?.write {
+  $0.message = "User tapped Buy button"
+  $0.object = encodableProduct
+  $0.extra = ["price": price, "currency": currency]
+  $0.tags: ["productId", pID]
 ```
 
 That's it!
