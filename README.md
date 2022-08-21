@@ -122,6 +122,19 @@ It's fully integrated with Glider and absolutely simple to use.
 
 - [Network Sniffer](./Documentation/NetWatcher.md#network-sniffer)
   - [Introduction](./Documentation/NetWatcher.md#introduction)
+  - [Capture Taffic](./Documentation/NetWatcher.md#capture-taffic)
+    - [NetWatcherDelegate](./Documentation/NetWatcher.md#netwatcherdelegate)
+  - [Transports](./Documentation/NetWatcher.md#transports)
+    - [NetSparseFilesTransport](./Documentation/NetWatcher.md#netsparsefilestransport)
+    - [NetArchiveTransport](./Documentation/NetWatcher.md#netarchivetransport)
+
+# Help Us!
+
+If you want to join this project we're maintaining a list of new features we would to implement into the next versions of Glider. 
+Open an issue and discuss one of them with us!
+
+- [ ] GliderViewer: a macOS, iPad & iPhone app to view and interact with logged data
+- [ ] New Transports: we would like to extend the list of supported transports; feel free to propose your third party transports
 
 # Installation
 
