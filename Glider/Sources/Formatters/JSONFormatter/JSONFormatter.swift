@@ -59,10 +59,8 @@ public class JSONFormatter: FieldsFormatter {
             .timestamp(style: .iso8601),
             .level(style: .numeric),
             .message(),
-            .objectMetadata(),
             .extra(keys: nil),
-            .tags(keys: nil),
-            .object()
+            .tags(keys: nil)
         ])
     }
     

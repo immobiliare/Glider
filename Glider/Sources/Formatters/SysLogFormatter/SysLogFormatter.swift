@@ -21,7 +21,7 @@ import Foundation
 ///
 /// `<priority>VERSION ISOTIMESTAMP HOSTNAME APPLICATION PID MESSAGEID [STRUCTURED-DATA] MESSAGE`
 ///
-/// SysLog formatter does not log `LogScope`.
+/// SysLog formatter does not log `Scope`.
 public class SysLogFormatter: FieldsFormatter {
 
     // MARK: - Private Properties

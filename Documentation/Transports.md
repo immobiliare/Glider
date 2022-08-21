@@ -7,20 +7,22 @@
     - [AsyncTransport](#asynctransport)
     - [BufferedTransport](#bufferedtransport)
     - [ThrottledTransport](#throttledtransport)
-- [Built-in Transports](#built-in-transports)
+- [Console Formatters](#console-formatters)
   - [ConsoleTransport](#consoletransport)
   - [OSLogTransport](#oslogtransport)
   - [POSIXStreamTransport](#posixstreamtransport)
+- [File Formatters](#file-formatters)
   - [FileTransport](#filetransport)
   - [SizeRotationFileTransport](#sizerotationfiletransport)
+  - [SQLiteTransport](#sqlitetransport)
+- [Remote Formatters](#remote-formatters)
   - [HTTPTransport](#httptransport)
   - [RemoteTransport](#remotetransport)
     - [RemoteTransportServer](#remotetransportserver)
-  - [SQLiteTransport](#sqlitetransport)
   - [WebSocketTransport](#websockettransport)
     - [WebSocketTransportClient](#websockettransportclient)
     - [WebSocketTransportServer](#websockettransportserver)
-- [Other Transports](#other-transports)
+- [Third Party Transports](#third-party-transports)
   - [GliderSentry](#glidersentry)
   - [GliderELKTransport](#gliderelktransport)
     - [ELK Features](#elk-features)
@@ -107,7 +109,7 @@ You can also set a time interval to auto flush the content of the buffer regardl
 > **Note**
 > Typically you don't need to use `ThrottledTransport` as is. It powers the `SQLiteTransport` transport service.
 
-# Built-in Transports
+# Console Formatters
 
 ## ConsoleTransport
 
@@ -166,6 +168,8 @@ let logger = Log {
 }
 ```
 
+# File Formatters
+
 ## FileTransport
 
 A `FileTransport` implementation that appends log entries to a local file. 
@@ -212,6 +216,36 @@ let logger = Log {
     $0.transports = [rotateFilesTransport]
 }
 ```
+
+## SQLiteTransport
+
+`SQLiteTransport` offer the ability to store events in a compact, searchable local sqlite3 database.  
+We strongly suggest using this database when you need to collect relevant amount of data; it offers a great reliability and it's fast.
+
+```swift
+// create an local database at given url
+let sqliteTransport = try SQLiteTransport(databaseLocation: .fileURL(url), {
+    // this transport used the ThrottledTransport as helper in order to optimize
+    // how the events are stored (we would avoid creating a SQL transaction per each
+    // event, so we connect enough data before making a single atomic transaction).
+    $0.throttledTransport = .init({
+        // Size of the buffer.
+        // Keep in mind: a big size may impact to the memory. 
+        // Tiny sizes may impact on storage service load.
+        $0.maxEntries = 100
+        // if not enough events (maxEntries) are collected in this interval do a transaction and flush data.
+        $0.autoFlushInterval = 5
+    })
+    $0.delegate = self // listen for events
+})
+        
+let logger = Log {
+    $0.level = .trace
+    $0.transports = [sqliteTransport]
+}                
+```
+
+# Remote Formatters
 
 ## HTTPTransport
 
@@ -308,34 +342,6 @@ func remoteTransportServer(_ server: RemoteTransportServer,
 }
 ```
 
-## SQLiteTransport
-
-`SQLiteTransport` offer the ability to store events in a compact, searchable local sqlite3 database.  
-We strongly suggest using this database when you need to collect relevant amount of data; it offers a great reliability and it's fast.
-
-```swift
-// create an local database at given url
-let sqliteTransport = try SQLiteTransport(databaseLocation: .fileURL(url), {
-    // this transport used the ThrottledTransport as helper in order to optimize
-    // how the events are stored (we would avoid creating a SQL transaction per each
-    // event, so we connect enough data before making a single atomic transaction).
-    $0.throttledTransport = .init({
-        // Size of the buffer.
-        // Keep in mind: a big size may impact to the memory. 
-        // Tiny sizes may impact on storage service load.
-        $0.maxEntries = 100
-        // if not enough events (maxEntries) are collected in this interval do a transaction and flush data.
-        $0.autoFlushInterval = 5
-    })
-    $0.delegate = self // listen for events
-})
-        
-let logger = Log {
-    $0.level = .trace
-    $0.transports = [sqliteTransport]
-}                
-```
-
 ## WebSocketTransport
 
 ### WebSocketTransportClient
@@ -384,7 +390,7 @@ Just create a `WebSocketTransportServer` transport:
 
 and use `delegate` with `WebSocketTransportServerDelegate` to listen for useful events coming from server (connection and/or disconnection by clients, or any other error).
 
-# Other Transports
+# Third Party Transports
 
 Glider also offer other transports used to connect and send events to specific destinations.  
 These transports are not part of the core package so you need to install them along with the main library using relative podspecs or SPM packages.

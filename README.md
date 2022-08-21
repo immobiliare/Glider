@@ -70,8 +70,16 @@ Click here to read it.
 ## Formatters
 
 - [Formatters](./Documentation/Formatters.md#formatters)
-- [Built-In Formatters](./Documentation/Formatters#built-in-formatters)
-  - [FieldsFormatter](./Documentation/Formatters#fieldsformatter)
+- [Archiviation](./Documentation/Formatters.md#archiviation)
+  - [FieldsFormatter](./Documentation/Formatters.md#fieldsformatter)
+  - [JSONFormatter](./Documentation/Formatters.md#jsonformatter)
+  - [MsgPackDataFormatter](./Documentation/Formatters.md#msgpackdataformatter)
+- [User Display (Console/Terminals)](./Documentation/Formatters.md#user-display-consoleterminals)
+  - [TableFormatter](./Documentation/Formatters.md#tableformatter)
+  - [TerminalFormatter](./Documentation/Formatters.md#terminalformatter)
+  - [XCodeFormatter](./Documentation/Formatters.md#xcodeformatter)
+  - [SysLogFormatter](./Documentation/Formatters.md#syslogformatter)
+
 ## Transports
 
 - [Transports](./Documentation/Transports.md#transports)
@@ -108,7 +116,7 @@ Click here to read it.
 
 ## Swift Package Manager
 
-The Swift Package Manager is a tool for automating the distribution of Swift code and is integrated into the swift compiler. It is in early development, but Willow does support its use on supported platforms.
+The Swift Package Manager is a tool for automating the distribution of Swift code and is integrated into the swift compiler. It is in early development, but Glider does support its use on supported platforms.
 
 Once you have your Swift package set up, adding Willow as a dependency is as easy as adding it to the dependencies value of your `Package.swift`.
 
