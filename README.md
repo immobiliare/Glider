@@ -37,7 +37,7 @@ logger.info?.write { // Logs an event with a set of attached details
   $0.message = "User tapped Buy button"
   $0.object = encodableProduct
   $0.extra = ["price": price, "currency": currency]
-  $0.tags: ["productId", pID]
+  $0.tags = ["productId", pID]
 }
 ```
 
@@ -54,9 +54,11 @@ Those are 5 reasons you will love Glider:
 
 # API Documentation
 
-APIs is fully documented using Apple DoCC.  
+APIs are fully documented using Apple DoCC.  
 Click here to read it.
-# Documentation
+# Guide
+
+The following manual will guide you through the usage of Glider for your project.
 ## Introduction
 
 - [Logging](#logging)
@@ -72,7 +74,7 @@ Click here to read it.
     - [Synchronous Logging](#synchronous-logging)
     - [Asynchronous Logging](#asynchronous-logging)
 
-## Formatters
+## Event Formatters
 
 - [Formatters](./Documentation/Formatters.md#formatters)
 - [Archiviation](./Documentation/Formatters.md#archiviation)
@@ -85,7 +87,7 @@ Click here to read it.
   - [XCodeFormatter](./Documentation/Formatters.md#xcodeformatter)
   - [SysLogFormatter](./Documentation/Formatters.md#syslogformatter)
 
-## Transports
+## Data Transports
 
 - [Transports](./Documentation/Transports.md#transports)
   - [Introduction](./Documentation/Transports.md#introduction)
@@ -114,6 +116,9 @@ Click here to read it.
 
 ## Network Sniffer
 
+`NetWatcher` package offers the ability to capture the network traffic of your app (including requests/responses) and redirect them to a specific transport.  
+It's fully integrated with Glider and absolutely simple to use.
+
 - [Network Sniffer](./Documentation/NetWatcher.md#network-sniffer)
   - [Introduction](./Documentation/NetWatcher.md#introduction)
 
@@ -127,9 +132,12 @@ Once you have your Swift package set up, adding Willow as a dependency is as eas
 
 ```swift
 dependencies: [
-    .package(url: "")
+    .package(url: "https://github.com/malcommac/Glider.git")
 ]
 ```
+
+Package also include third-party transports (like ELK or Sentry).
+
 ## CocoaPods
 
 CocoaPods is a dependency manager for Cocoa projects.  
@@ -137,7 +145,6 @@ To integrate Willow into your project, specify it in your Podfile:
 
 ```ruby
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '11.0'
 use_frameworks!
 
 pod 'Glider'
