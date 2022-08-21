@@ -1,6 +1,6 @@
 # Glider
 
-Glider is the logger for just about everything; *it's like [winston.js](https://github.com/winstonjs/winston) but for for mobile!*
+Glider is the logger for just about everything; *it's like [winston.js](https://github.com/winstonjs/winston) but for mobile!*
 
 **Glider is designed to be a simple, performant, universal logging library supporting multiple transports.**  
 A transport is essentially a storage device for your logs.  
@@ -10,25 +10,25 @@ Each logger can have multiple transports configured at different levels; you can
 # Why Logging?
 
 Logging and monitoring are fundamental parts of our job as engineers.  
-Especially in mobile world (with very heterogeneous environments), you'll often find yourself in a situation where understanding how your software behaves in production is essential.
+Especially in the mobile world (with very heterogeneous environments), you'll often find yourself in a situation where understanding how your software behaves in production is essential.
 
 That's the right job for logging: logged data provide valuable information that would be difficult to gather otherwise, unveil unexpected behaviors and bugs, and even if the data was adequately anonymized, identify the sequences of actions of singular users.
 
 # Feature Highlights
 
 We loved making this open-source package and would see engineers like you using this software.  
-Those are 5 reasons you will love Glider:
+Those are five reasons you will love Glider:
 
 - 🧩 14+ built-in, fully customizable transports to store your data ([ELK](https://github.com/malcommac/Glider/tree/main/GliderELK/Sources), [HTTP](https://github.com/malcommac/Glider/blob/main/Glider/Sources/Transports/HTTPTransport/HTTPTransport.swift), [Logstash](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/LogstashTransport), [SQLite](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/SQLiteTransport), [WebSocket](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/WebSocketTransport), [Console](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/Console), [File/Rotating Files](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File), [POSIX](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File/POSIXTransports), [swift-log](https://github.com/malcommac/Glider/tree/main/GliderSwiftLog/Sources), [sentry.io](https://github.com/malcommac/Glider/tree/main/GliderSentry/Sources)...)
 - ✏️ 7+ customizable formatters for log messages ([JSON](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/JSONFormatter), [Fields based](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/FieldsFormatter)), [MsgPack](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/MsgPackFormatter), [Syslog](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/SysLogFormatter))...)
-- 🚀 A simple APIs set with an extensible architecture to suit your need
+- 🚀 A simple API set with an extensible architecture to suit your need
 - 📚 A fully documented code (check out our DoCC site!)
 - ⚙️ An extensive unit test suite
   
 # One Line Implementation
 
 Creating a logger is simple.  
-Each logger is an instance of `Log` class; typically, you need to specify one or more transports (where the data is stored).
+Each logger is an instance of the `Log` class; typically, you need to specify one or more transports (where the data is stored).
 
 ```swift
 let logger = Log {
@@ -56,11 +56,11 @@ logger.info?.write { // Logs an event with a set of attached details
 
 # APIs Documentation
 
-APIs are fully documented using Apple DoCC.  
+APIs are thoroughly documented using Apple DoCC.  
 Click here to read it.
 # Guide
 
-The following manual will guide you through the usage of Glider for your project.
+The following manual will guide you through using Glider for your project.
 ## Introduction
 
 - [The Logger](./Documentation/Logger.md#the-logger)
@@ -117,8 +117,8 @@ The following manual will guide you through the usage of Glider for your project
 
 ## Network Sniffer
 
-`NetWatcher` package offers the ability to capture the network traffic of your app (including requests/responses) and redirect them to a specific transport.  
-It's fully integrated with Glider and absolutely simple to use.
+`NetWatcher` package offers the ability to capture your app's network traffic (including requests/responses) and redirect them to a specific transport.  
+It's fully integrated with Glider and simple to use.
 
 - [Network Sniffer](./Documentation/NetWatcher.md#network-sniffer)
   - [Introduction](./Documentation/NetWatcher.md#introduction)
@@ -131,11 +131,11 @@ It's fully integrated with Glider and absolutely simple to use.
 
 # Help Us!
 
-If you want to join this project we're maintaining a list of new features we would to implement into the next versions of Glider. 
-Open an issue and discuss one of them with us!
+If you want to join this project, we're maintaining a list of new features we would like to implement into the following versions of Glider. 
+Please open an issue and discuss one of them with us!
 
 - [ ] GliderViewer: a macOS, iPad & iPhone app to view and interact with logged data
-- [ ] New Transports: we would like to extend the list of supported transports; feel free to propose your third party transports
+- [ ] New Transports: we would like to extend the list of supported transports; feel free to propose your third-party transports
 - [ ] Increment our code coverage by writing more tests
 
 # Installation
@@ -152,8 +152,8 @@ dependencies: [
 ]
 ```
 
-Manifest also includes third-party packages for additional transports, like ELK or Sentry.  
-The Glider core SDK is `Glider` package.
+Manifest also includes third-party packages for other transports, like ELK or Sentry.  
+The Glider core SDK is the `Glider` package.
 
 ## CocoaPods
 
@@ -170,7 +170,7 @@ pod 'GliderLogger'
 ## Powered Apps
 
 Glider was created by the amazing mobile team at [ImmobiliareLabs](http://labs.immobiliare.it), the Tech dept at Immobiliare.it.
-We are currently using Glider for logging in all of our products.
+We are currently using Glider for logging in to all of our products.
 
 **If you are using Glider in your app [drop us a message](mailto:mobile@immobiliare.it), we'll add below**.
 
@@ -181,4 +181,4 @@ We are currently using Glider for logging in all of our products.
 Made with ❤️ by [ImmobiliareLabs](https://github.com/orgs/immobiliare) & [Contributors](https://github.com/immobiliare/Glider/graphs/contributors)
 
 We'd love for you to contribute to Glider!  
-If you have any questions on how to use Glider, bugs and enhancement please feel free to reach out by opening a [GitHub Issue](https://github.com/immobiliare/Glider/issues).
+If you have questions on using Glider, bugs, and enhancement, please feel free to reach out by opening a [GitHub Issue](https://github.com/immobiliare/Glider/issues).
