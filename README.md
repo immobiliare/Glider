@@ -59,7 +59,8 @@ logger.info?.write { // Logs an event with a set of attached details
 # APIs References
 
 APIs are thoroughly documented using Apple DoCC; you can access to the reference directly from XCode autocompletion or by visiting the domain:
-[API REFERENCES](http://malcommac.github.io/glider).
+
+👉 [API REFERENCE](https://malcommac.github.io/Glider/).
 
 # Guide
 
