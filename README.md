@@ -10,6 +10,7 @@ Each logger can have multiple transports configured at different levels; you can
 
 Logging and monitoring are fundamental parts of our job as engineers.  
 Especially in mobile world (with very heterogeneous environments), you'll often find yourself in a situation where understanding how your software behaves in production is essential.
+
 That's the right job for logging: logged data provide valuable information that would be difficult to gather otherwise, unveil unexpected behaviors and bugs, and even if the data was adequately anonymized, identify the sequences of actions of singular users.
 
 # What you will get?
@@ -41,7 +42,7 @@ logger.info?.write { // Logs an event with a set of attached details
 }
 ```
 
-# Why Glider will be your next logging solution?
+# Feature Highlights
 
 We loved making this open-source package and would see engineers like you using this software.  
 Those are 5 reasons you will love Glider:
@@ -77,7 +78,7 @@ The following manual will guide you through the usage of Glider for your project
 ## Event Formatters
 
 - [Formatters](./Documentation/Formatters.md#formatters)
-- [Archiviation](./Documentation/Formatters.md#archiviation)
+- [Archiving](./Documentation/Formatters.md#archiving)
   - [FieldsFormatter](./Documentation/Formatters.md#fieldsformatter)
   - [JSONFormatter](./Documentation/Formatters.md#jsonformatter)
   - [MsgPackDataFormatter](./Documentation/Formatters.md#msgpackdataformatter)

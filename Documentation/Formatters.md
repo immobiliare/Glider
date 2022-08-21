@@ -1,7 +1,7 @@
 # Formatters
 
 - [Formatters](#formatters)
-- [Archiviation](#archiviation)
+- [Archiving](#archiving)
   - [FieldsFormatter](#fieldsformatter)
   - [JSONFormatter](#jsonformatter)
   - [MsgPackDataFormatter](#msgpackdataformatter)
@@ -25,7 +25,7 @@ public protocol EventMessageFormatter {
 The vast majority of transports offers, in their configuration, a property called `formatters`: you can specify one or more formatters that will be executed in order and contribute to transform the output at each step.  
 Typically you are done specifyng a single formatter which define the output of the event for a particular transport instance.  
 
-# Archiviation
+# Archiving
 
 Glider offers several different event formatters, some suitable for console display, some other suggested for archiviation.
 ## FieldsFormatter
