@@ -140,6 +140,15 @@ Please open an issue and discuss one of them with us!
 - [ ] New Transports: we would like to extend the list of supported transports; feel free to propose your third-party transports
 - [ ] Increment our code coverage by writing more tests
 
+# Requirements
+
+Glider can be installed in any platform which supports:
+
+- iOS 14+, macOS Catalina+, watchOS 7+, tvOS 13+
+- Xcode 13.2+
+- Swift 5.5+
+
+
 # Installation
 
 ## Swift Package Manager
