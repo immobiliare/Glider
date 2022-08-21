@@ -48,17 +48,17 @@ public protocol Transport {
 - `minimumAcceptedLevel`: A filter by `severity` implemented at the transport level. You can, for example, create a logger which logs in `info` but for one of the transport (for example ELK or Sentry) it avoids to send messages with a severity lower than `error` in order to clog your remote service). When `nil` the message is not filtered and all messages accepted by the parent `Log` instance are accepted automatically.
 
 > **Note**
-> Moreover most transports also specify another common property called `formatters`.
-> A Formatter is an object conform to `EventFormatter` protocol which allows to format the `Event`'s `message` and transform them as you need.  
-> For example `ConsoleTransport` defines a single formatter used to print event messages in a style similar to a common XCode print statement (with timestamp, pid, message etc.).
+> Moreover, most transports also specify another common property called `formatters`.
+> A Formatter is an object that conforms to `EventFormatter` protocol, which allows you to format the `Event`'s `message` and transform them as you need.  
+> For example, `ConsoleTransport` defines a single formatter used to print event messages in a style similar to a common XCode print statement (with a timestamp, PID, message, etc.).
 
-The most important function of the protocol is the `record(event:)` function which receive `Event` instances coming from the parent `Log` instance and implement its own logic to store/send values.
+The most important function of the protocol is the `record(event:)` function which receives `Event` instances coming from the parent `Log` instance and implements its own logic to store/send values.
 
 ## Apple Swift-Log Integration
 
 Glider can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).  
 
-The `GliderSwiftLogHandler` offer a `LogHandler` object which you can assign to the swift-log settings to use Glider as backend:
+The `GliderSwiftLogHandler` offers a `LogHandler` object which you can assign to the swift-log settings to use Glider as the backend:
 
 ```swift
 LoggingSystem.bootstrap {
@@ -73,11 +73,11 @@ Glider offers several base transport layers you can use to simplify the creation
 
 ### AsyncTransport
 
-`AsyncTransport` is a transport specifically made for asynchrouns request.  
-It store logs locally in a temporary (in-memory) SQLite3 database; once a specified amount of messages are collected it allows to send them via a network request.
+`AsyncTransport` is a transport specifically made for asynchronous requests.  
+It stores logs locally in a temporary (in-memory) SQLite3 database; once a specified amount of messages are collected it allows to send them via a network request.
 
 > **Note**
-> Typically you don't need to use `AsyncTransport` as is. It powers the `HTTPTransport` transport service.
+> Typically, you don't need to use `AsyncTransport` as is. It powers the `HTTPTransport` transport service.
 
 ```swift
 let config = AsyncTransport.Configuration {
@@ -103,25 +103,25 @@ Construction requires a `bufferedItemBuilder` function, which is responsible for
 ### ThrottledTransport
 
 The throttled transport is a tiny but thread-safe logger with a buffering and retrying mechanism for iOS.
-Buffer is a limit cap when reached call the flush mechanism.  
+Buffer is a limit cap; when reached, call the flush mechanism.  
 You can also set a time interval to auto flush the content of the buffer regardless the number of currently stored payloads.
 
 > **Note**
-> Typically you don't need to use `ThrottledTransport` as is. It powers the `SQLiteTransport` transport service.
+> Typically, you don't need to use `ThrottledTransport` as is. It powers the `SQLiteTransport` transport service.
 
 # Console Formatters
 
 ## ConsoleTransport
 
-`ConsoleTransport` is used to print log directly on Xcode or other IDE consoles. By default when initialized the console transport is initialized by setting the `XCodeFormatter`, an event message formatter used to print messages using the similar output of standard `NSLog()` or `print()` methods.
+`ConsoleTransport` is used to print logs directly on Xcode or other IDE consoles. By default, when initialized, the console transport is initialized by setting the `XCodeFormatter` an event message formatter used to print messages using the similar output of standard `NSLog()` or `print()` methods.
 
 ```swift
-// This create a custom configuration of the `XCodeFormatter` which print
+// This creates a custom configuration of the `XCodeFormatter`, which print
 // print colored warning/error messages.
-// NOTE: Xcode does not support colored console anymore so you need to install
+// NOTE: Xcode does not support colored console anymore, so you need to install
 // this font:
 // https://raw.githubusercontent.com/jjrscott/ColoredConsole/master/ColoredConsole-Bold.ttf
-// And set it as the font for Console fonts inside the settings panel of xcode.
+// And set it as the font for Console fonts inside the settings panel of XCode.
 let consoleTransport = ConsoleTransport {
     $0.minimumAcceptedLevel = .info // print only info or more severe messages even if the log specify .trace below
     // setup formatters
@@ -219,8 +219,8 @@ let logger = Log {
 
 ## SQLiteTransport
 
-`SQLiteTransport` offer the ability to store events in a compact, searchable local sqlite3 database.  
-We strongly suggest using this database when you need to collect relevant amount of data; it offers a great reliability and it's fast.
+`SQLiteTransport` offers the ability to store events in a compact, searchable local sqlite3 database.  
+We strongly suggest using this database when you need to collect the relevant amount of data; it offers great reliability, and it's fast.
 
 ```swift
 // create an local database at given url
@@ -249,10 +249,10 @@ let logger = Log {
 
 ## HTTPTransport
 
-The `HTTPTransport` is used to send log events directly to an http service by executing network calls to a specific endpoint.
+The `HTTPTransport` is used to send log events directly to an HTTP service by executing network calls to a specific endpoint.
 
 It's up to the delegate (`HTTPTransportDelegate`) to produce a list of `HTTTransportRequest` requests which will be then executed and handled automatically by the transport.  
-It also supports retry mechanism in case of networking errors.
+It also supports a retry mechanism in case of network errors.
 
 ```swift
 let transport = try HTTPTransport(delegate: self) {
@@ -270,7 +270,7 @@ let log = Log {
 }
 ```
 
-The `HTTPTransportDelegate` should implement at least the method to produce the `URLRequest` used to send data to a remote webservice:
+The `HTTPTransportDelegate` should implement at least the method to produce the `URLRequest` used to send data to a remote web service:
 
 ```swift
  // MARK: - HTTPTransportDelegate
@@ -346,11 +346,11 @@ func remoteTransportServer(_ server: RemoteTransportServer,
 
 ### WebSocketTransportClient
 
-The `WebSocketTransportClient` is used to transport messages to a websocket compliant server.
-Each message is transmitted to the server directly on record.
+The `WebSocketTransportClient` is used to transport messages to a WebSocket compliant server.
+Each message is transmitted to the server directly on the record.
 
 > **Note**
-> In order to optimize message transmission we strongly suggest using a binary format
+> In order to optimize message transmission, we strongly suggest using a binary format
 > like `MsgPackFormatter`.
 
 ```swift
@@ -388,17 +388,17 @@ Just create a `WebSocketTransportServer` transport:
 })
 ```
 
-and use `delegate` with `WebSocketTransportServerDelegate` to listen for useful events coming from server (connection and/or disconnection by clients, or any other error).
+and use `delegate` with `WebSocketTransportServerDelegate` to listen for useful events coming from the server (connection and/or disconnection by clients or any other error).
 
 # Third Party Transports
 
 Glider also offer other transports used to connect and send events to specific destinations.  
-These transports are not part of the core package so you need to install them along with the main library using relative podspecs or SPM packages.
+These transports are not part of the core package, so you need to install them along with the main library using relative podspecs or SPM packages.
 
 ## GliderSentry
 
 The `GliderSentryTransport` is used to forward the messages coming from `Glider` logging system to the [Sentry](https://github.com/getsentry/sentry-cocoa) iOS official SDK.  
-When you install this package `sentry-cocoa` is a dependency.
+When you install this package, `sentry-cocoa` is a dependency.
 
 ```swift
 let sentryTransport = GliderSentryTransport {
@@ -424,9 +424,9 @@ The log entries are properly formatted, cached, and then uploaded via HTTP/HTTPS
 > The original inspiration is from [swift-log-elk](https://github.com/Apodini/swift-log-elk) project.
 
 ### ELK Features
-- Uploads the log data automatically to Logstash (eg. the ELK stack)
+- Uploads the log data automatically to Logstash (e.g. the ELK stack)
 - Caches the created log entries and sends them via HTTP either periodically or when exceeding a certain configurable memory threshold to Logstash
-- Converts the logging metadata to a JSON representation, which allows querying after those values (eg. filter after a specific parameter in Kibana)
+- Converts the logging metadata to a JSON representation, which allows querying after those values (e.g. filter after a specific parameter in Kibana)
 - Logs itself via a background activity logger (including protection against a possible infinite recursion)
 
 ```swift

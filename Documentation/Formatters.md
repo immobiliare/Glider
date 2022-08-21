@@ -1,7 +1,7 @@
 # Event Formatters
 
 - [Formatters](#formatters)
-- [Suitable for Archiviation](#suitable-for-archiviation)
+- [Suitable for Archiviation](#suitable-![Glider](../../../../Desktop/glider.png)for-archiviation)
   - [FieldsFormatter](#fieldsformatter)
   - [JSONFormatter](#jsonformatter)
   - [MsgPackDataFormatter](#msgpackdataformatter)

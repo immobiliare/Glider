@@ -16,19 +16,19 @@ It also works with Alamofire and RealHTTP, if that's your thing.
 
 - No code to write and no imports.
 - Record all app traffic that uses NSURLSession.
-- Log the content of all requests, responses, and header with no hassles with SSL/HTTPS
+- Log the content of all requests, responses, and headers with no hassles with SSL/HTTPS
 - Find, isolate and fix bugs quickly.
 - Also works with external libraries like Alamofire & RealHTTP.
 - Ability to blacklist hosts from being recorded using the array ignoredHosts.
-- Ability to share cURL rappresentation of API requests
+- Ability to share cURL representation of API requests
 
 ## Installation
 
-`NetWatcher` is not part of the Glider Core; you can install it by selecting the `GliderNetWatcher` package when installing main Glider dependency, or by using the `GliderNetWatcher.podspec` if you are using CocoaPods
+`NetWatcher` is not part of the Glider Core; you can install it by selecting the `GliderNetWatcher` package when installing the main Glider dependency or by using the `GliderNetWatcher.podspec` if you are using CocoaPods
 
 ## Capture Taffic
 
-If you want to capture all the network traffic inside the app just call `captureGlobally()` method:
+If you want to capture all the network traffic inside the app, just call `captureGlobally()` method:
 
 ```swift
 // Start global capture
@@ -51,7 +51,7 @@ NetWatcher.shared.capture(false, forSessionConfiguration: configuration)
 Most of the time you may want to capture sniffed traffics to send it to a Glider Transport service.  
 `NetWatcher` is perfectly integrated: just set your custom configuration before activating the sniffer:
 
-The following example uses the `NetArchiveTransport` transport, a transport made to store network requests/responses directly in a compact, readable SQLite3 local database (it's like `SQLiteTransport`).
+The following example uses the `NetArchiveTransport` transport; a transport made to store network requests/responses directly in a compact, readable SQLite3 local database (it's like `SQLiteTransport`).
 
 ```swift
 // Setup the configuration
@@ -91,20 +91,20 @@ class UIApplication: UIApplicationDelegate, NetWatcherDelegate {
 
 ## Transports
 
-`NetWatcher` has 2 transport specifically made to store network events.  
-You can, however, create your own implementation to suite your need.
+`NetWatcher` has two transport specifically made to store network events.  
+You can, however, create your own implementation to suit your need.
 
 ### NetSparseFilesTransport
 
 The `NetSparseFilesTransport` class is used to store network activity inside a root folder.
 
-Each call is stored with a single textual file with the id of the network call and its creation date set to the origin call date.
+Each call is stored with a single textual file with the id of the network call and its creation date set to the original call date.
 Inside each file you can found `<cURL command for request>\n\n<raw response data>`.
 
 ```swift
 let sparseArchive = NetSparseFilesTransport.Config {
   $0.directoryURL = localFolderURL // location of the directory (will be created if not exists)
-  $0.resetAtStartup = false // do not remove previously stored data at launch
+  $0.resetAtStartup = false // do not remove previously-stored data at launch
 }
 NetWatcher.shared.setConfiguration(sparseArchive)
 ```
