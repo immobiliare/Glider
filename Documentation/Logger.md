@@ -1,9 +1,9 @@
 - [The Logger](#the-logger)
-- [Writing Messages](#writing-messages)
-  - [Write Simple Message](#write-simple-message)
-  - [Write with Closure](#write-with-closure)
-  - [Write by passing Event](#write-by-passing-event)
-- [Interpolated Message](#interpolated-message)
+- [Writing messages](#writing-messages)
+  - [Writing simple messages](#writing-simple-messages)
+  - [Writing messages using closures](#writing-messages-using-closures)
+  - [Writing message by passing `Event`](#writing-message-by-passing-event)
+- [Message text composition](#message-text-composition)
 - [Disabling a Logger](#disabling-a-logger)
 - [Severity Levels](#severity-levels)
 - [Synchronous and Asynchronous Logging](#synchronous-and-asynchronous-logging)
@@ -37,7 +37,7 @@ let logger = Log {
 - `isEnabled`: when `false` any message received by the log is ignored. It's useful to temporary disable reception of data.
 - `isSynchronous`: Identify how the messages must be handled when sent to the logger instance. Typically you want to set if to `false` in production and `true` in development.
 
-## Writing Messages
+## Writing messages
 
 Sending a message to a logger is pretty simple; simply append the severity level channel to your logger instance and call `write()` function:
 
@@ -59,7 +59,7 @@ When you write a new message you can also customize the following fields.
 
 Glider's offer different `write()` functions. 
 
-### Write Simple Message
+### Writing simple messages
 
 For simple messages you can use the `write(msg:object:extra:tags:)` where the only required parameter is the message of the event. 
 
@@ -74,7 +74,7 @@ logger.info?.write(msg: "User tapped BUY button",
                    tags: ["productId": productId])
 ```
 
-### Write with Closure
+### Writing messages using closures
 
 Logging a message is easy, but knowing when to add the logic necessary to build a log message and tune it for performance can be a bit tricky. We want to make sure logic is encapsulated and very performant. Glider log level closures allow you to cleanly wrap all the logic to build up the message.
 
@@ -96,7 +96,7 @@ logger.info?.write {
 
 This is the best way to write an event and we suggest using it everytime.
 
-### Write by passing Event
+### Writing message by passing `Event`
 
 Finally there are some situation where you need to create an event in a moment and send it later:
 
@@ -106,7 +106,7 @@ let event = Event(message: "Message #\($0)", extra: ["idx": $0])
 log.info?.write(event: &events)
 ```
 
-## Interpolated Message
+## Message text composition
 
 Messages can be simple literals string or may include data coming from variables read at runtime.  
 Glider supports privacy and formatting options allow to manage the visibility of values in log messages and how data is presented, as like the Apple's OSLog.  
