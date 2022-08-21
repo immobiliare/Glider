@@ -1,17 +1,14 @@
-# Logging
-
-- [Logging](#logging)
-  - [The Logger](#the-logger)
-  - [Writing Messages](#writing-messages)
-    - [Write Simple Message](#write-simple-message)
-    - [Write with Closure](#write-with-closure)
-    - [Write by passing Event](#write-by-passing-event)
-  - [Interpolated Message](#interpolated-message)
-  - [Disabling a Logger](#disabling-a-logger)
-  - [Severity Levels](#severity-levels)
-  - [Synchronous and Asynchronous Logging](#synchronous-and-asynchronous-logging)
-    - [Synchronous Logging](#synchronous-logging)
-    - [Asynchronous Logging](#asynchronous-logging)
+- [The Logger](#the-logger)
+- [Writing Messages](#writing-messages)
+  - [Write Simple Message](#write-simple-message)
+  - [Write with Closure](#write-with-closure)
+  - [Write by passing Event](#write-by-passing-event)
+- [Interpolated Message](#interpolated-message)
+- [Disabling a Logger](#disabling-a-logger)
+- [Severity Levels](#severity-levels)
+- [Synchronous and Asynchronous Logging](#synchronous-and-asynchronous-logging)
+  - [Synchronous Logging](#synchronous-logging)
+  - [Asynchronous Logging](#asynchronous-logging)
 
 ## The Logger
 

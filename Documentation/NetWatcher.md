@@ -2,6 +2,7 @@
 
 - [Network Sniffer](#network-sniffer)
   - [Introduction](#introduction)
+  - [Installation](#installation)
   - [Capture Taffic](#capture-taffic)
     - [NetWatcherDelegate](#netwatcherdelegate)
   - [Transports](#transports)
@@ -20,6 +21,10 @@ It also works with Alamofire and RealHTTP, if that's your thing.
 - Also works with external libraries like Alamofire & RealHTTP.
 - Ability to blacklist hosts from being recorded using the array ignoredHosts.
 - Ability to share cURL rappresentation of API requests
+
+## Installation
+
+`NetWatcher` is not part of the Glider Core; you can install it by selecting the `GliderNetWatcher` package when installing main Glider dependency, or by using the `GliderNetWatcher.podspec` if you are using CocoaPods
 
 ## Capture Taffic
 
