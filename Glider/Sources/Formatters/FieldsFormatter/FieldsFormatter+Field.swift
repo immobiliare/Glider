@@ -163,7 +163,7 @@ extension FieldsFormatter {
         ///   - style: delimiter to use.
         ///   - configure: optional callback to further configure the representation of the data.
         /// - Returns: `Field`
-        public static func x(style: DelimiterStyle, _ configure: Configure? = nil) -> Field {
+        public static func delimiter(style: DelimiterStyle, _ configure: Configure? = nil) -> Field {
             self.init(.delimiter(style), configure)
         }
         
