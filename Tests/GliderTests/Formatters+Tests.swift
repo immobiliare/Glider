@@ -427,7 +427,7 @@ final class FormattersTest: XCTestCase {
         })
         
         for i in 0..<writtenLogLines.count {
-            XCTAssertTrue(writtenLogLines[i].contains("| ERRR Event message \(i)"))
+            XCTAssertTrue(writtenLogLines[i].contains("🔴 Event message \(i)"))
         }
     }
     

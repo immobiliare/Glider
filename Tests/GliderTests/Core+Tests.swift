@@ -18,13 +18,14 @@ final class CoreTests: XCTestCase {
     /// The following test validate the use of `Message` construct to produce
     /// an interpolated redacted message inside the `extra` field of an event.
     func test_interpolatedMessageInExtra() throws {
+        GliderSDK.shared.disablePrivacyRedaction = false
+        GliderSDK.shared.scope = Scope()
+
         let fieldFormatter = FieldsFormatter(fields: [.message(), .delimiter(style: .spacedPipe), .extra(keys: nil)])
         let transport = TestTransport(formatters: [fieldFormatter], onReceiveEvent: { _, message in
             XCTAssertEqual("Hello! Bart | {\"card\":\"Your card is ****6789103 with CVV <redacted>\",\"name\":\"Bart\"}", message)
         })
-        
-        GliderSDK.shared.disablePrivacyRedaction = false
-        
+                
         let log = Log {
             $0.level = .info
             $0.transports = [
@@ -42,6 +43,8 @@ final class CoreTests: XCTestCase {
             "card": Message("Your card is \(card, privacy: .partiallyHide) with CVV \(cvv, privacy: .private)"),
             "name": name
         ])
+        
+        GliderSDK.shared.disablePrivacyRedaction = true
     }
     
     /// The following test check if the `minimumAcceptedLevel` set for a transport

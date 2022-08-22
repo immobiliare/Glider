@@ -665,7 +665,7 @@ extension FieldsFormatter {
                         if value.isNil == false { // unwrapped has a value
                             list.append(key)
                             
-                            let formattedValue = String(describing: value!).applyFormattingOfField(field)
+                            let formattedValue = String(describing: value!)
                             list.append(formattedValue)
                         } else if includeNilKeys {
                             list.append(key)
@@ -676,7 +676,7 @@ extension FieldsFormatter {
                 return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
             case let arrayValue as [Any?]:
                 let rows = arrayValue.map({
-                    String(describing: $0).applyFormattingOfField(field)
+                    String(describing: $0)
                 })
                 return createKeyValueTableWithRows(rows, keyColumnTitle: keyColumnTitle)?.stringValue
             default:
@@ -692,7 +692,7 @@ extension FieldsFormatter {
                 let value = dictValue.keys.sorted().reduce(into: [String]()) { list, key in
                     if let value = dictValue[key] {
                         if value.isNil == false {
-                            list.append("\t- \(key)=\"\(String(describing: value!).applyFormattingOfField(field))\"")
+                            list.append("\t- \(key)=\"\(String(describing: value!))\"")
                         } else if includeNilKeys {
                             list.append("\t- \(key)=nil")
                         }
@@ -704,7 +704,7 @@ extension FieldsFormatter {
                     guard let value = $0 else {
                         return nil
                     }
-                    return "\t - \(String(describing: value).applyFormattingOfField(field))"
+                    return "\t - \(String(describing: value))"
                 }.joined(separator: "\n")
                 return "\n\(value)\n"
             default:
@@ -726,7 +726,7 @@ extension FieldsFormatter {
                 for key in dictValue.keys.sorted() {
                     if let value = dictValue[key]  {
                         if value.isNil == false {
-                            components.append("\(key)=\(String(describing: value!).applyFormattingOfField(field))")
+                            components.append("\(key)=\(String(describing: value!))")
                         } else if includeNilKeys {
                             components.append("\(key)=nil")
                         }
@@ -739,7 +739,7 @@ extension FieldsFormatter {
                     return nil
                 }
                 
-                return arrayValue.map({ String(describing: $0).applyFormattingOfField(field) }).joined(separator: field.separator)
+                return arrayValue.map({ String(describing: $0) }).joined(separator: field.separator)
             default:
                 return nil
             }
@@ -763,15 +763,15 @@ extension FieldsFormatter {
                 }
                 
                 let json = try? JSONSerialization.data(withJSONObject: serializableDictionary, options: .sortedKeys)
-                return json?.asString()?.applyFormattingOfField(field)
+                return json?.asString()
             case let arrayValue as [Any?]:
                 guard arrayValue.isEmpty == false else {
                     return nil
                 }
                 
-                return arrayValue.map({ String(describing: $0).applyFormattingOfField(field) }).joined(separator: field.separator)
+                return arrayValue.map({ String(describing: $0) }).joined(separator: field.separator)
             default:
-                return String(describing: value).applyFormattingOfField(field)
+                return String(describing: value)
             }
         }
         

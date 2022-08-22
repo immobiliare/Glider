@@ -66,12 +66,12 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
         expStdListener = nil
         
         XCTAssertNotNil(stdOutData.isEmpty)
-        XCTAssertTrue(stdOutData.contains("INFO Message"))
-        XCTAssertTrue(stdOutData.contains("ERRR Message") == false)
+        XCTAssertTrue(stdOutData.contains("[INFO] Message"))
+        XCTAssertTrue(stdOutData.contains("[ERROR] Message") == false)
 
         XCTAssertNotNil(stdErrData.isEmpty)
-        XCTAssertTrue(stdErrData.contains("ERRR Message"))
-        XCTAssertTrue(stdErrData.contains("INFO Message") == false)
+        XCTAssertTrue(stdErrData.contains("[ERROR] Message"))
+        XCTAssertTrue(stdErrData.contains("[INFO] Message") == false)
     }
     
     // MARK: - OutputListenerDelegate

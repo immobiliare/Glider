@@ -46,12 +46,6 @@ extension String {
 
 
 final class TableFormattersTest: XCTestCase {
-    
-    func test_d() {
-        print("They're all dead. Everybody's dead, Dave.".failureColor() + " come vA".anothe23())
-        print("Hello World!".successColor())
-        print("Houston we have a problem.".warningColor())
-    }
 
     /// The following test check if the `TableFormatter` return valid values
     /// when printed to the console.
@@ -87,7 +81,7 @@ final class TableFormattersTest: XCTestCase {
             │ ID          │ VALUE                                │
             ├─────────────┼──────────────────────────────────────┤
             │ Subsystem   │ MyApp.Network                        │
-            │ Level       │ info
+            │ Level       │ INFO
             """))
             
             XCTAssertTrue(msg.contains("""

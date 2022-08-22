@@ -109,9 +109,9 @@ extension StdStreamsTransport {
         /// initialize a new `StdStreamsTransport`.
         ///
         /// - Parameters:
-        ///   - formatters: formatters to set, by default the `TerminalFormatter` is used.
+        ///   - formatters: formatters to set, by default the `TerminalFormatter` is used (with no colorization).
         ///   - builder: builder configuration callabck.
-        public init(formatters: [EventMessageFormatter] = [TerminalFormatter()],
+        public init(formatters: [EventMessageFormatter] = [TerminalFormatter(colorize: .none)],
                     _ builder: ((inout Configuration) -> Void)?) {
             self.formatters = formatters
             self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
