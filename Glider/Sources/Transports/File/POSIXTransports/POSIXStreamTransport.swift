@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import Darwin.C.stdio
 
 /// This transport can output text messages to POSIX stream.
 open class POSIXStreamTransport: Transport {

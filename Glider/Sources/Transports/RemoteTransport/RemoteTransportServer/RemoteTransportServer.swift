@@ -11,8 +11,9 @@
 //
 
 import Foundation
-import Network
 
+#if canImport(Network)
+import Network
 #if os(iOS) || os(tvOS)
 import UIKit
 #elseif os(watchOS)
@@ -278,3 +279,5 @@ extension RemoteTransportServer {
     }
     
 }
+
+#endif

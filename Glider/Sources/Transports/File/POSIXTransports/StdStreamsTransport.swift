@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import Darwin.C.stdio
 
 /// The `StdStreamsTransport` is a transport that writes log events
 /// to either the standard output stream ("`stdout`") or the standard error stream

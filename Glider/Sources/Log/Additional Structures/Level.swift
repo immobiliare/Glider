@@ -11,7 +11,9 @@
 //
 
 import Foundation
+#if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
 import os.log
+#endif
 
 /// Represent the different log severity levels defined by the Glider SDK.
 /// Lower level means an higher severity (`emergency` is equal to `0`, `trace` equals to `8`)
@@ -111,6 +113,7 @@ extension Level {
         return self.rawValue < minLevel.rawValue
     }
     
+    #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
     /// Return the os_log compatible representation of the severity level.
     ///
     /// NOTE:
@@ -133,5 +136,6 @@ extension Level {
         case .trace:        return .debug
         }
     }
+    #endif
     
 }

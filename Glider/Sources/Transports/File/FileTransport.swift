@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import Darwin.C.stdio
 
 /// A `FileTransport` implementation that appends log entries to a file.
 ///

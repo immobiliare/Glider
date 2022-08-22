@@ -10,11 +10,9 @@
 //  Licensed under MIT License.
 //
 
-#if canImport(Network)
+#if os(iOS) || os(watchOS) || os(tvOS)
 import Foundation
 import Network
-
-#if os(iOS) || os(tvOS) || os(watchOS)
 import CoreGraphics
 import UIKit
 
@@ -189,6 +187,4 @@ extension UIImage {
 
 
 }
-
-#endif
 #endif

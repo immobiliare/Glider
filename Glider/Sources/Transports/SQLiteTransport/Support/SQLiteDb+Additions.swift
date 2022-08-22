@@ -11,7 +11,13 @@
 //
 
 import Foundation
+
+#if os(Linux)
+import CSQLite
+#else
 import SQLite3
+#endif
+
 
 extension SQLiteDb {
     

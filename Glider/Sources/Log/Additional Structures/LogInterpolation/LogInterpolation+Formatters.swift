@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import CoreGraphics
 
 // MARK: - Formats
 

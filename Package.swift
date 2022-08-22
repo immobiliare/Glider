@@ -16,9 +16,13 @@ var dependencies: [Package.Dependency] = [
 ]
 
 var targets: [Target] = [
-    // TARGETS
+    .systemLibrary(
+        name: "CSQLite",
+        providers: [.apt(["libsqlite3-dev"])]
+    ),
     .target(
         name: "Glider",
+        dependencies: ["CSQLite"],
         path: "Glider/Sources"
     ),
     .target(
@@ -88,9 +92,7 @@ targets.append(contentsOf: [
         name: "GliderSentry",
         dependencies: [
             "Glider",
-            .product(name: "Sentry",
-                     package: "sentry-cocoa",
-                     condition: .when(platforms: [.iOS, .macOS, .watchOS, .tvOS]))
+            .product(name: "Sentry", package: "sentry-cocoa")
         ],
         path:"GliderSentry/Sources"
     ),
@@ -105,7 +107,6 @@ targets.append(contentsOf: [
 ])
 dependencies.append(.package(url: "https://github.com/getsentry/sentry-cocoa.git", .upToNextMajor(from: "7.0.0")))
 #endif
-
 
 let package = Package(
     name: "Glider",
