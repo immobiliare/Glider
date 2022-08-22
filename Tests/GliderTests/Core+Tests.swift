@@ -265,6 +265,7 @@ final class CoreTests: XCTestCase {
     /// The following test check if the message, both as a literal string or computed string
     /// is dispatched correctly to the underlying transporters.
     func test_writeLiteralsAndComputedMessages() throws {
+        GliderSDK.shared.disablePrivacyRedaction = true
         let log = Log {
             $0.level = .trace
         }
@@ -279,6 +280,7 @@ final class CoreTests: XCTestCase {
         
         XCTAssertEqual(event1?.message.description, "Hello", "Literal message is not filled correctly")
         XCTAssertEqual(event2?.message.description, "Hello, it's 1970-01-01T00:00:00Z", "Computed message literal is not correct")
+        GliderSDK.shared.disablePrivacyRedaction = false
     }
     
     /// The following test check if event filters are working correctly to ignore
@@ -645,6 +647,6 @@ public class TestTransport: Transport {
         return true
     }
     
-    public var queue: DispatchQueue? = DispatchQueue(label: "com.test.transport", qos: .background)
+    public var queue: DispatchQueue = DispatchQueue(label: String(describing: type(of: TestTransport.self)), attributes: [])
     
 }

@@ -41,8 +41,8 @@ extension GliderSentryTransport {
         /// `nil` means every passing message level is accepted.
         public var minimumAcceptedLevel: Level? = nil
         
-        /// GCD queue. If not set a default one is created for you.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Generally, the tag accepts any value, but it's intended to refer to your code deployments'
         /// naming convention, such as development, testing, staging, or production.
@@ -58,6 +58,7 @@ extension GliderSentryTransport {
         ///
         /// - Parameter builder: builder configuration callback.
         public init(_ builder: ((inout Configuration) -> Void)?) {
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

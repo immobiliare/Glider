@@ -21,7 +21,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     // MARK: - Public Properties
     
     /// GCD queue.
-    public var queue: DispatchQueue?
+    public var queue: DispatchQueue
     
     /// Configuration used.
     public let configuration: Configuration
@@ -121,7 +121,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     public func asyncTransport(_ transport: AsyncTransport, canSendPayloadsChunk
                                chunk: AsyncTransport.Chunk,
                                onCompleteSendTask completion: @escaping ((ChunkCompletionResult)  -> Void)) {
-        guard let session = session, let queue = queue else {
+        guard let session = session else {
             return
         }
 
@@ -143,12 +143,12 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
             dispatchGroup.enter()
 
             task.write(messageData, timeout: configuration.timeout) { [weak self] error in
-                guard let _ = self else {
+                guard let self = self else {
                     dispatchGroup.leave()
                     return
                 }
                 
-                queue.async(group: dispatchGroup) {
+                self.queue.async(group: dispatchGroup) {
                     if let error = error {
                         unsentEvents[item.event.id] = error
                     } else if hasDelegate {
@@ -199,8 +199,8 @@ extension LogstashTransport {
         /// Connection port.
         public var port: Int
         
-        /// Dispatch queue where the record happens.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// Connection timeout.
         /// By default is set to 5 seconds.
@@ -259,9 +259,18 @@ extension LogstashTransport {
         /// By default a default `AsyncTransport` class with default settings is used.
         internal var asyncTransportConfiguration: AsyncTransport.Configuration
 
+        // MARK: - Initialization
+        
+        /// Initialize a new configuration for logstash.
+        ///
+        /// - Parameters:
+        ///   - host: host.
+        ///   - port: port.
+        ///   - builder: optional builder configuration function.
         public init(host: String, port: Int, _ builder: ((inout Configuration) -> Void)?) {
             self.host = host
             self.port = port
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             self.asyncTransportConfiguration = .init()
             builder?(&self)
         }

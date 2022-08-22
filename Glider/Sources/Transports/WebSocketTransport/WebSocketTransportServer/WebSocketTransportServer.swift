@@ -20,8 +20,8 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     
     // MARK: - Public Properties
     
-    /// GCD queue
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Configuration.
     public let configuration: Configuration
@@ -250,8 +250,8 @@ extension WebSocketTransportServer {
         /// Parameters for NW.
         public var parameters: NWParameters?
         
-        /// GCD queue. If not set a default one is created for you.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -265,6 +265,7 @@ extension WebSocketTransportServer {
         ///   - builder: builder for extra configuration.
         public init(port: UInt16, _ builder: ((inout Configuration) -> Void)? = nil) {
             self.port = port
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
     }

@@ -20,8 +20,8 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     // MARK: - Public Properties
     
-    /// Dispatch queue.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// SQLiteTransport configuration.
     public let configuration: Configuration
@@ -106,7 +106,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// - Returns: Removed Logs
     @discardableResult
     public func purge(vacuum: Bool = true) throws -> Int64 {
-       try queue!.sync {
+       try queue.sync {
            guard let logsLifeTimeInterval = configuration.lifetimeInterval,
                  let flushMinimumInterval = configuration.purgeMinInterval,
                   Date().timeIntervalSince(lastPurge) >= flushMinimumInterval else {
@@ -376,8 +376,8 @@ extension SQLiteTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// Dispatch queue.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// The maximum age of a log before it it will be removed automatically
         /// to preserve the space. Set as you needs.
@@ -427,6 +427,7 @@ extension SQLiteTransport {
             self.databaseLocation = databaseLocation
             self.throttledTransport = ThrottledTransport.init({ _ in })
             self.purgeMinInterval = (lifetimeInterval != nil ? lifetimeInterval! * 3.0 : nil)
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

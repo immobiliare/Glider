@@ -21,8 +21,8 @@ open class POSIXStreamTransport: Transport {
     /// Configuration used to create the transport.
     public let configuration: Configuration
     
-    /// Dispatch queue.
-    open var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    open var queue: DispatchQueue
     
     /// Transport is enabled.
     open var isEnabled: Bool = true
@@ -104,8 +104,8 @@ extension POSIXStreamTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// Dispatch queue.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// POSIX stream.
         public var stream: UnsafeMutablePointer<FILE> = Darwin.stdout
@@ -124,6 +124,7 @@ extension POSIXStreamTransport {
         /// Initialize a new `POSIXStreamTransport`.
         /// - Parameter builder: builder settings.
         public init(_ builder: ((inout Configuration) -> Void)?) {
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

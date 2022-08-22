@@ -27,8 +27,8 @@ open class StdStreamsTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// Dispatch queue.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Configuration settings.
     public let configuration: Configuration
@@ -94,8 +94,8 @@ extension StdStreamsTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// Dispatch queue.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Formatter used to transform a payload into a string.
         public var formatters: [EventMessageFormatter]
@@ -114,6 +114,7 @@ extension StdStreamsTransport {
         public init(formatters: [EventMessageFormatter] = [TerminalFormatter()],
                     _ builder: ((inout Configuration) -> Void)?) {
             self.formatters = formatters
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

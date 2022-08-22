@@ -23,8 +23,8 @@ public class NetSparseFilesTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// Dispatch queue. You should never change it once set.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Configuration used for this transport.
     public let configuration: Configuration

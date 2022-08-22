@@ -24,9 +24,8 @@ extension RemoteTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// The GCD dispatch queue to use.
-        /// If not specified a queue is created for you.
-        public var queue: DispatchQueue?
+        // The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// Name of the service.
         /// By default is set to `_glider._tcp` but you can configure it.
@@ -54,7 +53,7 @@ extension RemoteTransport {
         /// - Parameter builder: builder callback.
         public init(serviceType: String = "_glider._tcp", _ builder: ((inout Configuration) -> Void)?) {
             self.serviceType = serviceType
-            self.queue = DispatchQueue(label: "com.glider.remote-logger")
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

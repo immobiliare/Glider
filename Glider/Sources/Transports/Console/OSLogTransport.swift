@@ -36,8 +36,8 @@ open class OSLogTransport: Transport {
     // The `OSLog` used to perform logging.
     public let log: OSLog
     
-    // The GCD queue used by the receiver to record messages.
-    open var queue: DispatchQueue?
+    // The `DispatchQueue` to use for the recorder.
+    open var queue: DispatchQueue
     
     // MARK: - Initialization
     
@@ -113,8 +113,8 @@ extension OSLogTransport {
         /// Formatters.
         public var formatters = [EventMessageFormatter]()
         
-        // The GCD queue used by the receiver to record messages.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        // The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -123,6 +123,7 @@ extension OSLogTransport {
         // MARK: - Initialization
         
         public init(_ builder: ((inout Configuration) -> Void)?) {
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

@@ -35,8 +35,8 @@ public class BufferedTransport<BufferItem>: Transport {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
-    /// Dispatch queue where the record happens.
-    public let queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public let queue: DispatchQueue
     
     /// The buffer, an array of `BufferItem` created to represent the
     /// `Event` values recorded by the receiver.
@@ -88,7 +88,7 @@ public class BufferedTransport<BufferItem>: Transport {
     /// This operation is performed synchronously on the receiver's `queue`
     /// to ensure thread safety.
     public func clear() {
-        queue!.sync { // prevents race conditions
+        queue.sync { // prevents race conditions
             self.buffer = []
         }
     }
@@ -121,8 +121,8 @@ extension BufferedTransport {
         /// Formatters used to convert messages to strings.
         public var formatters = [EventMessageFormatter]()
         
-        /// Dispatch queue where the record happens.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue:DispatchQueue
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -135,6 +135,7 @@ extension BufferedTransport {
         /// - Parameter builder: builder configuration
         public init(bufferedItemBuilder: @escaping BufferItemBuilder, _ builder: ((inout Configuration) -> Void)) {
             self.bufferedItemBuilder = bufferedItemBuilder
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder(&self)
         }
         

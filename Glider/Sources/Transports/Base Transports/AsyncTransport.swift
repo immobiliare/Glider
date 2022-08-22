@@ -28,8 +28,8 @@ public class AsyncTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// GCD queue for operations.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Configuration used.
     public let configuration: Configuration
@@ -109,7 +109,7 @@ public class AsyncTransport: Transport {
     
     /// Perform manual flush on buffer data.
     public func flush() {
-        queue!.async {
+        queue.async {
             self.flushCache()
         }
     }
@@ -175,7 +175,7 @@ public class AsyncTransport: Transport {
     
     @objc
     private func tick() {
-        queue!.async {
+        queue.async {
             self.flushCache()
         }
     }
@@ -386,14 +386,15 @@ extension AsyncTransport {
         /// Options for buffer stroage.
         public var bufferStorageOptions: SQLiteDb.Options = .init()
         
-        /// GCD queue for operations.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
         public var minimumAcceptedLevel: Level? = nil
         
         public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

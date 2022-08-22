@@ -22,8 +22,8 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     // MARK: - Public Properties
     
-    /// GCD queue.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -203,8 +203,8 @@ extension HTTPTransport {
             get { asyncTransportConfiguration.autoFlushInterval }
         }
         
-        /// GCD Queue.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -222,6 +222,7 @@ extension HTTPTransport {
         public init(_ builder: ((inout Configuration) -> Void)?) throws {
             self.asyncTransportConfiguration = .init()
             self.urlSession = URLSession(configuration: .default)
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

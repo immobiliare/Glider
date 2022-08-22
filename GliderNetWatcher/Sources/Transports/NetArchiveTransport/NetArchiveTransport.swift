@@ -19,8 +19,8 @@ public class NetArchiveTransport: Transport, ThrottledTransportDelegate {
     
     // MARK: - Public Properties
     
-    /// Dispatch queue. You should never change it once set.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Configuration used for this transport.
     public let configuration: Configuration
@@ -88,7 +88,7 @@ public class NetArchiveTransport: Transport, ThrottledTransportDelegate {
     /// - Returns: Removed Logs
     @discardableResult
     public func purge(vacuum: Bool = true) throws -> Int64 {
-        try queue!.sync {
+        try queue.sync {
             guard let logsLifeTimeInterval = configuration.lifetimeInterval,
                   let flushMinimumInterval = configuration.purgeMinInterval,
                   Date().timeIntervalSince(lastPurge) >= flushMinimumInterval else {

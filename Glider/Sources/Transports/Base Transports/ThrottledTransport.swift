@@ -26,8 +26,8 @@ public class ThrottledTransport: Transport {
 
     // MARK: - Public Properties
     
-    /// Queue used to access to the buffer.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
 
     /// Configuration
     public let configuration: Configuration
@@ -44,9 +44,9 @@ public class ThrottledTransport: Transport {
     
     /// Pending payloads contained into the buffer.
     public var pendingPayloads: [Payload] {
-        queue?.sync {
+        queue.sync {
             buffer
-        } ?? []
+        }
     }
     
     // MARK: - Private Properties
@@ -76,7 +76,7 @@ public class ThrottledTransport: Transport {
         self.minimumAcceptedLevel = config.minimumAcceptedLevel
         
         self.queue = configuration.queue
-        queue!.sync { [weak self] in
+        queue.sync { [weak self] in
             self?.setupAutoFlushIntervalIfNeeded()
         }
     }
@@ -91,7 +91,7 @@ public class ThrottledTransport: Transport {
     /// Perform manual flush.
     public func flush() {
         self.lastFlushDate = Date()
-        queue!.async {
+        queue.async {
             self.flush(reason: .byUser)
         }
     }
@@ -105,7 +105,7 @@ public class ThrottledTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {        
-        queue!.async { [weak self] in
+        queue.async { [weak self] in
             guard let self = self else { return }
             
             let message = self.configuration.formatters.format(event: event)
@@ -124,7 +124,7 @@ public class ThrottledTransport: Transport {
         guard let flushInterval = configuration.autoFlushInterval else { return }
         
         if #available(iOS 10.0, *) {
-            dispatchPrecondition(condition: .onQueue(queue!))
+            dispatchPrecondition(condition: .onQueue(queue))
         }
 
         self.lastFlushDate = Date()
@@ -146,7 +146,7 @@ public class ThrottledTransport: Transport {
     @objc
     private func tick() {
         self.lastFlushDate = Date()        
-        queue!.async {
+        queue.async {
             self.flush(reason: .byInterval)
         }
     }
@@ -154,7 +154,7 @@ public class ThrottledTransport: Transport {
     /// The flush call is called when buffer reached the cap size or timer is triggered.
     private func flush(reason: FlushReason) {
         if #available(iOS 10.0, *) {
-            dispatchPrecondition(condition: .onQueue(queue!))
+            dispatchPrecondition(condition: .onQueue(queue))
         }
         
         if buffer.isEmpty {
@@ -198,8 +198,8 @@ extension ThrottledTransport {
         /// It will receive chunk of payloads to register.
         public weak var delegate: ThrottledTransportDelegate?
         
-        /// Queue used to access to the buffer.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Formatters used to format events into messages.
         public var formatters = [EventMessageFormatter]()
@@ -214,6 +214,7 @@ extension ThrottledTransport {
         ///
         /// - Parameter builder: builder function.
         public init(_ builder: ((inout Configuration) -> Void)? = nil) {
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

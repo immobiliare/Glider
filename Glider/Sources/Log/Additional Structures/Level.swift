@@ -85,12 +85,30 @@ public enum Level: Int, Comparable, CaseIterable,
 extension Level {
     
     /// Return `true` when receiver level is more severe than passed level argument.
+    /// If receiver is `nil` the function return false.
     ///
-    /// - Parameter than: comparision level.
+    /// - Parameter comparisonLevel: comparision level.
     /// - Returns: `Bool`
     @inlinable
-    public func isMoreSevere(than: Level) -> Bool {
-        self.rawValue < than.rawValue
+    public func isMoreSevere(than comparisonLevel: Level?) -> Bool {
+        guard let comparisonLevel = comparisonLevel else {
+            return false
+        }
+
+        return self.rawValue < comparisonLevel.rawValue
+    }
+    
+    /// Return `true` if receiver level should be accepted with passed `minLevel`.
+    /// If `minLevel` is `nil` it return `true`.
+    ///
+    /// - Parameter minLevel: minimum level accepted.
+    /// - Returns: `Bool`
+    internal func isAcceptedWithMinimumLevelSet(minLevel: Level?) -> Bool {
+        guard let minLevel = minLevel else {
+            return true
+        }
+
+        return self.rawValue < minLevel.rawValue
     }
     
     /// Return the os_log compatible representation of the severity level.

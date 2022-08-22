@@ -54,13 +54,15 @@ public class JSONFormatter: FieldsFormatter {
     /// - Returns: `JSONFormatter`
     public override class func standard(useSubsystemIcon: Bool = false, severityIcon: Bool = true) -> JSONFormatter {
         JSONFormatter(jsonOptions: [],
-                      encodeDataAsBase64: false,
+                      encodeDataAsBase64: true,
                       fields: [
             .timestamp(style: .iso8601),
             .level(style: .numeric),
             .message(),
             .extra(keys: nil),
-            .tags(keys: nil)
+            .tags(keys: nil),
+            .object(),
+            .objectMetadata()
         ])
     }
     

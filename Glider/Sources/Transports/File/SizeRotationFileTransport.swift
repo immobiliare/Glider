@@ -25,16 +25,8 @@ public class SizeRotationFileTransport: Transport {
     /// Delegate to listen relevant events of the transport layer.
     public weak var delegate: SizeRotationFileTransportDelegate?
     
-    /// the GCD queue that will be used when executing tasks related to
-    /// the receiver.
-    /// Log formatting and recording will be performed using this queue.
-    ///
-    /// A serial queue is typically used, such as when the underlying
-    /// log facility is inherently single-threaded and/or proper message ordering
-    /// wouldn't be ensured otherwise. However, a concurrent queue may also be
-    /// used, and might be appropriate when logging to databases or network
-    /// endpoints.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -200,16 +192,8 @@ extension SizeRotationFileTransport {
         /// Delegate to listen relevant events of the transport layer.
         public weak var delegate: SizeRotationFileTransportDelegate?
         
-        /// the GCD queue that will be used when executing tasks related to
-        /// the receiver.
-        /// Log formatting and recording will be performed using this queue.
-        ///
-        /// A serial queue is typically used, such as when the underlying
-        /// log facility is inherently single-threaded and/or proper message ordering
-        /// wouldn't be ensured otherwise. However, a concurrent queue may also be
-        /// used, and might be appropriate when logging to databases or network
-        /// endpoints.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// URL of the directory with files.
         public var directoryURL: URL
@@ -251,6 +235,7 @@ extension SizeRotationFileTransport {
         ///   - builder: builder configuration to setup additional settings.
         public init(directoryURL: URL, _ builder: ((inout Configuration) -> Void)?) {
             self.directoryURL = directoryURL
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

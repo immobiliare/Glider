@@ -44,6 +44,9 @@ extension GliderELKTransport {
         /// Specifies how large the log storage `ByteBuffer` must be at least
         public var logStorageSize: Int = 524_288
         
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
+        
         /// Specifies how large the log storage `ByteBuffer` with all the current uploading buffers can be at the most.
         ///
         /// NOTE:
@@ -108,6 +111,7 @@ extension GliderELKTransport {
             let threadsCount = (System.coreCount != 1) ? System.coreCount / 2 : 1
             self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: threadsCount)
             self.uploadInterval = TimeAmount.seconds(3)
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             
             self.backgroundActivityLogger = Logger(label: "backgroundActivity-logstashHandler")
             

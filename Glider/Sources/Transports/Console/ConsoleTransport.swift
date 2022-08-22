@@ -17,8 +17,8 @@ open class ConsoleTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// GCD queue.
-    open var queue: DispatchQueue? = nil
+    /// The `DispatchQueue` to use for the recorder.
+    open var queue: DispatchQueue
     
     /// Transport is enabled.
     open var isEnabled: Bool = true
@@ -75,8 +75,8 @@ extension ConsoleTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// GCD queue. If not set a default one is created for you.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Formatters used to transform a payload into a string.
         public var formatters = [EventMessageFormatter]()
@@ -95,6 +95,7 @@ extension ConsoleTransport {
         public init(formatters: [EventMessageFormatter] = [XCodeFormatter.init()],
                     _ builder: ((inout Configuration) -> Void)?) {
             self.formatters = formatters
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

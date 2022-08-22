@@ -20,8 +20,8 @@ open class GliderSentryTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// GCD queue.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Is logging enabled.
     public var isEnabled: Bool = true

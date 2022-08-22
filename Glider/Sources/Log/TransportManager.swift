@@ -14,7 +14,7 @@ import Foundation
 
 /// This class provide the low-level interface for accepting log messages.
 /// You will never interact with this class.
-public class TransportManager {
+public final class TransportManager {
     
     // MARK: - Private Properties
     
@@ -36,7 +36,7 @@ public class TransportManager {
     internal private(set) var serializedStrategies: SerializationStrategies
         
     /// This is the dispatch queue which make in order the payload received from different channels.
-    private let acceptQueue: DispatchQueue
+    private let acceptQueue = DispatchQueue(label: "glider.transport-manager.acceptqueue", attributes: [])
     
     /// Used to decide whether a given event should be passed along to the receiver
     /// recorders.
@@ -57,61 +57,63 @@ public class TransportManager {
     internal init(configuration: Log.Configuration) {
         self.serializedStrategies = configuration.serializationStrategies
         self.isSynchronous = configuration.isSynchronous
-        self.acceptQueue = configuration.acceptQueue
         self.filters = configuration.filters
         self.transports = configuration.transports
     }
     
     // MARK: - Internal Functions
     
-    /// Record a new event to underlying transports.
-    ///
-    /// - Parameter event: event to log.
     internal func write(_ event: inout Event) {
         // serialize the assigned object, if any.
         event.serializeObjectIfNeeded(withTransportManager: self)
-        
-        let mainExecutor = executorForQueue(acceptQueue, synchronous: isSynchronous)
-        mainExecutor { [event, filters, transports] in
-            guard filters.canAcceptEvent(event) else {
+        // dispatch to transports
+        writeToTransports(event)
+    }
+    
+    /// Record a new event to underlying transports.
+    ///
+    /// - Parameter event: event to log.
+    internal func writeToTransports(_ event: Event) {
+        let acceptDispatcher = dispatcherForQueue(acceptQueue, synchronous: isSynchronous)
+        acceptDispatcher { [weak self] in
+            guard let self = self else {
+                return
+            }
+            
+            guard self.filters.canAcceptEvent(event) else {
                 return // event ignored by the filters
             }
             
-            for recorder in transports {
-                if let queue = recorder.queue {
-                    if let minimumAcceptedLevel = recorder.minimumAcceptedLevel,
-                       event.level.rawValue > minimumAcceptedLevel.rawValue, recorder.isEnabled {
-                        continue // event ignored by the transport itself.
+            for transport in self.transports {
+                let recordDispatcher = self.dispatcherForQueue(transport.queue, synchronous: self.isSynchronous)
+                recordDispatcher {
+                    if transport.isEnabled && event.level.isAcceptedWithMinimumLevelSet(minLevel: transport.minimumAcceptedLevel) {
+                        transport.record(event: event)
                     }
-                    
-                    let recorderExecutor = self.executorForQueue(queue, synchronous: self.isSynchronous)
-                    recorderExecutor {
-                        recorder.record(event: event)
-                    }
-                } else {
-                    recorder.record(event: event)
                 }
             }
+            
         }
     }
     
     // MARK: - Private Functions
     
-    /// Create dispatch queue.
+    /// Call the dispatch queue `async` or `sync` method based upon configuration settings.
+    /// It's used to perform synchronous or asynchronous logging.
     ///
     /// - Parameters:
-    ///   - queue: queue
-    ///   - synchronous: `true` for synchronous.
-    /// - Returns: Escaping function.
-    private func executorForQueue(_ queue: DispatchQueue, synchronous: Bool) -> (@escaping () -> Void) -> Void {
-        let executor: (@escaping () -> Void) -> Void = { block in
+    ///   - queue: target queue to call.
+    ///   - synchronous: `true` to perform synchronous call, `false` to make asynchronous call (typically on production).
+    /// - Returns:`(@escaping () -> Void) -> Void`
+    private func dispatcherForQueue(_ queue: DispatchQueue, synchronous: Bool) -> (@escaping () -> Void) -> Void {
+        let dispatcher: (@escaping () -> Void) -> Void = { block in
             if synchronous {
                 return queue.sync(execute: block)
             } else {
                 return queue.async(execute: block)
             }
         }
-        return executor
+        return dispatcher
     }
     
 }

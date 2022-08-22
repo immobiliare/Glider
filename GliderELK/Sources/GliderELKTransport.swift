@@ -35,8 +35,8 @@ public class GliderELKTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// GCD queue.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Is logging enabled.
     public var isEnabled: Bool = true
@@ -87,6 +87,7 @@ public class GliderELKTransport: Transport {
     public init(configuration: Configuration, delegate: GliderELKTransportDelegate? = nil) throws {
         self.configuration = configuration
         self.isEnabled = configuration.isEnabled
+        self.queue = configuration.queue
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
         self.delegate = delegate
         self.httpClient = HTTPClient(

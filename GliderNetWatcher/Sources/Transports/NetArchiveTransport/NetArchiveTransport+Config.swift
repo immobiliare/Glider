@@ -23,9 +23,8 @@ extension NetArchiveTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// The GCD dispatch queue to use.
-        /// If not specified a queue is created for you.
-        public var queue: DispatchQueue?
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// Local database file URL.
         public var databaseLocation: SQLiteDb.Location
@@ -59,7 +58,7 @@ extension NetArchiveTransport {
         /// - Parameter builder: builder callback.
         public init(location: SQLiteDb.Location, _ builder: ((inout Configuration) -> Void)? = nil) {
             self.databaseLocation = location
-            self.queue = DispatchQueue(label: "com.glider.netwatcher.databasetransport")
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             self.throttledTransport.autoFlushInterval = 3
             self.purgeMinInterval = (lifetimeInterval != nil ? lifetimeInterval! * 3.0 : nil)
             builder?(&self)

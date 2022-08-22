@@ -22,9 +22,8 @@ public extension NetSparseFilesTransport {
         /// Is the transport enabled. By default is set to `true`.
         public var isEnabled = true
         
-        /// The GCD dispatch queue to use.
-        /// If not specified a queue is created for you.
-        public var queue: DispatchQueue?
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// URL of the folder where to store each call.
         public var directoryURL: URL
@@ -40,7 +39,7 @@ public extension NetSparseFilesTransport {
         /// - Parameter builder: builder callback.
         public init(directoryURL: URL, _ builder: ((inout Configuration) -> Void)? = nil) {
             self.directoryURL = directoryURL
-            self.queue = DispatchQueue(label: "com.glider.netwatcher.sparsefiles")
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

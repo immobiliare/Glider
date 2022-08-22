@@ -164,12 +164,8 @@ public class NetWatcher {
         let mainExecutor = executorForQueue(config.queue, synchronous: isSync)
         mainExecutor { [event, transports] in
             for recorder in transports{
-                if let queue = recorder.queue {
-                    let recorderExecutor = self.executorForQueue(queue, synchronous: isSync)
-                    recorderExecutor {
-                        recorder.record(event: event)
-                    }
-                } else {
+                let recorderExecutor = self.executorForQueue(recorder.queue, synchronous: isSync)
+                recorderExecutor {
                     recorder.record(event: event)
                 }
             }

@@ -24,17 +24,15 @@ public protocol Transport {
     
     // MARK: - Public Properties
     
-    /// Queue used to receive the event.
+    /// Returns the GCD queue that will be used when executing tasks related to the receiver.
+    /// Log formatting and recording will be performed using this queue.
     ///
-    /// A serial queue is typically used, such as when the underlying
-    /// log facility is inherently single-threaded and/or proper message ordering
-    /// wouldn't be ensured otherwise. However, a concurrent queue may also be
-    /// used, and might be appropriate when logging to databases or network endpoints.
+    /// A serial queue is typically used, such as when the underlying log facility is inherently
+    /// single-threaded and/or proper message ordering wouldn't be ensured otherwise.
     ///
-    /// You can avoid to use a dispatch queue especially if you are not working with a remote
-    /// transporter; in this case use `nil` to receive message from the same queue of the
-    /// `TransportManager` instance.
-    var queue: DispatchQueue? { get }
+    /// However, a concurrent queue may also be used, and might be appropriate when logging
+    /// to databases or network endpoints.
+    var queue: DispatchQueue { get }
     
     /// Allows to disable or enable the transport enabled.
     /// When disabled transport ignore all incoming events to record.

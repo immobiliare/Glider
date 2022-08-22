@@ -31,8 +31,8 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     /// Transport is enabled.
     public var isEnabled: Bool = true
     
-    /// GCD Queue.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Delegate.
     public weak var delegate: WebSocketTransportClientDelegate?
@@ -209,8 +209,8 @@ extension WebSocketTransportClient {
         /// By default is set to `.background`
         public var socketQueue = DispatchQueue.global(qos: .background)
         
-        /// GCD Queue.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
         
         /// What kind of data send.
         /// By default is send to `message` to send formatted message when available.
@@ -234,6 +234,7 @@ extension WebSocketTransportClient {
         ///   - builder: builder settings.
         public init(url: URL, _ builder: ((inout Configuration) -> Void)?) {
             self.url = url
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

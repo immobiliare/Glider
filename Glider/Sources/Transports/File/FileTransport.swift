@@ -25,16 +25,8 @@ open class FileTransport: Transport {
     
     // MARK: - Public Properties
     
-    /// the GCD queue that will be used when executing tasks related to
-    /// the receiver.
-    /// Log formatting and recording will be performed using this queue.
-    ///
-    /// A serial queue is typically used, such as when the underlying
-    /// log facility is inherently single-threaded and/or proper message ordering
-    /// wouldn't be ensured otherwise. However, a concurrent queue may also be
-    /// used, and might be appropriate when logging to databases or network
-    /// endpoints.
-    public var queue: DispatchQueue?
+    /// The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -163,16 +155,8 @@ extension FileTransport {
             FieldsFormatter.standard()
         ]
         
-        /// the GCD queue that will be used when executing tasks related to
-        /// the receiver.
-        /// Log formatting and recording will be performed using this queue.
-        ///
-        /// A serial queue is typically used, such as when the underlying
-        /// log facility is inherently single-threaded and/or proper message ordering
-        /// wouldn't be ensured otherwise. However, a concurrent queue may also be
-        /// used, and might be appropriate when logging to databases or network
-        /// endpoints.
-        public var queue = DispatchQueue(label: "Glider.\(UUID().uuidString)")
+        /// The `DispatchQueue` to use for the recorder.
+        public var queue: DispatchQueue
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
@@ -187,6 +171,7 @@ extension FileTransport {
         ///   - builder: builder callback to configure additional options.
         public init(fileURL: URL, _ builder: ((inout Configuration) -> Void)?) {
             self.fileURL = fileURL
+            self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
             builder?(&self)
         }
         

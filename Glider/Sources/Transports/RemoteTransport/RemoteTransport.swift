@@ -47,10 +47,10 @@ public class RemoteTransport: Transport {
             if isEnabled {
                 /// Enables remote logging.
                 /// The transport will start searching for available servers.
-                queue?.async(execute: startBrowser)
+                queue.async(execute: startBrowser)
             } else {
                 /// Disables remote logging and disconnects from the server.
-                queue?.async(execute: cancel)
+                queue.async(execute: cancel)
             }
         }
     }
@@ -59,8 +59,8 @@ public class RemoteTransport: Transport {
     /// no filter is made after the event is accepted by the parent log instance.
     public var minimumAcceptedLevel: Level?
     
-    /// Dispatch queue. You should never change it once set.
-    public var queue: DispatchQueue?
+    // The `DispatchQueue` to use for the recorder.
+    public var queue: DispatchQueue
     
     // MARK: - Public Properties (Manage Connection)
     
@@ -114,12 +114,12 @@ public class RemoteTransport: Transport {
         self.queue = configuration.queue
         
         if isEnabled {
-            queue?.async(execute: startBrowser)
+            queue.async(execute: startBrowser)
         }
 
         // The buffer is used to cover the time between the app launch and the
         // iniitial (automatic) connection to the server.
-        queue?.asyncAfter(deadline: .now() + .seconds(2)) { [weak self] in
+        queue.asyncAfter(deadline: .now() + .seconds(2)) { [weak self] in
             self?.buffer = nil
         }
     }
@@ -161,7 +161,7 @@ public class RemoteTransport: Transport {
     
     /// Start a new discovery for remote endpoints.
     private func startBrowser() {
-        guard let queue = queue, !isStarted else { return }
+        guard !isStarted else { return }
         
         isStarted = true
 
@@ -193,7 +193,7 @@ public class RemoteTransport: Transport {
     
     /// Schedule an automatic retry for discover after certain amount of time.
     private func scheduleBrowserRetry() {
-        guard let queue = queue, isStarted else { return }
+        guard isStarted else { return }
 
         // Automatically retry until the user cancels
         queue.asyncAfter(deadline: .now() + .seconds(configuration.autoRetryConnectInterval)) { [weak self] in
@@ -244,7 +244,7 @@ public class RemoteTransport: Transport {
         // Save selection for the future
         selectedServer = name
 
-        queue?.async { [weak self] in
+        queue.async { [weak self] in
             guard let self = self else { return }
             
             switch self.connectionState {
@@ -262,10 +262,6 @@ public class RemoteTransport: Transport {
     ///
     /// - Parameter server: server to connect.
     private func openConnection(to server: NWBrowser.Result) {
-        guard let queue = queue else {
-            return
-        }
-
         connectedServer = server
         connectionState = .connecting
 
@@ -325,7 +321,7 @@ public class RemoteTransport: Transport {
         connection.sendPacket(PacketHello())
 
         // Set timeout and retry in case there was no response from the server
-        queue?.asyncAfter(deadline: .now() + .seconds(10)) { [weak self] in
+        queue.asyncAfter(deadline: .now() + .seconds(10)) { [weak self] in
             guard let self = self else { return } // Failed to connect in 10 sec
             
             guard self.connectionState == .connecting else { return }
@@ -353,7 +349,7 @@ public class RemoteTransport: Transport {
                   let server = self.connectedServer else { return }
             self.openConnection(to: server)
         }
-        queue?.asyncAfter(deadline: .now() + .seconds(2), execute: item)
+        queue.asyncAfter(deadline: .now() + .seconds(2), execute: item)
         connectionRetryItem = item
     }
     
@@ -366,7 +362,7 @@ public class RemoteTransport: Transport {
             self.schedulePeriodicPingToCurrentConnection()
         }
         
-        queue?.asyncAfter(deadline: .now() + .seconds(2), execute: item)
+        queue.asyncAfter(deadline: .now() + .seconds(2), execute: item)
         pingItem = item
     }
     
@@ -385,7 +381,7 @@ public class RemoteTransport: Transport {
             self.scheduleConnectionRetry()
         }
         
-        queue?.asyncAfter(deadline: .now() + .seconds(4), execute: item)
+        queue.asyncAfter(deadline: .now() + .seconds(4), execute: item)
         timeoutDisconnectItem = item
     }
     

@@ -81,12 +81,6 @@ extension Log {
         /// Strategy used to encode common object formats data when passed as `Codable` object.
         public var serializationStrategies = SerializationStrategies()
         
-        /// This is the dispatch queue which allows to receive messages in order from different channels.
-        ///
-        /// Usually you don't need to specify it manually, a new `.background` serial queue
-        /// is created automatically when a new configuration is created.
-        public var acceptQueue: DispatchQueue = .init(label: "com.glider.acceptqueue", qos: .background, attributes: [])
-        
         // MARK: - Initialization
         
         /// Initialize a new configuration via callback.

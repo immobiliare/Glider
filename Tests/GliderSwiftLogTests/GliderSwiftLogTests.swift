@@ -90,6 +90,6 @@ fileprivate class TestTransport: Transport {
         return true
     }
     
-    var queue: DispatchQueue? = DispatchQueue(label: "com.test.transport", qos: .background)
+    var queue: DispatchQueue = DispatchQueue(label: String(describing: type(of: TestTransport.self)), attributes: [])
     
 }
