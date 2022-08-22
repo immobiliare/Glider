@@ -29,6 +29,9 @@
 
 ## Introduction
 
+A transport is essentially a storage device for your logs.  
+Each logger can have multiple transports configured at different levels; you can also customize how the messages are formatted.
+
 Writing log messages to various locations is an essential feature of any robust logging library.  
 This is made possible in Glider through the `Transport` protocol:
 
