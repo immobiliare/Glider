@@ -29,12 +29,15 @@
 
 ## Introduction
 
+A transport is essentially a storage device for your logs.  
+Each logger can have multiple transports configured at different levels; you can also customize how the messages are formatted.
+
 Writing log messages to various locations is an essential feature of any robust logging library.  
 This is made possible in Glider through the `Transport` protocol:
 
 ```swift
 public protocol Transport { 
-    var queue: DispatchQueue? { get }
+    var queue: DispatchQueue { get }
     var isEnabled: Bool { get set }
     var minimumAcceptedLevel: Level? { get set }
 
@@ -43,7 +46,7 @@ public protocol Transport {
 }
 ```
 
-- `queue`: represent the `DispatchQueue` used to store events. A serial queue is typically used, such as when the underlying log facility is inherently single-threaded and/or proper message ordering wouldn't be ensured otherwise. However, a concurrent queue may also be used, and might be appropriate when logging to databases or network endpoints. Typically each transport define its own queue and you should never need to modify it.
+- `queue`: return the GCD queue that will be used when executing tasks related to the receiver. Log formatting and recording will be performed using this queue. A serial queue is typically used, such as when the underlying log facility is inherently single-threaded and/or proper message ordering wouldn't be ensured otherwise. However, a concurrent queue may also be used, and might be appropriate when logging to databases or network endpoints.
 - `isEnabled`: allows to temporary disable a transport without disabling its parent `Log`.
 - `minimumAcceptedLevel`: A filter by `severity` implemented at the transport level. You can, for example, create a logger which logs in `info` but for one of the transport (for example ELK or Sentry) it avoids to send messages with a severity lower than `error` in order to clog your remote service). When `nil` the message is not filtered and all messages accepted by the parent `Log` instance are accepted automatically.
 
