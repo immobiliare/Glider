@@ -3,10 +3,10 @@
 </p>
 
 **Glider is the logger for just about everything!**
-*it's [winston.js](https://github.com/winstonjs/winston) but for mobile!*
-
-**Glider is designed to be a simple, performant, universal logging library supporting multiple transports (from local files, to remote destination or colorized terminal messages) and formatters (json, binary, syslog, etc).**  
-Everything in Glider is made to have the least impact on production without sacrificing the details of the reported data.
+It's designed to be:
+- **SIMPLE**: with a modular & extensible architecture, fully documented
+- **PERFORMANT**: you can use Glider without the worry of impacting your app performances
+- **UNIVERSAL**: it supports 14+ transports to satisfy every need; you can create your transport too!
 
 # Why Logging?
 
