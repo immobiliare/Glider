@@ -51,13 +51,14 @@ class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
         }
                 
         // Periodically send messages.
-        messageTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+        messageTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
             if let event = log.info?.write(msg: "Hello \(self.sentEvents)", extra: ["idx": self.sentEvents]) {
                 self.sendEvents.append(event)
                 self.sentEvents += 1
                 
                 if self.sentEvents == self.countEvents {
                     self.messageTimer?.invalidate()
+                    self.exp?.fulfill()
                 }
             }
         }

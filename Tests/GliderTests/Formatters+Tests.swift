@@ -358,6 +358,7 @@ final class FormattersTest: XCTestCase {
     #endif
 
     func test_defaultFieldsBasedFormatterWithCustomFields() throws {
+        GliderSDK.shared.disablePrivacyRedaction = true
         let fileURL = URL.temporaryFileURL()
 
         GliderSDK.shared.scope.extra = [:]
@@ -403,10 +404,13 @@ final class FormattersTest: XCTestCase {
             XCTAssertEqual(components[1], "tags={t1=v1}")
             XCTAssertEqual(components[2], "extra={e1=\(i)}")
         }
+        GliderSDK.shared.disablePrivacyRedaction = false
     }
     
     /// Test the default human readable format using `FileTransport` transport layer.
     func test_defaultFieldsBasedFormatter() throws {
+        GliderSDK.shared.disablePrivacyRedaction = true
+        GliderSDK.shared.scope = Scope()
         let fileURL = URL.temporaryFileURL()
 
         let fileTransport = try FileTransport(fileURL: fileURL, {
@@ -429,6 +433,7 @@ final class FormattersTest: XCTestCase {
         for i in 0..<writtenLogLines.count {
             XCTAssertTrue(writtenLogLines[i].contains("🔴 Event message \(i)"))
         }
+        GliderSDK.shared.disablePrivacyRedaction = true
     }
     
     /// The following test check if structures like extra, tags and userData are correctly encoded
