@@ -2,12 +2,11 @@
 <img src="./Documentation/assets/glider.png" alt="Glider" width="350"/>
 </p>
 
-Glider is the logger for just about everything; *it's like [winston.js](https://github.com/winstonjs/winston) but for mobile!*
+**Glider is the logger for just about everything!**
+*it's [winston.js](https://github.com/winstonjs/winston) but for mobile!*
 
-**Glider is designed to be a simple, performant, universal logging library supporting multiple transports.**  
-A transport is essentially a storage device for your logs.  
-
-Each logger can have multiple transports configured at different levels; you can also customize how the messages are formatted.
+**Glider is designed to be a simple, performant, universal logging library supporting multiple transports (from local files, to remote destination or colorized terminal messages) and formatters (json, binary, syslog, etc).**  
+Everything in Glider is made to have the least impact on production without sacrificing the details of the reported data.
 
 # Why Logging?
 
@@ -60,7 +59,7 @@ logger.info?.write { // Logs an event with a set of attached details
 
 APIs are thoroughly documented using Apple DoCC; you can access to the reference directly from XCode autocompletion or by visiting the domain:
 
-👉 [API REFERENCE](https://malcommac.github.io/Glider/).
+👉 [API REFERENCE](https://malcommac.github.io/Glider/)
 
 # Guide
 
