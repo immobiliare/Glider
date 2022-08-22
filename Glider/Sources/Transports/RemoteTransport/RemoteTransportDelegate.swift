@@ -11,6 +11,7 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
 
 /// You can implement the following method in order to receive important information
@@ -106,3 +107,4 @@ public protocol RemoteTransportDelegate: AnyObject {
 
     
 }
+#endif

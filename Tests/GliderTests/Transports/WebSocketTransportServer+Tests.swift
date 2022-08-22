@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -195,3 +196,4 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
     }
 
 }
+#endif

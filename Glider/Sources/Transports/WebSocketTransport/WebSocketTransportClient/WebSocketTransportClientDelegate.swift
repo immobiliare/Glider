@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -92,3 +93,4 @@ public protocol WebSocketTransportClientDelegate: AnyObject {
                             didSendPayload payload: WebSocketTransportClient.Payload, error: Error?)
     
 }
+#endif

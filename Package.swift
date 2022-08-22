@@ -80,7 +80,7 @@ var targets: [Target] = [
     )
 ]
 
-// GliderSentry is not available on Sentry
+// GliderSentry is not available on Linux
 #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
 products.append(.library(name: "GliderSentry", targets: ["GliderSentry"]))
 targets.append(contentsOf: [

@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
 import Foundation
 import Darwin.C.stdio
 import os.log
@@ -247,3 +248,4 @@ extension OSLogTransport {
     }
     
 }
+#endif

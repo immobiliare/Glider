@@ -11,6 +11,7 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
 
 // MARK: - NWBrowser.Result
@@ -88,3 +89,4 @@ extension NWListener.State {
     
 }
 
+#endif

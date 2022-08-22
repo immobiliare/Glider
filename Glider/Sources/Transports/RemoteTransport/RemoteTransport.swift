@@ -11,6 +11,7 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
 
 /// The `RemoteTransport` is used to send log in a custom binary format to a LAN/WAN destination.
@@ -463,3 +464,4 @@ extension RemoteTransport: RemoteTransportConnectionDelegate {
     }
     
 }
+#endif

@@ -11,6 +11,7 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
 
 extension RemoteTransport {
@@ -252,3 +253,4 @@ internal protocol RemoteTransportConnectionDelegate: AnyObject {
 
     
 }
+#endif

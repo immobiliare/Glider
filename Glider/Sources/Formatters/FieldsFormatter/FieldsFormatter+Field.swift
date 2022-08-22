@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import Network
 
 extension FieldsFormatter {
     

@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
+#endif
 
 internal enum StatusMonitor { }
 
@@ -47,12 +49,14 @@ extension StatusMonitor {
 // MARK: - Network
 
 extension StatusMonitor {
-    
+
     internal class Network {
         
         // MARK: - Public Properties
 
         static let current = Network()
+        
+        #if canImport(Network)
         
         // MARK: - Private Properties
         
@@ -83,7 +87,17 @@ extension StatusMonitor {
         private lazy var pathUpdateHandler: ((NWPath) -> Void) = { path in
             self.path = path
         }
+        #else
         
+        private init() {
+
+        }
+        
+        func isNetworkAvailable() -> Bool {
+            // TODO: An alternative implementation is needed for Linux
+            return true
+        }
+        #endif
     }
     
 }

@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -189,4 +190,5 @@ extension UIImage {
 
 }
 
+#endif
 #endif

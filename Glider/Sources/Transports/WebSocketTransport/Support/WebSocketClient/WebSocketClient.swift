@@ -11,6 +11,7 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
 
 // MARK: - WebSocketClient
@@ -454,3 +455,4 @@ internal extension NWConnection {
         }
     }
 }
+#endif

@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -76,3 +77,4 @@ public protocol WebSocketServerDelegate: AnyObject {
                          peer: WebSocketPeer, didReceiveString string: String)
 
 }
+#endif

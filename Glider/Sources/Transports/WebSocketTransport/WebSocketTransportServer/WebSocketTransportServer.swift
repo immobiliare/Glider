@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -271,3 +272,4 @@ extension WebSocketTransportServer {
     }
     
 }
+#endif

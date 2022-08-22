@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -177,3 +178,4 @@ public class WebSocketServer {
     }
     
 }
+#endif

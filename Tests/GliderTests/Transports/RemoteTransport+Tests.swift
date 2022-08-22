@@ -10,6 +10,7 @@
 //  Licensed under MIT License.
 //
 
+#if canImport(Network)
 import Foundation
 import Network
 
@@ -267,3 +268,4 @@ final class RemoteTransportReconnectServerTests: RemoteTransportTests {
     }
     
 }
+#endif

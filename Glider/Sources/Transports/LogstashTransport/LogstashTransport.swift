@@ -11,7 +11,6 @@
 //
 
 import Foundation
-import Network
 
 /// A logging backend that sends logging messages to Logstash.
 /// A more complete and customizable implementation can be found in `GliderELK` package.

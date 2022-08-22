@@ -11,6 +11,7 @@
 //
 
 import Foundation
+#if canImport(Network)
 import Network
 
 /// This is the delegate protocol which allows you to read important data about
@@ -70,3 +71,4 @@ public protocol RemoteTransportServerDelegate: AnyObject {
                                didConnectedClient client: RemoteTransportServer.Client)
 
 }
+#endif
