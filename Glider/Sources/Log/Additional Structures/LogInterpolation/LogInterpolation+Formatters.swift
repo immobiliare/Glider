@@ -107,6 +107,8 @@ extension Double {
             let currencyFormatter = NumberFormatter()
             currencyFormatter.usesGroupingSeparator = true
             currencyFormatter.numberStyle = .currency
+            currencyFormatter.currencyDecimalSeparator = "."
+            currencyFormatter.currencyGroupingSeparator = ""
             if let symbol = symbol {
                 currencyFormatter.currencySymbol = symbol
             }
