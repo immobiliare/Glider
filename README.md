@@ -154,6 +154,12 @@ Glider can be installed in any platform which supports:
 - Xcode 13.2+
 - Swift 5.5+
 
+# Tests Suite
+
+Glider offers an extensive suite of unit tests for Glider Core Logger and third party packages under the `/Tests` folder.
+
+Moreover the entire package is powered by [SwiftLint](https://github.com/realm/SwiftLint) for a better code quality.
+
 
 # Installation
 
