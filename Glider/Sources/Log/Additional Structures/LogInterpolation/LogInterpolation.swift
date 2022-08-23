@@ -60,6 +60,7 @@ public struct LogInterpolation: StringInterpolationProtocol {
     
     // MARK: - Internal Functions
     
+    // swiftlint:disable cyclomatic_complexity
     internal func content() -> String {
         var message = ""
         
@@ -103,7 +104,6 @@ public struct LogInterpolation: StringInterpolationProtocol {
         
         return message
     }
-    
     
 }
 
@@ -149,7 +149,6 @@ extension LogInterpolation {
         storage.append(.date(boolean, format: format, trunc: trunc, pad: pad, privacy: privacy))
     }
 }
-
 
 // MARK: - `Any.Type`, `NSObject`
 

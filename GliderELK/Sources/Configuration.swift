@@ -80,7 +80,7 @@ extension GliderELKTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         /// The `JSONEncoder` used to encode the event.
         /// By default you should never need to change it.
@@ -121,6 +121,7 @@ extension GliderELKTransport {
             
             // If the double minimum log storage size is larger than maximum log storage size throw error
             if maximumTotalLogStorageSize.nextPowerOf2() < (2 * logStorageSize.nextPowerOf2()) {
+                // swiftlint:disable line_length
                 throw GliderError(message: "maximumLogStorageSize needs to be at least twice as much (spoken in terms of the power of two) as the passed minimumLogStorageSize.")
             }
             

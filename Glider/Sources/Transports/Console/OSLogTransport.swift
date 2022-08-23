@@ -32,7 +32,7 @@ open class OSLogTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    open var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level?
     
     // The `OSLog` used to perform logging.
     public let log: OSLog
@@ -119,7 +119,7 @@ extension OSLogTransport {
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         
@@ -197,6 +197,7 @@ extension OSLogTransport {
         case allAsDebug
         case custom((Event) -> OSLogType)
         
+        // swiftlint:disable cyclomatic_complexity
         fileprivate func osLogTypeForEvent(_ event: Event) -> OSLogType {
             switch self {
             case .allAsDebug:

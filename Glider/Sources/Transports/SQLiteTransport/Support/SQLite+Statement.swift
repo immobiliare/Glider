@@ -28,7 +28,7 @@ extension SQLiteDb {
         private var isFinalized = false
         private let sql: String
         private let stmt: OpaquePointer
-        private let db: SQLiteDb
+        private let database: SQLiteDb
         private var paramIndex = 0
 
         // MARK: - Public Properties
@@ -43,11 +43,11 @@ extension SQLiteDb {
         ///   - sql: SQL statement
         /// - Throws: Throws a DatabaseError for SQLite errors, tyipcally for syntax errors
         required public init(database: SQLiteDb, sql: String) throws {
-            self.db = database
+            self.database = database
             self.sql = sql
             
             // Create statement
-            var stmt:OpaquePointer?
+            var stmt: OpaquePointer?
             try database.check(sqlite3_prepare_v2(database.handle, sql, -1, &stmt, nil))
             self.stmt = stmt!
             
@@ -79,7 +79,6 @@ extension SQLiteDb {
             
             return parsedRows
         }
-        
         
         // MARK: - Data Reading
         
@@ -131,13 +130,17 @@ extension SQLiteDb {
         /// - Parameter column: Column index (`0` based)
         /// - Returns: The column type of the current _value_
         public func columnType(_ column: Int) -> ColumnType {
-            switch sqlite3_column_type(stmt, Int32(column)){
-            case SQLITE_INTEGER:    return .integer
-            case SQLITE_FLOAT:      return .double
-            case SQLITE_BLOB:       return .data
-            case SQLITE_NULL:       return .null
-            case SQLITE_TEXT:       fallthrough
-            default:                return .string
+            switch sqlite3_column_type(stmt, Int32(column)) {
+            case SQLITE_INTEGER:
+                return .integer
+            case SQLITE_FLOAT:
+                return .double
+            case SQLITE_BLOB:
+                return .data
+            case SQLITE_NULL:
+                return .null
+            default:
+                return .string
             }
         }
         
@@ -191,7 +194,7 @@ extension SQLiteDb {
                 return nil
             }
             
-            return sqlite3_column_int(stmt,Int32(column)) != 0
+            return sqlite3_column_int(stmt, Int32(column)) != 0
         }
         
         /// Retrieve a value as a Int64.
@@ -265,13 +268,13 @@ extension SQLiteDb {
         /// - Parameters:
         ///   - column: column: Column index (`0` based)
         /// - Returns: A decoded instance, if not null AND a successful conversion exists
-        public func object<O:Decodable>(column: Int) -> O? {
+        public func object<O: Decodable>(column: Int) -> O? {
             guard !isNull(column: column) else {
                 return nil
             }
             
-            let data:Data?
-            if db.useJSON1 {
+            let data: Data?
+            if database.useJSON1 {
                 guard let str = string(column: column) else {
                     return nil
                 }
@@ -285,7 +288,7 @@ extension SQLiteDb {
                 return nil
             }
             
-            return try? db.jsonDecoder.decode(O.self, from: cdata)
+            return try? database.jsonDecoder.decode(O.self, from: cdata)
         }
         
         /// Retrieve a UUID, please note that UUIDs are not really supported by sqlite,
@@ -395,7 +398,7 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind(param: Int = autoParam, _ value: Int32?) throws -> Self{
+        public func bind(param: Int = autoParam, _ value: Int32?) throws -> Self {
             if let value = value {
                 let param = autoParamIndex(param)
                 return try check(sqlite3_bind_int(stmt, Int32(param), value))
@@ -427,16 +430,16 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind<V:Encodable>(param: Int = autoParam, _ value: V?) throws -> Self {
+        public func bind<V: Encodable>(param: Int = autoParam, _ value: V?) throws -> Self {
             if let value = value {
-                let data = try db.jsonEncoder.encode(value)
-                if self.db.useJSON1 {
+                let data = try database.jsonEncoder.encode(value)
+                if self.database.useJSON1 {
                     guard let json = String(data: data, encoding: .utf8) else {
                         throw DatabaseError(reason: "Error converting data to a UTF-8 string", code: -1)
                     }
-                    return try bind(param: param,json)
+                    return try bind(param: param, json)
                 } else {
-                    return try bind(param:param,data)
+                    return try bind(param: param, data)
                 }
             } else {
                 return try bind(param: param)
@@ -452,7 +455,7 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind(param: Int = autoParam,_ value: Date?) throws -> Self {
+        public func bind(param: Int = autoParam, _ value: Date?) throws -> Self {
             if let epoch = value?.timeIntervalSince1970 {
                 let param = autoParamIndex(param)
                 return try check(sqlite3_bind_int64(stmt, Int32(param), Int64(epoch)))
@@ -467,7 +470,7 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind(param: Int = autoParam,_ value: Bool?) throws -> Self {
+        public func bind(param: Int = autoParam, _ value: Bool?) throws -> Self {
             if let value = value {
                 let param = autoParamIndex(param)
                 return try check(sqlite3_bind_int(stmt, Int32(param), value ? 1 : 0))
@@ -483,8 +486,8 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind(param: Int = autoParam, _ value:Int?) throws -> Self {
-            let value32:Int32?
+        public func bind(param: Int = autoParam, _ value: Int?) throws -> Self {
+            let value32: Int32?
             if let value = value {
                 value32 = Int32(value)
             } else {
@@ -513,7 +516,7 @@ extension SQLiteDb {
         /// - Parameter idx: index of the parameter destination of the binding.
         /// - Throws: throw an exception if binding fails
         public func bindNull(param idx: Int) throws {
-            try db.check(sqlite3_bind_null(stmt, Int32(idx)))
+            try database.check(sqlite3_bind_null(stmt, Int32(idx)))
         }
         
         /// Bind an Int32 double to a statement
@@ -539,9 +542,9 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind(param: Int = autoParam, _ value: Data?) throws -> Self{
+        public func bind(param: Int = autoParam, _ value: Data?) throws -> Self {
             if let value = value {
-                return try value.withUnsafeBytes { (body:UnsafeRawBufferPointer) in
+                return try value.withUnsafeBytes { (body: UnsafeRawBufferPointer) in
                     let param = autoParamIndex(param)
                     return try check(sqlite3_bind_blob(stmt, Int32(param), body.baseAddress, Int32(value.count), SQLiteDb.SQLITE_TRANSIENT))
                 }
@@ -557,7 +560,7 @@ extension SQLiteDb {
         /// - Throws: DatabaseError
         /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
         @discardableResult
-        public func bind(param: Int = autoParam, _ value: UUID?) throws -> Self{
+        public func bind(param: Int = autoParam, _ value: UUID?) throws -> Self {
             return try bind(param: param, value?.uuidString)
         }
         
@@ -603,7 +606,7 @@ extension SQLiteDb {
             case SQLITE_DONE:
                 return false
             default:
-                assert(lastResult != SQLITE_OK,"Invalid return code")
+                assert(lastResult != SQLITE_OK, "Invalid return code")
                 try check(lastResult)
             }
             fatalError("Should never get here")
@@ -618,7 +621,6 @@ extension SQLiteDb {
             paramIndex = 0
         }
         
-
         /// Clear bindings set using the `bind(...)` variants.
         public func clearBindings() throws {
             try check(sqlite3_clear_bindings(stmt))
@@ -641,12 +643,13 @@ extension SQLiteDb {
         
         // MARK: - Private Functions
         
-        @discardableResult private func check(_ rc:Int32) throws -> Self{
-            try db.check(rc)
+        @discardableResult
+        private func check(_ result: Int32) throws -> Self {
+            try database.check(result)
             return self
         }
         
-        private func autoParamIndex(_ value:Int) -> Int {
+        private func autoParamIndex(_ value: Int) -> Int {
             guard value == Statement.autoParam else {
                 return value
             }

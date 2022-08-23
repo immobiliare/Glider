@@ -19,7 +19,6 @@ import UIKit
 import AppKit
 #endif
 
-
 // MARK: - Context
 
 /// The `Context` struct encapsulate all the relevant information about
@@ -60,6 +59,7 @@ extension Context {
     }
     
     public enum DeviceKeys: String, Codable {
+        // swiftlint:disable identifier_name
         case hostname, family, model
         case screen_resolution, screen_density
         case build_type, simulator
@@ -198,7 +198,6 @@ internal class ContextsData {
     }
         
 }
-
 
 // MARK: - ContextsCaptureOptions
 

@@ -25,10 +25,10 @@ public class WebSocketPeer {
 
     // MARK: - Internal Properties
     
-    internal var didStopHandler: ((Error?) -> Void)? = nil
-    internal var didReceiveStringHandler: ((String) -> ())? = nil
-    internal var didReceiveDataHandler: ((Data) -> ())? = nil
-    internal var didChangeState: ((NWConnection.State) -> ())? = nil
+    internal var didStopHandler: ((Error?) -> Void)?
+    internal var didReceiveStringHandler: ((String) -> Void)?
+    internal var didReceiveDataHandler: ((Data) -> Void)?
+    internal var didChangeState: ((NWConnection.State) -> Void)?
 
     // MARK: - Private properties
     
@@ -143,7 +143,7 @@ public class WebSocketPeer {
     }
 
     private func listen() {
-        connection.receiveMessage() { (data, context, isComplete, error) in
+        connection.receiveMessage { (data, context, _, error) in
             if let data = data, let context = context, !data.isEmpty {
                 self.receiveMessage(data: data, context: context)
             }
@@ -166,7 +166,7 @@ public class WebSocketPeer {
         self.connection.send(content: data,
                              contentContext: context,
                              isComplete: true,
-                             completion: .contentProcessed( { error in
+                             completion: .contentProcessed({ error in
                                 if let error = error {
                                     self.connectionDidReceiveError(error)
                                     return

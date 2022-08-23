@@ -28,7 +28,7 @@ open class ConsoleTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    open var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level?
     
     // MARK: - Initialization
     
@@ -83,7 +83,7 @@ extension ConsoleTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         

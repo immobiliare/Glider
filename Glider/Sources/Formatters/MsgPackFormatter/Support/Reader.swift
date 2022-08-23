@@ -1,7 +1,3 @@
-// This method contains most of the public API and extensive documentation
-// The 400 line limit doesn't make sense here
-// swiftlint:disable file_length
-
 import Foundation
 
 public enum MessagePackReaderError: Error {
@@ -62,34 +58,35 @@ internal extension MessagePackReader {
     /// - Returns: the int64 representation of the integer
     /// - Throws: MessagePackReaderError.containerTooSmall if the number didn't fit in the container.
     ///           MessagePackReaderError.typeMismatch if the value wasn't an integer
+    // swiftlint:disable cyclomatic_complexity
     mutating func readInteger() throws -> Int64 {
         let type = try MessagePackType.from(stream.readByte())
         switch type {
-            case let .negativeFixedInt(value):
-                return Int64(value)
-            case let .positiveFixedInt(value):
-                return Int64(value)
-            case .int8:
-                return Int64(try stream.read(Int8.self))
-            case .int16:
-                return Int64(try stream.read(Int16.self))
-            case .int32:
-                return Int64(try stream.read(Int32.self))
-            case .int64:
-                return try stream.read(Int64.self)
-            case .uint8:
-                return Int64(try stream.read(UInt8.self))
-            case .uint16:
-                return Int64(try stream.read(UInt16.self))
-            case .uint32:
-                return Int64(try stream.read(UInt32.self))
-            case .uint64:
-                if let int = Int64(exactly: try stream.read(UInt64.self)) {
-                    return int
-                }
-                throw MessagePackReaderError.inappropriateContainer
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case let .negativeFixedInt(value):
+            return Int64(value)
+        case let .positiveFixedInt(value):
+            return Int64(value)
+        case .int8:
+            return Int64(try stream.read(Int8.self))
+        case .int16:
+            return Int64(try stream.read(Int16.self))
+        case .int32:
+            return Int64(try stream.read(Int32.self))
+        case .int64:
+            return try stream.read(Int64.self)
+        case .uint8:
+            return Int64(try stream.read(UInt8.self))
+        case .uint16:
+            return Int64(try stream.read(UInt16.self))
+        case .uint32:
+            return Int64(try stream.read(UInt32.self))
+        case .uint64:
+            if let int = Int64(exactly: try stream.read(UInt64.self)) {
+                return int
+            }
+            throw MessagePackReaderError.inappropriateContainer
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
     }
 
@@ -100,28 +97,28 @@ internal extension MessagePackReader {
     mutating func readUnsignedInteger() throws -> UInt64 {
         let type = try MessagePackType.from(stream.readByte())
         switch type {
-            case .negativeFixedInt:
-                throw MessagePackReaderError.inappropriateContainer
-            case let .positiveFixedInt(value):
-                return UInt64(value)
-            case .int8:
-                return try fitInUInt(try stream.read(Int8.self))
-            case .int16:
-                return try fitInUInt(try stream.read(Int16.self))
-            case .int32:
-                return try fitInUInt(try stream.read(Int32.self))
-            case .int64:
-                return try fitInUInt(try stream.read(Int64.self))
-            case .uint8:
-                return UInt64(try stream.read(UInt8.self))
-            case .uint16:
-                return UInt64(try stream.read(UInt16.self))
-            case .uint32:
-                return UInt64(try stream.read(UInt32.self))
-            case .uint64:
-                return try stream.read(UInt64.self)
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case .negativeFixedInt:
+            throw MessagePackReaderError.inappropriateContainer
+        case let .positiveFixedInt(value):
+            return UInt64(value)
+        case .int8:
+            return try fitInUInt(try stream.read(Int8.self))
+        case .int16:
+            return try fitInUInt(try stream.read(Int16.self))
+        case .int32:
+            return try fitInUInt(try stream.read(Int32.self))
+        case .int64:
+            return try fitInUInt(try stream.read(Int64.self))
+        case .uint8:
+            return UInt64(try stream.read(UInt8.self))
+        case .uint16:
+            return UInt64(try stream.read(UInt16.self))
+        case .uint32:
+            return UInt64(try stream.read(UInt32.self))
+        case .uint64:
+            return try stream.read(UInt64.self)
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
     }
 
@@ -277,12 +274,12 @@ public extension MessagePackReader {
     mutating func read(_: Float.Type) throws -> Float {
         let type = try MessagePackType.from(stream.readByte())
         switch type {
-            case .float32:
-                return Float(bitPattern: try stream.read(UInt32.self))
-            case .float64:
-                throw MessagePackReaderError.inappropriateContainer
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case .float32:
+            return Float(bitPattern: try stream.read(UInt32.self))
+        case .float64:
+            throw MessagePackReaderError.inappropriateContainer
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
     }
 
@@ -293,12 +290,12 @@ public extension MessagePackReader {
     mutating func read(_: Double.Type) throws -> Double {
         let type = try MessagePackType.from(stream.readByte())
         switch type {
-            case .float32:
-                return Double(Float(bitPattern: try stream.read(UInt32.self)))
-            case .float64:
-                return Double(bitPattern: try stream.read(UInt64.self))
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case .float32:
+            return Double(Float(bitPattern: try stream.read(UInt32.self)))
+        case .float64:
+            return Double(bitPattern: try stream.read(UInt64.self))
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
     }
 
@@ -309,16 +306,16 @@ public extension MessagePackReader {
         let type = try MessagePackType.from(stream.readByte())
         var lengthToRead: UInt
         switch type {
-            case let .fixedStr(size):
-                lengthToRead = UInt(size)
-            case .str8:
-                lengthToRead = UInt(try stream.read(UInt8.self))
-            case .str16:
-                lengthToRead = UInt(try stream.read(UInt16.self))
-            case .str32:
-                lengthToRead = UInt(try stream.read(UInt32.self))
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case let .fixedStr(size):
+            lengthToRead = UInt(size)
+        case .str8:
+            lengthToRead = UInt(try stream.read(UInt8.self))
+        case .str16:
+            lengthToRead = UInt(try stream.read(UInt16.self))
+        case .str32:
+            lengthToRead = UInt(try stream.read(UInt32.self))
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
         let bytes = try stream.readBytes(count: lengthToRead)
         guard let result = String(bytes: bytes, encoding: .utf8) else {
@@ -334,14 +331,14 @@ public extension MessagePackReader {
         let type = try MessagePackType.from(stream.readByte())
         var lengthToRead: UInt
         switch type {
-            case .bin8:
-                lengthToRead = UInt(try stream.read(UInt8.self))
-            case .bin16:
-                lengthToRead = UInt(try stream.read(UInt16.self))
-            case .bin32:
-                lengthToRead = UInt(try stream.read(UInt32.self))
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case .bin8:
+            lengthToRead = UInt(try stream.read(UInt8.self))
+        case .bin16:
+            lengthToRead = UInt(try stream.read(UInt16.self))
+        case .bin32:
+            lengthToRead = UInt(try stream.read(UInt32.self))
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
         return try stream.readBytes(count: lengthToRead)
     }
@@ -351,14 +348,14 @@ public extension MessagePackReader {
     mutating func readDictionaryHeader() throws -> UInt {
         let type = try MessagePackType.from(stream.readByte())
         switch type {
-            case let .fixedMap(size):
-                return UInt(size)
-            case .map16:
-                return UInt(try stream.read(UInt16.self))
-            case .map32:
-                return UInt(try stream.read(UInt32.self))
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case let .fixedMap(size):
+            return UInt(size)
+        case .map16:
+            return UInt(try stream.read(UInt16.self))
+        case .map32:
+            return UInt(try stream.read(UInt32.self))
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
     }
 
@@ -381,8 +378,8 @@ public extension MessagePackReader {
     /// - Parameter mapClosure: The closure that will be ran to map the flat values to
     ///                         a key/object.
     /// - Throws: MessagePackReaderError if the value could not be unpacked
-    mutating func readAndMapDictionary<T>(_ mapClosure: (inout MessagePackReader) throws -> (AnyHashable, T)) throws -> [AnyHashable: T] {
-        // swiftlint:disable:previous line_length
+    mutating func readAndMapDictionary<T>(_ mapClosure: (inout MessagePackReader)
+                                          throws -> (AnyHashable, T)) throws -> [AnyHashable: T] {
         let dictLength = try readDictionaryHeader()
         var resultDict: [AnyHashable: T] = [:]
         for _ in 0 ..< dictLength {
@@ -391,23 +388,23 @@ public extension MessagePackReader {
         }
         return resultDict
     }
-
+    
     /// Read an array's header and return its length. Does not attempt to read the array.
     /// - Throws: MessagePackReaderError if the value could not be unpacked
     mutating func readArrayHeader() throws -> UInt {
         let type = try MessagePackType.from(stream.readByte())
         switch type {
-            case let .fixedArray(size):
-                return UInt(size)
-            case .array16:
-                return UInt(try stream.read(UInt16.self))
-            case .array32:
-                return UInt(try stream.read(UInt32.self))
-            default:
-                throw MessagePackReaderError.typeMismatch(found: type.description)
+        case let .fixedArray(size):
+            return UInt(size)
+        case .array16:
+            return UInt(try stream.read(UInt16.self))
+        case .array32:
+            return UInt(try stream.read(UInt32.self))
+        default:
+            throw MessagePackReaderError.typeMismatch(found: type.description)
         }
     }
-
+    
     /// Read an array.
     /// See readAny(_:) for how values are decoded.
     /// - Throws: MessagePackReaderError if the value could not be unpacked
@@ -450,26 +447,26 @@ public extension MessagePackReader {
     mutating func readAny() throws -> Any? {
         let type = try MessagePackType.from(stream.peekByte())
         switch type {
-            case .nil:
-                stream.skipByte()
-                return nil
-            case let .boolean(value):
-                stream.skipByte()
-                return value
-            case let .positiveFixedInt(value):
-                stream.skipByte()
-                return Int64(value)
-            case let .negativeFixedInt(value):
-                stream.skipByte()
-                return Int64(value)
-            case .int8, .int16, .int32, .int64, .uint8, .uint16, .uint32: return try read(Int64.self)
-            case .uint64: return try read(UInt64.self)
-            case .float32: return try read(Float.self)
-            case .float64: return try read(Double.self)
-            case .fixedStr, .str8, .str16, .str32: return try read(String.self)
-            case .bin8, .bin16, .bin32: return try read(Data.self)
-            case .fixedArray, .array16, .array32: return try readArray()
-            case .fixedMap, .map16, .map32: return try readDictionary()
+        case .nil:
+            stream.skipByte()
+            return nil
+        case let .boolean(value):
+            stream.skipByte()
+            return value
+        case let .positiveFixedInt(value):
+            stream.skipByte()
+            return Int64(value)
+        case let .negativeFixedInt(value):
+            stream.skipByte()
+            return Int64(value)
+        case .int8, .int16, .int32, .int64, .uint8, .uint16, .uint32: return try read(Int64.self)
+        case .uint64: return try read(UInt64.self)
+        case .float32: return try read(Float.self)
+        case .float64: return try read(Double.self)
+        case .fixedStr, .str8, .str16, .str32: return try read(String.self)
+        case .bin8, .bin16, .bin32: return try read(Data.self)
+        case .fixedArray, .array16, .array32: return try readArray()
+        case .fixedMap, .map16, .map32: return try readDictionary()
         }
     }
 

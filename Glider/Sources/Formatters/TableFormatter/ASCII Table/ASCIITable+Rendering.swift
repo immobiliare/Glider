@@ -47,8 +47,6 @@ extension ASCIITable: TerminalDisplay {
             hasHeaderBottomBorder = hasHeaderBottomBorder || header.bottomBorder != nil
         }
         
-        
-        
         var columnIndex = -1
         var contentLines = [[Substring]]()
         var rowHeights = [Int]()
@@ -210,13 +208,13 @@ extension ASCIITable: TerminalDisplay {
 
 extension String {
  
-    static func split(string: String, byCount n: Int?, breakableCharacters: [Character] = [" "]) -> String {
-        guard let n = n else {
+    static func split(string: String, byCount count: Int?, breakableCharacters: [Character] = [" "]) -> String {
+        guard let count = count else {
             return string
         }
 
-        precondition(n > 0)
-        guard !string.isEmpty && string.count > n else { return string }
+        precondition(count > 0)
+        guard !string.isEmpty && string.count > count else { return string }
 
         var string = string
         var startIndex = string.startIndex
@@ -224,8 +222,8 @@ extension String {
         repeat {
             // Break a string into lines.
             var endIndex = string[string.index(after: startIndex)...].firstIndex(of: "\n") ?? string.endIndex
-            if string.distance(from: startIndex, to: endIndex) > n {
-                let wrappedLine = String.split(line: string[startIndex..<endIndex], byCount: n, breakableCharacters: breakableCharacters)
+            if string.distance(from: startIndex, to: endIndex) > count {
+                let wrappedLine = String.split(line: string[startIndex..<endIndex], byCount: count, breakableCharacters: breakableCharacters)
                 string.replaceSubrange(startIndex..<endIndex, with: wrappedLine)
                 endIndex = string.index(startIndex, offsetBy: wrappedLine.count)
             }
@@ -235,13 +233,12 @@ extension String {
         return string
     }
     
-    
-    private static func split(line: Substring, byCount n: Int, breakableCharacters: [Character]) -> String {
+    private static func split(line: Substring, byCount count: Int, breakableCharacters: [Character]) -> String {
         var line = String(line)
         var lineStartIndex = line.startIndex
 
-        while line.distance(from: lineStartIndex, to: line.endIndex) > n {
-            let maxLineEndIndex = line.index(lineStartIndex, offsetBy: n)
+        while line.distance(from: lineStartIndex, to: line.endIndex) > count {
+            let maxLineEndIndex = line.index(lineStartIndex, offsetBy: count)
 
             if breakableCharacters.contains(line[maxLineEndIndex]) {
                 // If line terminates at a breakable character, replace that character with a newline

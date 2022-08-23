@@ -29,9 +29,12 @@ extension String {
         /// Length of the truncation
         fileprivate var length: Int {
             switch self {
-            case .head(let l): return l
-            case .middle(let l): return l
-            case .tail(let l): return l
+            case .head(let length):
+                return length
+            case .middle(let length):
+                return length
+            case .tail(let length):
+                return length
             }
         }
         
@@ -67,6 +70,7 @@ extension String {
         
         var result = [String]()
         
+        // swiftlint:disable identifier_name
         for i in stride(from: 0, to: self.count, by: width) {
             let endIndex = self.index(self.endIndex, offsetBy: -i)
             let startIndex = self.index(endIndex, offsetBy: -width, limitedBy: self.startIndex) ?? self.startIndex
@@ -166,9 +170,12 @@ extension String.PaddingStyle {
     
     fileprivate var columnsLength: Int {
         switch self {
-        case .left(columns: let c): return c
-        case .center(columns: let c): return c
-        case .right(columns: let c): return c
+        case .left(columns: let length):
+            return length
+        case .center(columns: let length):
+            return length
+        case .right(columns: let length):
+            return length
         }
     }
     

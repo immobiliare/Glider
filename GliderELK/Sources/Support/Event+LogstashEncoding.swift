@@ -89,7 +89,7 @@ extension Event {
         // The identifier en_US_POSIX leads to exception on Linux machines,
         // on Darwin this is apperently ignored (it's even possible to state an
         // arbitrary value, no exception is thrown on Darwin machines -> inconsistency?)
-        //formatter.timeZone = TimeZone(identifier: "en_US_POSIX")
+        // formatter.timeZone = TimeZone(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone.autoupdatingCurrent
         return formatter
     }()

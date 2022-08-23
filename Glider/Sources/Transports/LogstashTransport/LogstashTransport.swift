@@ -27,7 +27,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -77,8 +77,8 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     ///   - delegate: delegate for events.
     ///   - builder: builder to configure extra options.
     public convenience init(host: String, port: Int,
-                delegate: LogstashTransportDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
+                            delegate: LogstashTransportDelegate? = nil,
+                            _ builder: ((inout Configuration) -> Void)? = nil) throws {
         try self.init(configuration: Configuration(host: host, port: port, builder), delegate: delegate)
     }
     
@@ -92,7 +92,6 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
                              delegateQueue: socketQueue)
     }
     
-    
     // MARK: - Conformance
     
     public func asyncTransport(_ transport: AsyncTransport,
@@ -102,7 +101,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     
     public func asyncTransport(_ transport: AsyncTransport,
                                didFinishChunkSending sentEvents: Set<String>,
-                               willRetryEvents unsentEventsToRetry: [String : Error],
+                               willRetryEvents unsentEventsToRetry: [String: Error],
                                discardedIDs: Set<String>) {
         
     }
@@ -119,7 +118,7 @@ open class LogstashTransport: Transport, AsyncTransportDelegate {
     
     public func asyncTransport(_ transport: AsyncTransport, canSendPayloadsChunk
                                chunk: AsyncTransport.Chunk,
-                               onCompleteSendTask completion: @escaping ((ChunkCompletionResult)  -> Void)) {
+                               onCompleteSendTask completion: @escaping ((ChunkCompletionResult) -> Void)) {
         guard let session = session else {
             return
         }
@@ -210,7 +209,7 @@ extension LogstashTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         /// Formatters set.
         ///
@@ -218,8 +217,8 @@ extension LogstashTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var formatters: [EventMessageFormatter] {
-            set { asyncTransportConfiguration.formatters = newValue }
             get { asyncTransportConfiguration.formatters }
+            set { asyncTransportConfiguration.formatters = newValue }
         }
         
         /// Limit cap for stored message.
@@ -228,8 +227,8 @@ extension LogstashTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var maxEntries: Int {
-            set { asyncTransportConfiguration.maxRetries = newValue }
             get { asyncTransportConfiguration.maxRetries }
+            set { asyncTransportConfiguration.maxRetries = newValue }
         }
 
         /// Size of the chunks (number of payloads) sent at each dispatch event.
@@ -238,8 +237,8 @@ extension LogstashTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var chunkSize: Int {
-            set { asyncTransportConfiguration.chunksSize = newValue }
             get { asyncTransportConfiguration.chunksSize }
+            set { asyncTransportConfiguration.chunksSize = newValue }
         }
         
         /// Automatic interval for flushing data in buffer.
@@ -248,8 +247,8 @@ extension LogstashTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var autoFlushInterval: TimeInterval? {
-            set { asyncTransportConfiguration.autoFlushInterval = newValue }
             get { asyncTransportConfiguration.autoFlushInterval }
+            set { asyncTransportConfiguration.autoFlushInterval = newValue }
         }
 
         // MARK: - Private Properties
@@ -326,7 +325,6 @@ public protocol LogstashTransportDelegate: AnyObject {
     func logstashTransport(_ transport: LogstashTransport,
                            didFailTrustingService host: String)
     
-
     /// Event triggered when a chunk of data is sent.
     ///
     /// - Parameters:

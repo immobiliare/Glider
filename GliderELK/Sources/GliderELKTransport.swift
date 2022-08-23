@@ -17,7 +17,6 @@ import NIOConcurrencyHelpers
 import Logging
 import AsyncHTTPClient
 
-
 /// The `GliderELKTransport` library provides a logging transport for glider and ELK environments.
 /// The log entries are properly formatted, cached, and then uploaded via HTTP/HTTPS to elastic/logstash,
 /// which allows for further processing in its pipeline. The logs can then be stored in elastic/elasticsearch
@@ -46,7 +45,7 @@ public class GliderELKTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Delegate events.
     public weak var delegate: GliderELKTransportDelegate?
@@ -234,6 +233,7 @@ public class GliderELKTransport: Transport {
     ///   for a short amount of time (the time it takes to duplicate this bytebuffer). Then, the "original"
     ///   stored log data `ByteBuffer` is freed and the lock is lifted
     /// - Parameter task: task
+    // swiftlint:disable cyclomatic_complexity
     private func uploadLogData(_ task: RepeatedTask? = nil) {
         guard byteBuffer.readableBytes != 0 else {
             return
@@ -330,7 +330,6 @@ public class GliderELKTransport: Transport {
                 self.byteBufferLock.unlock()
             }
     }
-    
     
     /// Creates the HTTP request which stays constant during the entire lifetime of the `LogstashLogHandler`
     /// Sets some default headers, eg. a dynamically adjusted "Keep-Alive" header

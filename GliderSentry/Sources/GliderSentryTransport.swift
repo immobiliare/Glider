@@ -31,7 +31,7 @@ open class GliderSentryTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     // MARK: - Private Properties
     

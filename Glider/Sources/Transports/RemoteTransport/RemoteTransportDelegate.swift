@@ -105,6 +105,5 @@ public protocol RemoteTransportDelegate: AnyObject {
                          connection: RemoteTransport.Connection,
                          failedToDecodingPacketData data: Data, error: Error)
 
-    
 }
 #endif

@@ -29,7 +29,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -83,7 +83,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
     ///   - port: port of the server.
     ///   - builder: builder configuration.
     public convenience init(port: UInt16, delegate: WebSocketTransportServerDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
+                            _ builder: ((inout Configuration) -> Void)? = nil) throws {
         try self.init(configuration: Configuration(port: port, builder), delegate: delegate)
     }
     
@@ -256,7 +256,7 @@ extension WebSocketTransportServer {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         

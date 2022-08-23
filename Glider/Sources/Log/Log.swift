@@ -116,8 +116,8 @@ public class Log: Equatable {
     /// they will be executed in order and stops when one of them return `false` to the
     /// `shouldAccept()` message.
     public var filters: [TransportFilter] {
-        set { transporter.filters = newValue }
         get { transporter.filters }
+        set { transporter.filters = newValue }
     }
     
     /// Defines the logger destination bucket where messages are sent once accepted by the logger.
@@ -252,8 +252,8 @@ public class Log: Equatable {
     /// - Returns: `T`
     public func transport<T: Transport>(ofType type: T.Type) -> T? {
         for transport in transports {
-            if let t = transport as? T {
-                return t
+            if let transport = transport as? T {
+                return transport
             }
         }
         return nil

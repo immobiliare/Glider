@@ -30,7 +30,7 @@ public class BufferedTransport<BufferItem>: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -59,7 +59,7 @@ public class BufferedTransport<BufferItem>: Transport {
     ///   - bufferedItemBuilder: The function used to create a `BufferItem` given a `Event` instance.
     ///   - builder: builder function to setup additional settings.
     public convenience init(bufferedItemBuilder: @escaping BufferItemBuilder,
-                _ builder: ((inout Configuration) -> Void)) {
+                            _ builder: ((inout Configuration) -> Void)) {
         self.init(configuration: Configuration(bufferedItemBuilder: bufferedItemBuilder, builder))
     }
     
@@ -122,11 +122,11 @@ extension BufferedTransport {
         public var formatters = [EventMessageFormatter]()
         
         /// The `DispatchQueue` to use for the recorder.
-        public var queue:DispatchQueue
+        public var queue: DispatchQueue
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         

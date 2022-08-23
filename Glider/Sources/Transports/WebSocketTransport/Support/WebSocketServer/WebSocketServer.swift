@@ -85,7 +85,7 @@ public class WebSocketServer {
     /// - Throws: throw an exception if something fails.
     public func start() throws {
         if listener == nil {
-            listener = try! NWListener(using: parameters, on: self.port)
+            listener = try NWListener(using: parameters, on: self.port)
         }
         
         listener?.stateUpdateHandler = self.stateDidChange(to:)
@@ -124,7 +124,7 @@ public class WebSocketServer {
         
         connection.start()
         
-        connection.didStopHandler = { err in
+        connection.didStopHandler = { _ in
             self.connectionDidStop(connection)
         }
         

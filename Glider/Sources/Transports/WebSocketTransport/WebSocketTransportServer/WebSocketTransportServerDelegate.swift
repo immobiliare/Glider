@@ -63,7 +63,6 @@ public protocol WebSocketTransportServerDelegate: AnyObject {
     func webSocketServerTransport(_ transport: WebSocketTransportServer,
                                   didConnectPeer peer: WebSocketPeer)
     
-    
     /// Called when a connected peer did change its state.
     ///
     /// - Parameters:

@@ -36,7 +36,7 @@ public class SizeRotationFileTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// URL of the current logging file.
     public var currentFileURL: URL {
@@ -147,7 +147,6 @@ public class SizeRotationFileTransport: Transport {
         return "\(filePrefix)\(fileSuffix).\(fileExtension.isEmpty ? ".log" : fileExtension)"
     }
     
-    
     /// Remove exceeded log archives based upon the creation date.
     ///
     /// - Throws: throw an exception if something fails.
@@ -224,7 +223,7 @@ extension SizeRotationFileTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         
@@ -261,14 +260,14 @@ extension SizeRotationFileTransport {
         /// Return the bytes converted value.
         internal var bytes: Int64 {
             switch self {
-            case .gigabytes(let gb):
-                return Int64(pow(1024.0, 3.0)) * Int64(gb)
-            case .megabytes(let mb):
-                return Int64(pow(1024.0, 2.0)) * Int64(mb)
-            case .kilobytes(let kb):
-                return Int64(1024 * Int64(kb))
-            case .bytes(let b):
-                return Int64(Int64(b))
+            case .gigabytes(let value):
+                return Int64(pow(1024.0, 3.0)) * Int64(value)
+            case .megabytes(let value):
+                return Int64(pow(1024.0, 2.0)) * Int64(value)
+            case .kilobytes(let value):
+                return Int64(1024 * Int64(value))
+            case .bytes(let value):
+                return Int64(Int64(value))
             }
         }
         

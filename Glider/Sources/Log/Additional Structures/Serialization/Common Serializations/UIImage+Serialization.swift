@@ -40,7 +40,7 @@ extension UIImage: SerializableObject {
     
 }
 
-// MARK - Image Resizing
+// MARK: - Image Resizing
 
 extension UIImage {
         
@@ -120,7 +120,7 @@ extension UIImage {
         let scale = (Double)(newSize.width) / (Double)(ciImage.extent.size.width)
         
         filter.setValue(ciImage, forKey: kCIInputImageKey)
-        filter.setValue(NSNumber(value:scale), forKey: kCIInputScaleKey)
+        filter.setValue(NSNumber(value: scale), forKey: kCIInputScaleKey)
         filter.setValue(1.0, forKey: kCIInputAspectRatioKey)
         guard let outputImage = filter.value(forKey: kCIOutputImageKey) as? CIImage else { return nil }
         let context = CIContext(options: [.useSoftwareRenderer: false])
@@ -213,7 +213,10 @@ extension UIImage {
         defer {
             destData.deallocate()
         }
-        var destBuffer = vImage_Buffer(data: destData, height: vImagePixelCount(destHeight), width: vImagePixelCount(destWidth), rowBytes: destBytesPerRow)
+        var destBuffer = vImage_Buffer(data: destData,
+                                       height: vImagePixelCount(destHeight),
+                                       width: vImagePixelCount(destWidth),
+                                       rowBytes: destBytesPerRow)
         
         // scale the image
         error = vImageScale_ARGB8888(&sourceBuffer, &destBuffer, nil, numericCast(kvImageHighQualityResampling))
@@ -233,4 +236,3 @@ extension UIImage {
 }
 
 #endif
-

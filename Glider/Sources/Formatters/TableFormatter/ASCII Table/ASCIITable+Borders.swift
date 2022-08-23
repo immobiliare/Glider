@@ -24,7 +24,9 @@ extension ASCIITable.Column {
     ///   - style: style to set.
     ///   - horizontalMargin: margin in horizontal.
     /// - Returns: [Table.Column]
-    public static func configureBorders(in columns: [ASCIITable.Column], style: ASCIITable.BorderStyle, horizontalMargin: String = " ") -> [ASCIITable.Column] {
+    public static func configureBorders(in columns: [ASCIITable.Column],
+                                        style: ASCIITable.BorderStyle,
+                                        horizontalMargin: String = " ") -> [ASCIITable.Column] {
         var cols = columns
         self.configureBorders(in: &cols, uniformStyle: style, horizontalMargin: horizontalMargin)
         return cols
@@ -32,7 +34,9 @@ extension ASCIITable.Column {
     
     // MARK: - Private Functions
     
-    private static func configureBorders(in columns: inout [ASCIITable.Column], uniformStyle style: ASCIITable.BorderStyle, horizontalMargin: String = " ") {
+    private static func configureBorders(in columns: inout [ASCIITable.Column],
+                                         uniformStyle style: ASCIITable.BorderStyle,
+                                         horizontalMargin: String = " ") {
         guard !columns.isEmpty else { return }
         let multipleColumns = columns.count > 1
         columns[0].leadingMargin = "\(style.vertical)\(horizontalMargin)"
@@ -110,136 +114,135 @@ extension ASCIITable {
         case lightQuadrupleDash
         case lightTripleDash
         
-        
         var horizontal: Character {
             switch self {
-            case .double: return .boxDraw.doubleHorizontal
-            case .heavy: return .boxDraw.heavyHorizontal
-            case .heavyQuadrupleDash: return .boxDraw.heavyQuadrupleDashHorizontal
-            case .heavyTripleDash: return .boxDraw.heavyTripleDashHorizontal
-            case .light: return .boxDraw.lightHorizontal
-            case .lightQuadrupleDash: return .boxDraw.lightQuadrupleDashHorizontal
-            case .lightTripleDash: return .boxDraw.lightTripleDashHorizontal
+            case .double: return .BoxDrawn.doubleHorizontal
+            case .heavy: return .BoxDrawn.heavyHorizontal
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyQuadrupleDashHorizontal
+            case .heavyTripleDash: return .BoxDrawn.heavyTripleDashHorizontal
+            case .light: return .BoxDrawn.lightHorizontal
+            case .lightQuadrupleDash: return .BoxDrawn.lightQuadrupleDashHorizontal
+            case .lightTripleDash: return .BoxDrawn.lightTripleDashHorizontal
             }
         }
 
         var vertical: Character {
             switch self {
-            case .double: return .boxDraw.doubleVertical
-            case .heavy: return .boxDraw.heavyVertical
-            case .heavyQuadrupleDash: return .boxDraw.heavyQuadrupleDashVertical
-            case .heavyTripleDash: return .boxDraw.heavyTripleDashVertical
-            case .light: return .boxDraw.lightVertical
-            case .lightQuadrupleDash: return .boxDraw.lightQuadrupleDashVertical
-            case .lightTripleDash: return .boxDraw.lightTripleDashVertical
+            case .double: return .BoxDrawn.doubleVertical
+            case .heavy: return .BoxDrawn.heavyVertical
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyQuadrupleDashVertical
+            case .heavyTripleDash: return .BoxDrawn.heavyTripleDashVertical
+            case .light: return .BoxDrawn.lightVertical
+            case .lightQuadrupleDash: return .BoxDrawn.lightQuadrupleDashVertical
+            case .lightTripleDash: return .BoxDrawn.lightTripleDashVertical
             }
         }
 
         var downAndLeft: Character {
             switch self {
-            case .double: return .boxDraw.doubleDownAndLeft
-            case .heavy: return .boxDraw.heavyDownAndLeft
-            case .heavyQuadrupleDash: return .boxDraw.heavyDownAndLeft
-            case .heavyTripleDash: return .boxDraw.heavyDownAndLeft
-            case .light: return .boxDraw.lightDownAndLeft
-            case .lightQuadrupleDash: return .boxDraw.lightDownAndLeft
-            case .lightTripleDash: return .boxDraw.lightDownAndLeft
+            case .double: return .BoxDrawn.doubleDownAndLeft
+            case .heavy: return .BoxDrawn.heavyDownAndLeft
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyDownAndLeft
+            case .heavyTripleDash: return .BoxDrawn.heavyDownAndLeft
+            case .light: return .BoxDrawn.lightDownAndLeft
+            case .lightQuadrupleDash: return .BoxDrawn.lightDownAndLeft
+            case .lightTripleDash: return .BoxDrawn.lightDownAndLeft
             }
         }
 
         var downAndRight: Character {
             switch self {
-            case .double: return .boxDraw.doubleDownAndRight
-            case .heavy: return .boxDraw.heavyDownAndRight
-            case .heavyQuadrupleDash: return .boxDraw.heavyDownAndRight
-            case .heavyTripleDash: return .boxDraw.heavyDownAndRight
-            case .light: return .boxDraw.lightDownAndRight
-            case .lightQuadrupleDash: return .boxDraw.lightDownAndRight
-            case .lightTripleDash: return .boxDraw.lightDownAndRight
+            case .double: return .BoxDrawn.doubleDownAndRight
+            case .heavy: return .BoxDrawn.heavyDownAndRight
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyDownAndRight
+            case .heavyTripleDash: return .BoxDrawn.heavyDownAndRight
+            case .light: return .BoxDrawn.lightDownAndRight
+            case .lightQuadrupleDash: return .BoxDrawn.lightDownAndRight
+            case .lightTripleDash: return .BoxDrawn.lightDownAndRight
             }
         }
 
         var upAndLeft: Character {
             switch self {
-            case .double: return .boxDraw.doubleUpAndLeft
-            case .heavy: return .boxDraw.heavyUpAndLeft
-            case .heavyQuadrupleDash: return .boxDraw.heavyUpAndLeft
-            case .heavyTripleDash: return .boxDraw.heavyUpAndLeft
-            case .light: return .boxDraw.lightUpAndLeft
-            case .lightQuadrupleDash: return .boxDraw.lightUpAndLeft
-            case .lightTripleDash: return .boxDraw.lightUpAndLeft
+            case .double: return .BoxDrawn.doubleUpAndLeft
+            case .heavy: return .BoxDrawn.heavyUpAndLeft
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyUpAndLeft
+            case .heavyTripleDash: return .BoxDrawn.heavyUpAndLeft
+            case .light: return .BoxDrawn.lightUpAndLeft
+            case .lightQuadrupleDash: return .BoxDrawn.lightUpAndLeft
+            case .lightTripleDash: return .BoxDrawn.lightUpAndLeft
             }
         }
 
         var upAndRight: Character {
             switch self {
-            case .double: return .boxDraw.doubleUpAndRight
-            case .heavy: return .boxDraw.heavyUpAndRight
-            case .heavyQuadrupleDash: return .boxDraw.heavyUpAndRight
-            case .heavyTripleDash: return .boxDraw.heavyUpAndRight
-            case .light: return .boxDraw.lightUpAndRight
-            case .lightQuadrupleDash: return .boxDraw.lightUpAndRight
-            case .lightTripleDash: return .boxDraw.lightUpAndRight
+            case .double: return .BoxDrawn.doubleUpAndRight
+            case .heavy: return .BoxDrawn.heavyUpAndRight
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyUpAndRight
+            case .heavyTripleDash: return .BoxDrawn.heavyUpAndRight
+            case .light: return .BoxDrawn.lightUpAndRight
+            case .lightQuadrupleDash: return .BoxDrawn.lightUpAndRight
+            case .lightTripleDash: return .BoxDrawn.lightUpAndRight
             }
         }
 
         var upAndHorizontal: Character {
             switch self {
-            case .double: return .boxDraw.doubleUpAndHorizontal
-            case .heavy: return .boxDraw.heavyUpAndHorizontal
-            case .heavyQuadrupleDash: return .boxDraw.heavyUpAndHorizontal
-            case .heavyTripleDash: return .boxDraw.heavyUpAndHorizontal
-            case .light: return .boxDraw.lightUpAndHorizontal
-            case .lightQuadrupleDash: return .boxDraw.lightUpAndHorizontal
-            case .lightTripleDash: return .boxDraw.lightUpAndHorizontal
+            case .double: return .BoxDrawn.doubleUpAndHorizontal
+            case .heavy: return .BoxDrawn.heavyUpAndHorizontal
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyUpAndHorizontal
+            case .heavyTripleDash: return .BoxDrawn.heavyUpAndHorizontal
+            case .light: return .BoxDrawn.lightUpAndHorizontal
+            case .lightQuadrupleDash: return .BoxDrawn.lightUpAndHorizontal
+            case .lightTripleDash: return .BoxDrawn.lightUpAndHorizontal
             }
         }
 
         var downAndHorizontal: Character {
             switch self {
-            case .double: return .boxDraw.doubleDownAndHorizontal
-            case .heavy: return .boxDraw.heavyDownAndHorizontal
-            case .heavyQuadrupleDash: return .boxDraw.heavyDownAndHorizontal
-            case .heavyTripleDash: return .boxDraw.heavyDownAndHorizontal
-            case .light: return .boxDraw.lightDownAndHorizontal
-            case .lightQuadrupleDash: return .boxDraw.lightDownAndHorizontal
-            case .lightTripleDash: return .boxDraw.lightDownAndHorizontal
+            case .double: return .BoxDrawn.doubleDownAndHorizontal
+            case .heavy: return .BoxDrawn.heavyDownAndHorizontal
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyDownAndHorizontal
+            case .heavyTripleDash: return .BoxDrawn.heavyDownAndHorizontal
+            case .light: return .BoxDrawn.lightDownAndHorizontal
+            case .lightQuadrupleDash: return .BoxDrawn.lightDownAndHorizontal
+            case .lightTripleDash: return .BoxDrawn.lightDownAndHorizontal
             }
         }
 
         var verticalAndLeft: Character {
             switch self {
-            case .double: return .boxDraw.doubleVerticalAndLeft
-            case .heavy: return .boxDraw.heavyVerticalAndLeft
-            case .heavyQuadrupleDash: return .boxDraw.heavyVerticalAndLeft
-            case .heavyTripleDash: return .boxDraw.heavyVerticalAndLeft
-            case .light: return .boxDraw.lightVerticalAndLeft
-            case .lightQuadrupleDash: return .boxDraw.lightVerticalAndLeft
-            case .lightTripleDash: return .boxDraw.lightVerticalAndLeft
+            case .double: return .BoxDrawn.doubleVerticalAndLeft
+            case .heavy: return .BoxDrawn.heavyVerticalAndLeft
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyVerticalAndLeft
+            case .heavyTripleDash: return .BoxDrawn.heavyVerticalAndLeft
+            case .light: return .BoxDrawn.lightVerticalAndLeft
+            case .lightQuadrupleDash: return .BoxDrawn.lightVerticalAndLeft
+            case .lightTripleDash: return .BoxDrawn.lightVerticalAndLeft
             }
         }
 
         var verticalAndRight: Character {
             switch self {
-            case .double: return .boxDraw.doubleVerticalAndRight
-            case .heavy: return .boxDraw.heavyVerticalAndRight
-            case .heavyQuadrupleDash: return .boxDraw.heavyVerticalAndRight
-            case .heavyTripleDash: return .boxDraw.heavyVerticalAndRight
-            case .light: return .boxDraw.lightVerticalAndRight
-            case .lightQuadrupleDash: return .boxDraw.lightVerticalAndRight
-            case .lightTripleDash: return .boxDraw.lightVerticalAndRight
+            case .double: return .BoxDrawn.doubleVerticalAndRight
+            case .heavy: return .BoxDrawn.heavyVerticalAndRight
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyVerticalAndRight
+            case .heavyTripleDash: return .BoxDrawn.heavyVerticalAndRight
+            case .light: return .BoxDrawn.lightVerticalAndRight
+            case .lightQuadrupleDash: return .BoxDrawn.lightVerticalAndRight
+            case .lightTripleDash: return .BoxDrawn.lightVerticalAndRight
             }
         }
 
         var verticalAndHorizontal: Character {
             switch self {
-            case .double: return .boxDraw.doubleVerticalAndHorizontal
-            case .heavy: return .boxDraw.heavyVerticalAndHorizontal
-            case .heavyQuadrupleDash: return .boxDraw.heavyVerticalAndHorizontal
-            case .heavyTripleDash: return .boxDraw.heavyVerticalAndHorizontal
-            case .light: return .boxDraw.lightVerticalAndHorizontal
-            case .lightQuadrupleDash: return .boxDraw.lightVerticalAndHorizontal
-            case .lightTripleDash: return .boxDraw.lightVerticalAndHorizontal
+            case .double: return .BoxDrawn.doubleVerticalAndHorizontal
+            case .heavy: return .BoxDrawn.heavyVerticalAndHorizontal
+            case .heavyQuadrupleDash: return .BoxDrawn.heavyVerticalAndHorizontal
+            case .heavyTripleDash: return .BoxDrawn.heavyVerticalAndHorizontal
+            case .light: return .BoxDrawn.lightVerticalAndHorizontal
+            case .lightQuadrupleDash: return .BoxDrawn.lightVerticalAndHorizontal
+            case .lightTripleDash: return .BoxDrawn.lightVerticalAndHorizontal
             }
         }
     }

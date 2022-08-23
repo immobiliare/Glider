@@ -21,11 +21,6 @@ var targets: [Target] = [
         providers: [.apt(["libsqlite3-dev"])]
     ),
     .target(
-        name: "Glider",
-        dependencies: ["CSQLite"],
-        path: "Glider/Sources"
-    ),
-    .target(
         name: "GliderSwiftLog",
         dependencies: [
             "Glider",
@@ -83,6 +78,38 @@ var targets: [Target] = [
         path: "Tests/GliderNetWatcherTests"
     )
 ]
+
+// Enable swift-lint on SPM
+#if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
+targets.insert(contentsOf: [
+    // Specify where to download the compiled swiftlint tool from
+    .binaryTarget(
+        name: "SwiftLintBinary",
+        url: "https://github.com/juozasvalancius/SwiftLint/releases/download/spm-accommodation/SwiftLintBinary-macos.artifactbundle.zip",
+        checksum: "cdc36c26225fba80efc3ac2e67c2e3c3f54937145869ea5dbcaa234e57fc3724"
+    ),
+    // Define the SPM plugin
+    .plugin(
+        name: "SwiftLintXcode",
+        capability: .buildTool(),
+        dependencies: ["SwiftLintBinary"]
+    ),
+    .target(
+        name: "Glider",
+        dependencies: ["CSQLite"],
+        path: "Glider/Sources",
+        plugins: ["SwiftLintXcode"]
+    ),
+], at: 0)
+#else
+targets.insert(contentsOf: [
+    .target(
+        name: "Glider",
+        dependencies: ["CSQLite"],
+        path: "Glider/Sources"
+    ),
+], at: 1)
+#endif
 
 // GliderSentry is not available on Linux
 #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)

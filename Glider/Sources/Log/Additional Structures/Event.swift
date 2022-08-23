@@ -86,10 +86,10 @@ public struct Event: Codable, Equatable {
     }
     
     /// Associated subsystem.
-    public internal(set) var subsystem: String? = nil
+    public internal(set) var subsystem: String?
     
     /// Associated category.
-    public internal(set) var category: String? = nil
+    public internal(set) var category: String?
     
     /// Scope assigned to the event.
     public internal(set) var scope: Scope

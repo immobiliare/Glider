@@ -181,8 +181,8 @@ public extension MessagePackReader {
     /// - Parameter mapClosure: The closure that will be ran to map the flat values to
     ///                         a key/object.
     /// - Throws: MessagePackReaderError if the value could not be unpacked
-    mutating func readAndMapOptionalDictionary<T>(_ mapClosure: (inout MessagePackReader) throws -> (AnyHashable, T)) throws -> [AnyHashable: T]? {
-        // swiftlint:disable:previous line_length
+    mutating func readAndMapOptionalDictionary<T>(_ mapClosure: (inout MessagePackReader)
+                                                  throws -> (AnyHashable, T)) throws -> [AnyHashable: T]? {
         if try tryConsumeNil() { return nil }
         return try readAndMapDictionary(mapClosure)
     }

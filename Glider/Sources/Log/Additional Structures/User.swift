@@ -37,11 +37,6 @@ public struct User: Codable {
     
     /// Initialize a new user with the id.
     ///
-    /// - Parameter userId: id of the user.
-    
-    
-    /// Initialize a new user with the id.
-    ///
     /// - Parameters:
     ///   - userId: user id.
     ///   - email: user email.
@@ -73,7 +68,6 @@ public struct User: Codable {
         try container.encodeIfPresent(self.username, forKey: .email)
         try container.encodeIfPresent(self.ipAddress, forKey: .ipAddress)
         
-        
         if let encodableDict: [String: Data?] = data?.mapValues({ $0.asData() }) {
             let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableDict, requiringSecureCoding: false)
             try container.encode(rawData, forKey: .data)
@@ -86,7 +80,6 @@ public struct User: Codable {
         self.email = try container.decodeIfPresent(String.self, forKey: .email)
         self.username = try container.decodeIfPresent(String.self, forKey: .username)
         self.ipAddress = try container.decodeIfPresent(String.self, forKey: .ipAddress)
-        
         
         let rawValues = try container.decode(Data.self, forKey: .data)
         self.data = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawValues) as? [String: Data] ?? [:]

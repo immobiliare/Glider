@@ -127,7 +127,7 @@ extension StatusMonitor {
         
         /// Used memory in bytes.
         var usedMemoryBytes: Float {
-            var used_megabytes: Float = 0
+            var usedMegabytes: Float = 0
             var info = mach_task_basic_info()
             var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
             
@@ -143,11 +143,11 @@ extension StatusMonitor {
             }
             
             if kerr == KERN_SUCCESS {
-                let used_bytes: Float = Float(info.resident_size)
-                used_megabytes = used_bytes / 1024.0 / 1024.0
+                let usedBytes: Float = Float(info.resident_size)
+                usedMegabytes = usedBytes / 1024.0 / 1024.0
             }
             
-            return used_megabytes
+            return usedMegabytes
         }
         
         /// Free memory expressed in bytes.

@@ -112,7 +112,7 @@ public class BonjourPublisher {
 // MARK: - BonjourPublisherDelegate
 
 /// This class is used only to incapsulate the objective-c requirements of the NetServiceDelegate.
-fileprivate class BonjourPublisherObjectDelegate: NSObject, NetServiceDelegate {
+private class BonjourPublisherObjectDelegate: NSObject, NetServiceDelegate {
     weak var server: BonjourPublisher?
     
     weak var delegate: BonjourPublisherDelegate?
@@ -148,7 +148,6 @@ public protocol BonjourPublisherDelegate: AnyObject {
     /// - Parameter publisher: publisher instance.
     func bonjourPublisherDidStart(_ publisher: BonjourPublisher)
     
-
     /// Called when bonjour service did stop.
     ///
     /// - Parameters:

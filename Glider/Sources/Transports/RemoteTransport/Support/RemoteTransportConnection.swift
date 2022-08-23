@@ -251,6 +251,5 @@ internal protocol RemoteTransportConnectionDelegate: AnyObject {
                     failedToDecodingPacketData data: Data,
                     error: Error)
 
-    
 }
 #endif

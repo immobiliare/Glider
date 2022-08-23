@@ -35,7 +35,7 @@ open class FileTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    open var minimumAcceptedLevel: Level? = nil
+    open var minimumAcceptedLevel: Level?
     
     /// Current file size (expressed in bytes).
     public var size: UInt64 {
@@ -159,7 +159,7 @@ extension FileTransport {
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         

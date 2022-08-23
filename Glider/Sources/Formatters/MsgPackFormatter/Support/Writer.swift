@@ -1,7 +1,5 @@
 // This method contains most of the public API and extensive documentation
 // The 400 line limit doesn't make sense here
-// swiftlint:disable file_length
-
 import Foundation
 
 enum MessagePackWriterError: Error {
@@ -412,6 +410,7 @@ public extension MessagePackWriter {
     ///                        [Any?],
     ///                        [AnyHashable: Any?]
     /// - Throws: throws MessagePackWriterError.unsupportedType for unpackable types
+    // swiftlint:disable cyclomatic_complexity
     mutating func packAny(_ anyValue: Any?) throws {
         guard let anyValue = anyValue else {
             packNil()
@@ -420,28 +419,28 @@ public extension MessagePackWriter {
 
         // I could not think of a better way to pack any than just a ton of if let, so here.we.go.
         switch anyValue {
-            case let val as Bool: pack(val)
-
+        case let val as Bool: pack(val)
+            
             // Numerics
-            case let val as UInt: pack(val)
-            case let val as UInt8: pack(val)
-            case let val as UInt16: pack(val)
-            case let val as UInt32: pack(val)
-            case let val as UInt64: pack(val)
-            case let val as Int: pack(val)
-            case let val as Int8: pack(val)
-            case let val as Int16: pack(val)
-            case let val as Int32: pack(val)
-            case let val as Int64: pack(val)
-            case let val as Float: pack(val) // Also works for Float32
-            case let val as Double: pack(val) // Also works for Float64
-
-            case let val as String: try pack(val)
-            case let val as Data: try pack(val)
-            case let val as [Any?]: try pack(val)
-            case let val as [AnyHashable: Any?]: try pack(val)
-
-            default: throw MessagePackWriterError.unsupportedType(type: String(describing: type(of: anyValue)))
+        case let val as UInt: pack(val)
+        case let val as UInt8: pack(val)
+        case let val as UInt16: pack(val)
+        case let val as UInt32: pack(val)
+        case let val as UInt64: pack(val)
+        case let val as Int: pack(val)
+        case let val as Int8: pack(val)
+        case let val as Int16: pack(val)
+        case let val as Int32: pack(val)
+        case let val as Int64: pack(val)
+        case let val as Float: pack(val) // Also works for Float32
+        case let val as Double: pack(val) // Also works for Float64
+            
+        case let val as String: try pack(val)
+        case let val as Data: try pack(val)
+        case let val as [Any?]: try pack(val)
+        case let val as [AnyHashable: Any?]: try pack(val)
+            
+        default: throw MessagePackWriterError.unsupportedType(type: String(describing: type(of: anyValue)))
         }
     }
 

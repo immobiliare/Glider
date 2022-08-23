@@ -49,15 +49,15 @@ extension ASCIITable {
         // MARK: - Public Properties
         
         public var fillCharacter: Character = " "
-        public var footer: Footer? = nil
-        public var header: Header? = nil
+        public var footer: Footer?
+        public var header: Header?
         public var horizontalAlignment: HorizontalAlignment = .leading
         public var leadingMargin: String = ""
         public var minWidth: Int = 0
         public var trailingMargin: String = ""
         public var verticalAlignment: VerticalAlignment = .middle
         public var verticalPadding: VerticalPadding = .zero
-        public var maxWidth: Int? = nil
+        public var maxWidth: Int?
         
         // MARK: - Initialization
         
@@ -78,14 +78,14 @@ extension ASCIITable {
 extension ASCIITable.Column {
     
     public struct Header {
-        public var bottomBorder: Character? = nil
+        public var bottomBorder: Character?
         public var corners: Corners = .default
         public var fillCharacter: Character = " "
         public var horizontalAlignment: HorizontalAlignment = .leading
         public var leadingMargin: String = ""
         public var minHeight: Int = 0
         public var title: String
-        public var topBorder: Character? = nil
+        public var topBorder: Character?
         public var trailingMargin: String = ""
         public var verticalAlignment: VerticalAlignment = .top
         public var verticalPadding: VerticalPadding = .zero
@@ -108,9 +108,9 @@ extension ASCIITable.Column {
 extension ASCIITable.Column {
     
     public struct Footer {
-        public var border: Character? = nil
-        public var leadingCorner: Character? = nil
-        public var trailingCorner: Character? = nil
+        public var border: Character?
+        public var leadingCorner: Character?
+        public var trailingCorner: Character?
         
         public init(_ builder: ((inout Footer) -> Void)? = nil) {
             builder?(&self)
@@ -132,10 +132,10 @@ extension ASCIITable.Column {
 extension ASCIITable.Column {
     
     public struct Corners {
-        public var topLeading: Character? = nil
-        public var topTrailing: Character? = nil
-        public var bottomTrailing: Character? = nil
-        public var bottomLeading: Character? = nil
+        public var topLeading: Character?
+        public var topTrailing: Character?
+        public var bottomTrailing: Character?
+        public var bottomLeading: Character?
         
         public static let `default`: Corners = .init()
         
@@ -238,7 +238,7 @@ extension ASCIITable.Column {
 }
 
 extension Character {
-    public enum boxDraw {
+    public enum BoxDrawn {
         /// Unicode box drawing character `─`
         public static let lightHorizontal: Character = "─"
         /// Unicode box drawing character `━`
@@ -507,7 +507,6 @@ public protocol TerminalDisplay {
 extension String: TerminalDisplay {
     public var stringValue: String { self }
 }
-
 
 extension TerminalDisplay where Self: CustomStringConvertible {
     public var stringValue: String {

@@ -89,7 +89,6 @@ public class RemoteTransport: Transport {
     /// The browser discovery class.
     private var browser: NWBrowser?
     
-    
     // MARK: - Private Properties (Connection Related)
     
     /// Connection used.
@@ -333,7 +332,6 @@ public class RemoteTransport: Transport {
             self.scheduleConnectionRetry()
         }
     }
-    
     
     /// Will retry connection to the server after certain interval.
     private func scheduleConnectionRetry() {

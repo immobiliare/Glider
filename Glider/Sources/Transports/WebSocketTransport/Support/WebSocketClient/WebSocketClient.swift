@@ -442,7 +442,7 @@ open class WebSocketClient {
 
 // MARK: - NWConnection Extension
 
-fileprivate var _intentionalDisconnection: Bool = false
+private var _intentionalDisconnection: Bool = false
 
 internal extension NWConnection {
 

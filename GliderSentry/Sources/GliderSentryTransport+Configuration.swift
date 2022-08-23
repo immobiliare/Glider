@@ -39,7 +39,7 @@ extension GliderSentryTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         /// The `DispatchQueue` to use for the recorder.
         public var queue: DispatchQueue

@@ -45,7 +45,7 @@ extension FieldsFormatter {
         ///
         /// Keep in mind: it works only for certain formatters (like `XCodeFormatter` and `TerminalFormatter` where
         /// colorization is supported. Some formatters may ignore this value.
-        public var colors: [FieldsFormatterColor]? = nil
+        public var colors: [FieldsFormatterColor]?
         
         /// For array and dictionaries (like `extra` or `tags`) you can specify a format to write the content.
         ///
@@ -68,7 +68,7 @@ extension FieldsFormatter {
         /// For example (`extra = { %@ }` uses the format and replace the placeholder with the value formatted.
         ///
         /// By default is set to `nil`•
-        public var stringFormat: String? = nil
+        public var stringFormat: String?
         
         // MARK: - Initialization
                
@@ -139,7 +139,7 @@ extension FieldsFormatter {
         ///   - style: representation style of the calling thread.
         ///   - configure: optional callback to further configure the representation of the data.
         /// - Returns: `Field`
-        public static func callingThread(style: CallingThreadStyle,  _ configure: Configure? = nil) -> Field {
+        public static func callingThread(style: CallingThreadStyle, _ configure: Configure? = nil) -> Field {
             self.init(.callingThread(style), configure)
         }
         
@@ -276,7 +276,6 @@ extension FieldsFormatter {
         public static func fingerprint(_ configure: Configure? = nil) -> Field {
             self.init(.fingerprint, configure)
         }
-        
         
         /// Create a field to show all/some of the `metadata` associated with the attached `object` of the event.
         /// Use `format` property to define how the data are represented as string.
@@ -441,7 +440,7 @@ extension FieldsFormatter {
         case spacedHyphen
         case tab
         case space
-        case `repeat`(Character,Int)
+        case `repeat`(Character, Int)
         case custom(String)
         
         public var delimiter: String {
@@ -723,7 +722,7 @@ extension FieldsFormatter {
                 var components = [String]()
                 
                 for key in dictValue.keys.sorted() {
-                    if let value = dictValue[key]  {
+                    if let value = dictValue[key] {
                         if value.isNil == false {
                             components.append("\(key)=\(String(describing: value!))")
                         } else if includeNilKeys {
@@ -781,7 +780,7 @@ extension FieldsFormatter {
             
             let columnIdentifier = ASCIITable.Column { col in
                 col.footer = .init({ footer in
-                    footer.border = .boxDraw.heavyHorizontal
+                    footer.border = .BoxDrawn.heavyHorizontal
                 })
                 col.header = .init(title: keyColumnTitle, { header in
                     header.fillCharacter = " "
@@ -797,7 +796,7 @@ extension FieldsFormatter {
             
             let columnValues = ASCIITable.Column { col in
                 col.footer = .init({ footer in
-                    footer.border = .boxDraw.heavyHorizontal
+                    footer.border = .BoxDrawn.heavyHorizontal
                 })
                 col.header = .init(title: "VALUE", { header in
                     header.fillCharacter = " "

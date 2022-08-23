@@ -128,7 +128,7 @@ extension Array where Element == TransportFilter {
     /// - Returns: Bool
     fileprivate func canAcceptEvent(_ event: Event) -> Bool {
         guard isEmpty == false else { return true }
-        
+        // swiftlint:disable unused_optional_binding
         if let _ = first(where: { $0.shouldAccept(event) == false }) {
             return false
         }

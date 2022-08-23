@@ -33,7 +33,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Count running operations.
     public var runningOperations: Int {
@@ -67,10 +67,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         self.asyncTransport = try AsyncTransport(delegate: self,
                                                  configuration: configuration.asyncTransportConfiguration)
         self.asyncTransport?.queue = self.queue
-                
-        defer {
-            self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentRequests
-        }
+        self.networkQueue.maxConcurrentOperationCount = configuration.maxConcurrentRequests
     }
     
     /// Initialize a new `HTTPTransport` for generic HTTP log sends.
@@ -98,8 +95,8 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
         
         // Encapsulate each request in an async operation
         let operations: [AsyncURLRequestOperation] = chuckURLRequests.map { urlRequest in
-            let op = AsyncURLRequestOperation(request: urlRequest, transport: self)
-            op.onComplete = { [weak self] result in
+            let asyncOperation = AsyncURLRequestOperation(request: urlRequest, transport: self)
+            asyncOperation.onComplete = { [weak self] result in
 
                 // alert delegate
                 self?.delegate?.httpTransport(self!, didFinishRequest: urlRequest, withResult: result)
@@ -109,7 +106,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
                     completion(.chunkFailed(error))
                 }
             }
-            return op
+            return asyncOperation
         }
         
         // Enqueue
@@ -123,7 +120,7 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
     
     public func asyncTransport(_ transport: AsyncTransport,
                                didFinishChunkSending sentEvents: Set<String>,
-                               willRetryEvents unsentEventsToRetry: [String : Error],
+                               willRetryEvents unsentEventsToRetry: [String: Error],
                                discardedIDs: Set<String>) {
         
     }
@@ -143,7 +140,6 @@ open class HTTPTransport: Transport, AsyncTransportDelegate {
 // MARK: - HTTPTransport.Configuration
 
 extension HTTPTransport {
-    
     
     /// Represent the configuration settings used to create a new `HTTPTransport` instance.
     public struct Configuration {
@@ -169,8 +165,8 @@ extension HTTPTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var formatters: [EventMessageFormatter] {
-            set { asyncTransportConfiguration.formatters = newValue }
             get { asyncTransportConfiguration.formatters }
+            set { asyncTransportConfiguration.formatters = newValue }
         }
         
         /// Limit cap for stored message.
@@ -179,8 +175,8 @@ extension HTTPTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var maxEntries: Int {
-            set { asyncTransportConfiguration.maxRetries = newValue }
             get { asyncTransportConfiguration.maxRetries }
+            set { asyncTransportConfiguration.maxRetries = newValue }
         }
 
         /// Size of the chunks (number of payloads) sent at each dispatch event.
@@ -189,8 +185,8 @@ extension HTTPTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var chunkSize: Int {
-            set { asyncTransportConfiguration.chunksSize = newValue }
             get { asyncTransportConfiguration.chunksSize }
+            set { asyncTransportConfiguration.chunksSize = newValue }
         }
         
         /// Automatic interval for flushing data in buffer.
@@ -199,8 +195,8 @@ extension HTTPTransport {
         /// This is a derivate properties of the `AsyncTransport.Configuration`,
         /// it will set automatically the underlying AsyncTransport.Configuration.
         public var autoFlushInterval: TimeInterval? {
-            set { asyncTransportConfiguration.autoFlushInterval = newValue }
             get { asyncTransportConfiguration.autoFlushInterval }
+            set { asyncTransportConfiguration.autoFlushInterval = newValue }
         }
         
         /// The `DispatchQueue` to use for the recorder.
@@ -208,7 +204,7 @@ extension HTTPTransport {
 
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Private Properties
         
@@ -256,4 +252,3 @@ public protocol HTTPTransportDelegate: AnyObject {
                        didFinishRequest request: HTTPTransportRequest, withResult result: AsyncURLRequestOperation.Response)
     
 }
-

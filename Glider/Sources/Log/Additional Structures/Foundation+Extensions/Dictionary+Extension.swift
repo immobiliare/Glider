@@ -21,7 +21,7 @@ extension Dictionary {
     ///   - baseDictionary: base dictionary.
     ///   - additionalData: dictionary to merge.
     /// - Returns: `[Key: Value]`
-    internal static func merge(baseDictionary: [Key: Value], additionalData:  [Key: Value]?) ->  [Key: Value] {
+    internal static func merge(baseDictionary: [Key: Value], additionalData: [Key: Value]?) -> [Key: Value] {
         guard let additionalData = additionalData else {
             return baseDictionary
         }

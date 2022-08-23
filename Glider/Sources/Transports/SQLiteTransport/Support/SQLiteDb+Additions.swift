@@ -18,7 +18,6 @@ import CSQLite
 import SQLite3
 #endif
 
-
 extension SQLiteDb {
     
     // MARK: WAL
@@ -50,11 +49,11 @@ extension SQLiteDb {
     /// - Throws: DatabaseError
     /// - Returns: Version integer value
     public func getVersion(_ version: Version, schema: String? = nil) throws -> Int {
-        let sql:String
+        let sql: String
         sql = schemaStatement(template: "PRAGMA %@\(version.rawValue)", schema: schema)
         let stmt = try statement(sql: sql)
         guard try stmt.step() else {
-            throw DatabaseError(reason: "Error fetching version",code:-1)
+            throw DatabaseError(reason: "Error fetching version", code: -1)
         }
         return stmt.integer(column: 0)!
     }
@@ -65,11 +64,11 @@ extension SQLiteDb {
     ///
     /// - Returns: Bool
     public func hasForeignKeys() throws -> Bool {
-        let sql:String
+        let sql: String
         sql = schemaStatement(template: "PRAGMA foreign_keys;", schema: nil)
         let stmt = try statement(sql: sql)
         guard try stmt.step() else {
-            throw DatabaseError(reason: "Error fetching version",code:-1)
+            throw DatabaseError(reason: "Error fetching version", code: -1)
         }
         return stmt.integer(column: 0) == 1
     }
@@ -140,8 +139,8 @@ extension SQLiteDb {
     public func vacuum(schema: String? = nil, into: String? = nil) throws {
         let sql: String
         if let into = into {
-            let into_escaped = into.replacingOccurrences(of: "'", with: "''")
-            sql = schemaStatement(template: "VACUUM %@ INTO '\(into_escaped)'", schema: schema)
+            let intoEscaped = into.replacingOccurrences(of: "'", with: "''")
+            sql = schemaStatement(template: "VACUUM %@ INTO '\(intoEscaped)'", schema: schema)
         } else {
             sql = schemaStatement(template: "VACUUM %@", schema: schema)
         }

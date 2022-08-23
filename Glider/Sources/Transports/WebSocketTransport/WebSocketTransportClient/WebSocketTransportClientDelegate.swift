@@ -72,7 +72,6 @@ public protocol WebSocketTransportClientDelegate: AnyObject {
     func webSocketTransport(_ transport: WebSocketTransportClient,
                             didReceiveData data: SerializableData?)
     
-    
     /// Tells the delegate that the WebSocket connection viability has changed.
     ///
     /// - Parameters:

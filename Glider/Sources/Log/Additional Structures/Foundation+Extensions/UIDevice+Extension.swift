@@ -77,7 +77,6 @@ extension UIDevice {
     
 }
 
-
 // MARK: - Distribution
 
 internal enum Distribution: CustomStringConvertible {

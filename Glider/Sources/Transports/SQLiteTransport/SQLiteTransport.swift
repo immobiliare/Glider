@@ -28,7 +28,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -42,7 +42,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     public weak var delegate: SQLiteTransportDelegate?
     
     /// SQLite3 Database.
-    public let db: SQLiteDb
+    public let database: SQLiteDb
     
     /// Database user's version.
     public var databaseVersion: Int = 0
@@ -67,7 +67,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
         
         let fileExists = configuration.databaseLocation.fileExists
 
-        self.db = try SQLiteDb(configuration.databaseLocation, options: configuration.databaseOptions)
+        self.database = try SQLiteDb(configuration.databaseLocation, options: configuration.databaseOptions)
         self.databaseVersion = configuration.databaseVersion
         self.delegate = configuration.delegate
         self.queue = configuration.queue
@@ -115,11 +115,11 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
            
            // Purge old logs
            let oldestAge = Date(timeInterval: -logsLifeTimeInterval, since: Date())
-           try db.update(sql: "DELETE FROM log WHERE timestamp < \(oldestAge.timeIntervalSince1970)")
-           let countRemoved = try db.select(sql: "SELECT changes()").int64(column: 0) ?? 0
+           try database.update(sql: "DELETE FROM log WHERE timestamp < \(oldestAge.timeIntervalSince1970)")
+           let countRemoved = try database.select(sql: "SELECT changes()").int64(column: 0) ?? 0
            
            if vacuum { // vacum database
-               try db.vacuum()
+               try database.vacuum()
            }
            
            lastPurge = Date()
@@ -140,25 +140,25 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// Tables structure are created here. You can override this class and make your
     /// own tables by customizing every aspect of the storage.
     open func prepareDatabaseStructure() throws {
-        try? db.setForeignKeys(enabled: true) // enable foreign keys enforcement if available
+        try? database.setForeignKeys(enabled: true) // enable foreign keys enforcement if available
         
-        try db.update(sql: Queries.mainTable)
-        try db.update(sql: Queries.tagsTable)
-        try db.update(sql: Queries.extraTable)
+        try database.update(sql: Queries.mainTable)
+        try database.update(sql: Queries.tagsTable)
+        try database.update(sql: Queries.extraTable)
     }
     
     /// This method receive the payloads (event + formatted messages if one or more formatters are set).
     /// You can override this method to perform your own store.
     ///
     /// - Parameter payloads: payloads.
-    open func storeEventsPayloads(_ payloads: [ThrottledTransport.Payload]) throws  {
+    open func storeEventsPayloads(_ payloads: [ThrottledTransport.Payload]) throws {
         // Payloads are recorder by chunks in order to avoid too many writes.
-        let payloadStmt = try db.prepare(sql: Queries.recordEvent)
-        let tagStmt = try db.prepare(sql: Queries.recordTag)
-        let extraStmt = try db.prepare(sql: Queries.recordExtra)
+        let payloadStmt = try database.prepare(sql: Queries.recordEvent)
+        let tagStmt = try database.prepare(sql: Queries.recordTag)
+        let extraStmt = try database.prepare(sql: Queries.recordExtra)
         
         // The entire process is inside a transaction.
-        try db.updateWithTransaction {
+        try database.updateWithTransaction {
             try payloads.forEach({
                 try executeInsertPayloadStmt($0,
                                              payloadStmt: payloadStmt, tagStmt: tagStmt, extraStmt: extraStmt)
@@ -270,7 +270,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
     /// - Throws: throw an exception if something fails.
     @discardableResult
     private func migrateDatabaseIfNeeded() throws -> Bool {
-        let currentVersion = try db.getVersion(.user)
+        let currentVersion = try database.getVersion(.user)
         guard currentVersion < self.databaseVersion else {
             return false
         }
@@ -282,7 +282,7 @@ open class SQLiteTransport: Transport, ThrottledTransportDelegate {
             self.delegate?.sqliteTransport(self, schemaMigratedFromVersion: currentVersion, toVersion: self.databaseVersion)
         }
         
-        try db.setVersion(self.databaseVersion)
+        try database.setVersion(self.databaseVersion)
         return true
     }
     
@@ -413,7 +413,7 @@ extension SQLiteTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Initialization
         

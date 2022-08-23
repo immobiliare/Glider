@@ -57,6 +57,7 @@ fileprivate extension Data {
     func parseInt(size: Int) -> UInt64 {
         precondition(size > 0 && size <= 8)
         var accumulator: UInt64 = 0
+        // swiftlint:disable identifier_name
         for i in 0..<size {
             let shift = (size - i - 1) * 8
             accumulator |= UInt64(self[self.startIndex + i]) << UInt64(shift)

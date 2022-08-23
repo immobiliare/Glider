@@ -81,7 +81,6 @@ public enum Level: Int, Comparable, CaseIterable,
     
 }
 
-
 // MARK: - Extension
 
 extension Level {

@@ -24,7 +24,7 @@ internal extension NetService {
         return NetService.data(fromTXTRecord: data.mapValues { $0.data(using: .utf8) ?? Data() })
     }
 
-    func setTXTRecord(dictionary: [String: String]?){
+    func setTXTRecord(dictionary: [String: String]?) {
         guard let dictionary = dictionary else {
             self.setTXTRecord(nil)
             return

@@ -27,7 +27,7 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -81,8 +81,8 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     ///   - delegate: delegate to receive events.
     ///   - builder: builder configuration function.
     public convenience init(url urlString: String,
-                delegate: WebSocketTransportClientDelegate? = nil,
-                _ builder: ((inout Configuration) -> Void)? = nil) throws {
+                            delegate: WebSocketTransportClientDelegate? = nil,
+                            _ builder: ((inout Configuration) -> Void)? = nil) throws {
         
         guard let url = URL(string: urlString) else {
             throw GliderError(message: "Invalid WebSocket url: \(urlString)")
@@ -219,7 +219,7 @@ extension WebSocketTransportClient {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         // MARK: - Private Properties
         

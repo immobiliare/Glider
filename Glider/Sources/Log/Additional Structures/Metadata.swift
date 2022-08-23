@@ -106,5 +106,4 @@ public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
         self.values = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(rawValues) as? [String: Data?] ?? [:]
     }
     
-    
 }

@@ -1,4 +1,3 @@
-
 //
 //  Glider
 //  Fast, Lightweight yet powerful logging system for Swift.

@@ -85,6 +85,7 @@ public struct GliderSwiftLogHandler: LogHandler {
     
     // MARK: - Conformance to swift-log
     
+    // swiftlint:disable function_parameter_count
     public func log(level: Logger.Level, message: Logger.Message,
                     metadata: Logger.Metadata?,
                     source: String, file: String, function: String, line: UInt) {

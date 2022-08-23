@@ -21,12 +21,8 @@ public class TableFormatter: EventMessageFormatter {
     
     /// Fields used to format the message part of the log.
     public var messageFields: [FieldsFormatter.Field] {
-        set {
-            self.messageFormatter.fields = newValue
-        }
-        get {
-            self.messageFormatter.fields
-        }
+        get { self.messageFormatter.fields }
+        set { self.messageFormatter.fields = newValue }
     }
     
     /// Separator used to compose the message and table fields.
@@ -115,7 +111,7 @@ public class TableFormatter: EventMessageFormatter {
         
         let columnIdentifier = ASCIITable.Column { col in
             col.footer = .init({ footer in
-                footer.border = .boxDraw.heavyHorizontal
+                footer.border = .BoxDrawn.heavyHorizontal
             })
             col.header = .init(title: self.columnHeaderTitles.info, { header in
                 header.fillCharacter = " "
@@ -129,10 +125,9 @@ public class TableFormatter: EventMessageFormatter {
             col.horizontalAlignment = .leading
         }
         
-        
         let columnValues = ASCIITable.Column { col in
             col.footer = .init({ footer in
-                footer.border = .boxDraw.heavyHorizontal
+                footer.border = .BoxDrawn.heavyHorizontal
             })
             col.header = .init(title: self.columnHeaderTitles.values, { header in
                 header.fillCharacter = " "
@@ -153,6 +148,7 @@ public class TableFormatter: EventMessageFormatter {
     ///
     /// - Parameter event: event.
     /// - Returns: `[String]`
+    // swiftlint:disable cyclomatic_complexity
     open func valuesForEvent(event: Event) -> [String] {
         var contents = [String]()
         
@@ -238,11 +234,11 @@ extension FieldsFormatter.FieldIdentifier {
         case .objectMetadata:   return "Obj Metadata"
         case .object:           return "Obj"
         case .delimiter:        return nil
-        case .literal(let t):   return t
+        case .literal(let value):   return value
         case .tags:             return "Tags"
         case .extra:            return "Extra"
         case .custom:           return nil
-        case .customValue(let f): return f(nil)?.key
+        case .customValue(let function): return function(nil)?.key
         }
     }
     

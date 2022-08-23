@@ -20,18 +20,17 @@ protocol AnOptional {
 
 }
 
-extension Optional : AnOptional {
-
+extension Optional: AnOptional {
+    
     public var isNil: Bool {
-        get {
-            guard let hasValue = self.map({ (value: Wrapped) -> Bool in
-                return true
-            }) else {
-                return true
-            }
-
-            return !hasValue
+        // swiftlint:disable unused_closure_parameter
+        guard let hasValue = self.map({ (value: Wrapped) -> Bool in
+            return true
+        }) else {
+            return true
         }
+        
+        return !hasValue
     }
-
+    
 }

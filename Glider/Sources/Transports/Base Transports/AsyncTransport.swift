@@ -36,7 +36,7 @@ public class AsyncTransport: Transport {
     
     /// Minumum accepted level for this transport.
     /// `nil` means every passing message level is accepted.
-    public var minimumAcceptedLevel: Level? = nil
+    public var minimumAcceptedLevel: Level?
     
     /// Transport is enabled.
     public var isEnabled: Bool = true
@@ -47,7 +47,7 @@ public class AsyncTransport: Transport {
     // MARK: - Private Properties
     
     /// Cache for buffered messages.
-    private var db: SQLiteDb
+    private var database: SQLiteDb
     
     /// Statement for sqlite database record operastion.
     private var recordPayloadStmt: SQLiteDb.Statement?
@@ -69,7 +69,7 @@ public class AsyncTransport: Transport {
         self.minimumAcceptedLevel = configuration.minimumAcceptedLevel
 
         let fileExists = configuration.bufferStorage.fileExists
-        self.db = try SQLiteDb(configuration.bufferStorage,
+        self.database = try SQLiteDb(configuration.bufferStorage,
                                options: configuration.bufferStorageOptions)
         if !fileExists {
             try prepareDatabase()
@@ -96,7 +96,7 @@ public class AsyncTransport: Transport {
             _ = try self.store(event: event, withMessage: message, retryAttempt: 0)
             
             if self.configuration.flushOnRecord,
-               let countStoredItems = try? self.db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
+               let countStoredItems = try? self.database.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0,
                countStoredItems > self.configuration.maxEntries {
                 self.flush()
             }
@@ -119,7 +119,7 @@ public class AsyncTransport: Transport {
     /// - Returns: Int
     public func countBufferedEvents() throws -> Int {
         do {
-            return try db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0
+            return try database.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0
         } catch {
             return 0
         }
@@ -129,10 +129,10 @@ public class AsyncTransport: Transport {
     
     /// Prepare the database infrastructure.
     private func prepareDatabase() throws {
-        try db.setForeignKeys(enabled: true)
-        try db.update(sql: AsyncTransportQueries.createBufferLogTable)
+        try database.setForeignKeys(enabled: true)
+        try database.update(sql: AsyncTransportQueries.createBufferLogTable)
         
-        self.recordPayloadStmt = try db.prepare(sql: AsyncTransportQueries.recordPayload)
+        self.recordPayloadStmt = try database.prepare(sql: AsyncTransportQueries.recordPayload)
     }
     
     /// Store message in cache.
@@ -182,6 +182,7 @@ public class AsyncTransport: Transport {
         
     /// Retrive the next chunk of data and attempt to sent.
     /// - Returns: Coun events marked to sent.
+    // swiftlint:disable cyclomatic_complexity
     @discardableResult
     private func flushCache() -> Int {
         do {
@@ -260,15 +261,15 @@ public class AsyncTransport: Transport {
     
     /// Remove payloads to respect the `maxEntries` if needed.
     private func vacuumCache() throws -> Int {
-        let itemsCount = try Int(db.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0)
+        let itemsCount = try Int(database.select(sql: "SELECT COUNT(*) FROM buffer").integer(column: 0) ?? 0)
         guard itemsCount > configuration.maxEntries else {
             return itemsCount // below the maximum size
         }
         
         let limit = (itemsCount - configuration.maxEntries)
-        try db.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
+        try database.update(sql: "DELETE FROM buffer ORDER BY timestamp ASC LIMIT \(limit)")
         
-        let countRemoved = try? db.select(sql: "SELECT changes()").int64(column: 0)
+        let countRemoved = try? database.select(sql: "SELECT changes()").int64(column: 0)
         delegate?.asyncTransport(self, discardedEventsFromBuffer: countRemoved ?? 0)
         
         return limit
@@ -278,7 +279,8 @@ public class AsyncTransport: Transport {
     ///
     /// - Returns: `[CachedPayload]`
     private func fetchNextPayloadsChunk() throws -> [Payload] {
-        let result = try db.select(sql: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(configuration.chunksSize);")
+        // swiftlint:disable line_length
+        let result = try database.select(sql: "SELECT rowId, timestamp, data, message, retryAttempt FROM buffer ORDER BY timestamp ASC LIMIT \(configuration.chunksSize);")
         
         var rowIds = [String]()
         let payloads: [Payload] = result.iterateRows { _, stmt in
@@ -296,7 +298,7 @@ public class AsyncTransport: Transport {
         }
         
         // Remove from buffer.
-        try db.update(sql: "DELETE FROM buffer WHERE rowId IN (\(rowIds.joined(separator: ",")))")
+        try database.update(sql: "DELETE FROM buffer WHERE rowId IN (\(rowIds.joined(separator: ",")))")
         return payloads
     }
     
@@ -305,7 +307,7 @@ public class AsyncTransport: Transport {
     /// - Parameter stmt: statement of query from select.
     /// - Returns: (rowId, event, message, attempt)
     private func fromBufferDatabase(_ stmt: SQLiteDb.Statement) throws
-        -> (rowId: Int64, event: Event, message: SerializableData?,  attempt: Int)? {
+        -> (rowId: Int64, event: Event, message: SerializableData?, attempt: Int)? {
         guard let rowId = stmt.int64(column: 0),
               let eventData = stmt.data(column: 2),
               let attempt = stmt.integer(column: 4)
@@ -322,7 +324,7 @@ public class AsyncTransport: Transport {
 
 // MARK: - AsyncTransport.Queries
 
-fileprivate enum AsyncTransportQueries {
+private enum AsyncTransportQueries {
     
     static let createBufferLogTable = """
             CREATE TABLE IF NOT EXISTS buffer (
@@ -342,7 +344,6 @@ fileprivate enum AsyncTransportQueries {
         """
     
 }
-
 
 // MARK: - AsyncTransport.Configuration
 
@@ -391,7 +392,7 @@ extension AsyncTransport {
         
         /// Minumum accepted level for this transport.
         /// `nil` means every passing message level is accepted.
-        public var minimumAcceptedLevel: Level? = nil
+        public var minimumAcceptedLevel: Level?
         
         public init(_ builder: ((inout Configuration) -> Void)? = nil) {
             self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
@@ -420,7 +421,7 @@ public protocol AsyncTransportDelegate: AnyObject {
     ///                 key is the `event.id` while value is the error occurred.
     func asyncTransport(_ transport: AsyncTransport,
                         canSendPayloadsChunk chunk: AsyncTransport.Chunk,
-                        onCompleteSendTask completion: @escaping ((ChunkCompletionResult)  -> Void))
+                        onCompleteSendTask completion: @escaping ((ChunkCompletionResult) -> Void))
     
     /// Received when an error has occurred handling data inside the class.
     ///

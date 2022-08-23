@@ -102,6 +102,7 @@ open class FieldsFormatter: EventMessageFormatter {
 
 internal extension Event {
     
+    // swiftlint:disable cyclomatic_complexity
     func valueForFormatterField(_ field: FieldsFormatter.Field) -> Any? {
         switch field.field {
         case .timestamp(let style):

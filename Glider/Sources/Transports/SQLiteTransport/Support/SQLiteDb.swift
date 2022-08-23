@@ -18,7 +18,6 @@ import CSQLite
 import SQLite3
 #endif
 
-
 public class SQLiteDb {
     
     // MARK: - Public Properties
@@ -108,9 +107,9 @@ public class SQLiteDb {
     /// Set the busy timeout, useful for WAL mode.
     /// See [sqlite3_busy_timeout()](https://sqlite.org/c3ref/busy_timeout.html)
     ///
-    /// - Parameter ms: milleseconds for timeout
-    public func setBusyTimeout(_ ms: Int) throws {
-        try check(sqlite3_busy_timeout(self.handle, Int32(ms)))
+    /// - Parameter milliseconds: milleseconds for timeout
+    public func setBusyTimeout(_ milliseconds: Int) throws {
+        try check(sqlite3_busy_timeout(self.handle, Int32(milliseconds)))
     }
     
     public func setWalCheckpoint(mode: CheckpointMode = .passive) throws {
@@ -122,7 +121,7 @@ public class SQLiteDb {
     /// - Parameters:
     ///   - version: Version numeric value
     ///   - schema: Optional schema
-    public func setVersion(_ version:Int, schema:String? = nil) throws {
+    public func setVersion(_ version: Int, schema: String? = nil) throws {
         let sql: String
         sql = schemaStatement(template: "PRAGMA %@user_version = \(version)", schema: schema)
         try exec(sql)
@@ -184,7 +183,7 @@ public class SQLiteDb {
     /// - Throws: throw an exception if something fails executing query.
     /// - Returns: Statement
     public func select<T>(sql: String, bindTo values: [Any?]? = nil,
-                       _ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) throws -> [T] {
+                          _ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) throws -> [T] {
         let statement = try prepare(sql: sql)
         if let values = values {
             try statement.bind(values)
@@ -197,14 +196,14 @@ public class SQLiteDb {
     ///
     /// - parameter closure: Block to be executed inside transaction
     /// - throws: ErrorType
-    public func updateWithTransaction(_ closure: () throws -> ()) throws {
+    public func updateWithTransaction(_ closure: () throws -> Void) throws {
         try update(sql: "BEGIN")
         do {
             try closure()
             try update(sql: "COMMIT")
-        } catch let e {
+        } catch let error {
             try update(sql: "ROLLBACK")
-            throw e
+            throw error
         }
     }
     
@@ -231,7 +230,7 @@ public class SQLiteDb {
     /// - Throws: throw an exception if something fails executing query.
     /// - Returns: Statement.
     public func select<T>(SQL: String, bindTo values: [Any?]? = nil,
-                       _ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) throws -> [T] {
+                          _ handler: ((_ columnCount: Int32, _ stmt: Statement) -> T?)) throws -> [T] {
         let statement = try prepare(sql: SQL)
         if let values = values {
             try statement.bind(values)
@@ -248,15 +247,15 @@ public class SQLiteDb {
     ///   - template: A string format containing a single %@ sequence, to be replaced with the schema identifier if available
     ///   - schema: Optional schema name
     /// - Returns: An SQL statement with or without a schema
-    internal func schemaStatement(template:String,schema:String?) -> String{
-        let schema_prefix: String
+    internal func schemaStatement(template: String, schema: String?) -> String {
+        let schemaPrefix: String
         if let schema = schema {
-            schema_prefix = schema.appending(".")
+            schemaPrefix = schema.appending(".")
         } else {
-            schema_prefix = ""
+            schemaPrefix = ""
         }
         
-        return String(format:template,schema_prefix)
+        return String(format: template, schemaPrefix)
     }
     
     /// Execute SQL statement.
@@ -272,34 +271,34 @@ public class SQLiteDb {
     /// - Parameter sql: SQL statement
     /// - Throws: DatabaseError
     /// - Returns: A new statement associated with this database connection
-    public func statement<S: Statement>(sql:String) throws -> S {
+    public func statement<S: Statement>(sql: String) throws -> S {
         return try S(database: self, sql: sql)
     }
     
     /// Validate an operation result and throw error if it's failure.
     ///
     /// - Parameter rc: code received.
-    internal func check(_ rc:Int32) throws {
-        try type(of: self).check(rc, handle: handle)
+    internal func check(_ result: Int32) throws {
+        try type(of: self).check(result, handle: handle)
     }
     
     /// Opens a new databae connection.
     /// NOTE: The old connection is closed if open.
     private func open(location: Location, options: Options) throws {
         close()
-        var lhandle : OpaquePointer?
+        var lhandle: OpaquePointer?
         let flags: Int32 = options.openMode.rawValue | options.threadMode.flag | options.cacheMode.flag | options.protection.flag
-        let rc = sqlite3_open_v2(location.description,
+        let result = sqlite3_open_v2(location.description,
                                  &lhandle,
                                  flags, nil)
         
         defer {
-            if rc != SQLITE_OK , let handle = lhandle {
+            if result != SQLITE_OK, let handle = lhandle {
                 sqlite3_close(handle)
             }
         }
         
-        try SQLiteDb.check(rc,handle: lhandle)
+        try SQLiteDb.check(result, handle: lhandle)
         self.handle = lhandle
         
         SQLiteDb.logger?.debug?.write(msg: "Opened database: \(location.description)")
@@ -323,17 +322,17 @@ public class SQLiteDb {
     
     // MARK: - Static Functions
     
-    internal static func check(_ rc:Int32, handle:OpaquePointer?) throws {
-        guard rc == SQLITE_OK else {
-            let reason:String
+    internal static func check(_ result: Int32, handle: OpaquePointer?) throws {
+        guard result == SQLITE_OK else {
+            let reason: String
             if let handle = handle {
                 reason = String(cString: sqlite3_errmsg(handle))
             } else {
                 reason = "Unknown reason"
             }
             
-            logger?.error?.write(msg: "Check failed: \(reason) with code \(rc)")
-            throw DatabaseError(reason: reason, code: rc)
+            logger?.error?.write(msg: "Check failed: \(reason) with code \(result)")
+            throw DatabaseError(reason: reason, code: result)
         }
     }
     
