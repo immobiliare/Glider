@@ -70,7 +70,7 @@ final class LogInterpolationTests: XCTestCase {
             "Float is                45.56",
             "Float is 45.6",
             "There are 45.556km",
-            "There are 45 byte",
+            "There are 45 bytes",
             "There are 1 KB",
             "There are 2.1 MB",
             "There are 13345.5534955068",
@@ -102,7 +102,7 @@ final class LogInterpolationTests: XCTestCase {
         let log = createTestingLog(level: .trace, { event, _ in
             print(event.message.content)
             
-            XCTAssertEqual(expectedOutput[testIndex], event.message.content)
+            XCTAssertEqual(event.message.content, expectedOutput[testIndex], "Expecting \"\(expectedOutput[testIndex])\", got \"\(event.message.content)\"")
             testIndex += 1
         })
         
@@ -114,7 +114,7 @@ final class LogInterpolationTests: XCTestCase {
         log.alert?.write(msg: "Date is \(date, format: .iso8601)") // default is private
         log.alert?.write(msg: "Date is \(date, format: .iso8601, pad: .right(columns: 50), privacy: .public)")
 
-        // Float
+        // Float*/
         let float = Float(45.55643)
         log.alert?.write(msg: "Float is \(float, format: .default)") // default is private
         log.alert?.write(msg: "Float is \(float, format: .default, privacy: .public)")
@@ -129,6 +129,7 @@ final class LogInterpolationTests: XCTestCase {
         let customFormatter = NumberFormatter()
         customFormatter.maximumFractionDigits = 10
         customFormatter.groupingSeparator = "'"
+        customFormatter.decimalSeparator = "."
         log.alert?.write(msg: "There are \(13345.5534955068292334, format: .formatter(formatter: customFormatter), privacy: .public)")
         log.alert?.write(msg: "There are \(12.0, format: .currency(symbol: nil, usesGroupingSeparator: true), privacy: .public)")
 

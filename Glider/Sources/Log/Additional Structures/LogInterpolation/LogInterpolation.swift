@@ -81,22 +81,22 @@ public struct LogInterpolation: StringInterpolationProtocol {
                 message.append(String(describing: value()).trunc(trunc).privacy(privacy))
 
             case .float(let value, let format, let trunc, let pad, let privacy):
-                message.append(Double.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
+                message.append(Double.format(value: NSNumber(value: value()), format).privacy(privacy).trunc(trunc).padded(pad))
                 
             case .double(let value, let format, let trunc, let pad, let privacy):
-                message.append(Double.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
+                message.append(Double.format(value: NSNumber(value: value()), format).privacy(privacy).trunc(trunc).padded(pad))
                 
             case .signedInt(let value, let format, let trunc, let pad, let privacy):
-                message.append(Int.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
+                message.append(Int.format(value: NSNumber(value: value()), format).privacy(privacy).trunc(trunc).padded(pad))
                 
             case .unsignedInt(let value, let format, let trunc, let pad, let privacy):
-                message.append(Int.format(value: NSNumber(value: value()), format).trunc(trunc).padded(pad).privacy(privacy))
+                message.append(Int.format(value: NSNumber(value: value()), format).privacy(privacy).trunc(trunc).padded(pad))
                 
             case .bool(let value, let format, let privacy):
                 message.append(value().format(format).privacy(privacy))
                 
             case .date(let value, let format, let trunc, let pad, let privacy):
-                message.append(value().format(format).trunc(trunc).padded(pad).privacy(privacy))
+                message.append(value().format(format).privacy(privacy).trunc(trunc).padded(pad))
                 
             }
         }
