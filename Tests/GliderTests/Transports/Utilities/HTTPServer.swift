@@ -137,8 +137,12 @@ public class HTTPServer {
             return stopReceiving(for: incomingFileHandle, close: true)
         }
         
-        guard data.withUnsafeBytes({ bytes in CFHTTPMessageAppendBytes(incomingRequest, bytes, data.count) }) else {
-            return stopReceiving(for: incomingFileHandle, close: true)
+        data.withUnsafeBytes { pointer in
+            guard let bytes = pointer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                stopReceiving(for: incomingFileHandle, close: true)
+                return
+            }
+            CFHTTPMessageAppendBytes(incomingRequest, bytes, data.count)
         }
         
         guard CFHTTPMessageIsHeaderComplete(incomingRequest) else {
