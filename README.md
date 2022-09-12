@@ -65,7 +65,7 @@ logger.info?.write { // Logs an event with a set of attached details
 
 ## API Reference
 
-RealHTTP is fully documented at source-code level. You'll get autocomplete with doc inside XCode for free; moreover, you can read the full Apple's DoCC Documentation automatically generated thanks to [**Swift Package Index**](https://swiftpackageindex.com) Project from here:
+Glider is fully documented at source-code level. You'll get autocomplete with doc inside XCode for free; moreover, you can read the full Apple's DoCC Documentation automatically generated thanks to [**Swift Package Index**](https://swiftpackageindex.com) Project from here:
 
 👉 [API REFERENCE](https://swiftpackageindex.com/immobiliare/Glider)
 
