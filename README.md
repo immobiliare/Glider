@@ -63,11 +63,11 @@ logger.info?.write { // Logs an event with a set of attached details
 }
 ```
 
-# APIs References
+## API Reference
 
-APIs are thoroughly documented using Apple DoCC; you can access to the reference directly from XCode autocompletion or by visiting the domain:
+RealHTTP is fully documented at source-code level. You'll get autocomplete with doc inside XCode for free; moreover, you can read the full Apple's DoCC Documentation automatically generated thanks to [**Swift Package Index**](https://swiftpackageindex.com) Project from here:
 
-👉 [API REFERENCE](https://malcommac.github.io/Glider/)
+👉 [API REFERENCE](https://swiftpackageindex.com/immobiliare/Glider)
 
 # Guide
 
@@ -140,6 +140,12 @@ It's fully integrated with Glider and simple to use.
     - [NetSparseFilesTransport](./Documentation/NetWatcher.md#netsparsefilestransport)
     - [NetArchiveTransport](./Documentation/NetWatcher.md#netarchivetransport)
 
+# Test Suite
+
+Glider offers an extensive suite of unit tests for Glider Core Logger and third-party packages under the `/Tests` folder.
+
+Moreover, the entire package is powered by [SwiftLint](https://github.com/realm/SwiftLint) for better code quality.
+
 # Help Us!
 
 If you want to join this project, we're maintaining a list of new features we would like to implement into the following versions of Glider. 
@@ -151,18 +157,11 @@ Please open an issue and discuss one of them with us!
 
 # Requirements
 
-Glider can be installed in any platform which supports:
+Glider can be installed on any platform which supports:
 
 - iOS 14+, macOS Catalina+, watchOS 7+, tvOS 13+
 - Xcode 13.2+
 - Swift 5.5+
-
-# Tests Suite
-
-Glider offers an extensive suite of unit tests for Glider Core Logger and third party packages under the `/Tests` folder.
-
-Moreover the entire package is powered by [SwiftLint](https://github.com/realm/SwiftLint) for a better code quality.
-
 
 # Installation
 
