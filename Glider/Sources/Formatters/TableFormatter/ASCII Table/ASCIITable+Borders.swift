@@ -2,13 +2,17 @@
 //  Glider
 //  Fast, Lightweight yet powerful logging system for Swift.
 //
-//  Created by Daniele Margutti
-//  Email: <hello@danielemargutti.com>
-//  Web: <http://www.danielemargutti.com>
+//  Created & Maintained by Mobile Platforms Team @ ImmobiliareLabs.it
+//  Email: mobile@immobiliare.it
+//  Web: http://labs.immobiliare.it
 //
-//  Copyright ©2022 Daniele Margutti. All rights reserved.
+//  Authors:
+//   - Daniele Margutti <hello@danielemargutti.com>
+//
+//  Copyright ©2022 Immobiliare.it SpA.
 //  Licensed under MIT License.
 //
+
 //  The following code was inspired by <https://github.com/juri/TableDraw>.
 
 import Foundation

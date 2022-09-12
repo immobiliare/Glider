@@ -1,5 +1,8 @@
 <p align="center">
-<img src="./Documentation/assets/glider.png" alt="Glider" width="350"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./Documentation/assets/glider-dark.png" width="350">
+  <img alt="logo-library" src="./Documentation/assets/glider-light.png" width="350">
+</picture>
 </p>
 
 [![Swift](https://img.shields.io/badge/Swift-5.3_5.4_5.5_5.6-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.3_5.4_5.5_5.6-Orange?style=flat-square)
@@ -195,13 +198,12 @@ pod 'GliderLogger'
 Glider was created by the amazing mobile team at [ImmobiliareLabs](http://labs.immobiliare.it), the Tech dept at Immobiliare.it.
 We are currently using Glider for logging in to all of our products.
 
-**If you are using Glider in your app [drop us a message](mailto:mobile@immobiliare.it), we'll add below**.
-
-<a href="https://apps.apple.com/us/app/immobiiiare-it-indomio/id335948517"><img src="./Documentation/assets/immobiliare-app.png" alt="Indomio" width="270"/></a>
-
+**If you are using Glider in your app [drop us a message](mailto:mobile@immobiliare.it)**
 ## Support & Contribute
 
 Made with ❤️ by [ImmobiliareLabs](https://github.com/orgs/immobiliare) & [Contributors](https://github.com/immobiliare/Glider/graphs/contributors)
 
 We'd love for you to contribute to Glider!  
 If you have questions on using Glider, bugs, and enhancement, please feel free to reach out by opening a [GitHub Issue](https://github.com/immobiliare/Glider/issues).
+
+<a href="https://apps.apple.com/us/app/immobiiiare-it-indomio/id335948517"><img src="./Documentation/assets/immobiliarelabs.png" alt="Indomio" width="200"/></a>
