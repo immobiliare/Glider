@@ -210,4 +210,4 @@ Made with ❤️ by [ImmobiliareLabs](https://github.com/orgs/immobiliare) & [Co
 We'd love for you to contribute to Glider!  
 If you have questions on using Glider, bugs, and enhancement, please feel free to reach out by opening a [GitHub Issue](https://github.com/immobiliare/Glider/issues).
 
-<a href="https://apps.apple.com/us/app/immobiiiare-it-indomio/id335948517"><img src="./Documentation/assets/immobiliarelabs.png" alt="Indomio" width="200"/></a>
+<a href="http://labs.immobiliare.it"><img src="./Documentation/assets/immobiliarelabs.png" alt="Indomio" width="200"/></a>
