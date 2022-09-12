@@ -192,7 +192,12 @@ use_frameworks!
 
 pod 'GliderLogger'
 ```
-
+> **Note**
+> Not all packages are available via CocoaPods:
+> - GliderSwiftLog: Apple Swift-Log backend
+> - GliderELK: ELK Stack client
+> 
+> are available only in SPM.
 ## Powered Apps
 
 Glider was created by the amazing mobile team at [ImmobiliareLabs](http://labs.immobiliare.it), the Tech dept at Immobiliare.it.
