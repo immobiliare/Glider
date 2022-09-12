@@ -174,7 +174,7 @@ Once you have your Swift package set up, adding Glider as a dependency is as eas
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/malcommac/Glider.git")
+    .package(url: "https://github.com/immobiliare/Glider.git")
 ]
 ```
 
