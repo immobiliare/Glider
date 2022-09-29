@@ -17,7 +17,7 @@ var dependencies: [Package.Dependency] = [
 
 var targets: [Target] = [
     .systemLibrary(
-        name: "CSQLite",
+        name: "CSQLiteGlider",
         providers: [.apt(["libsqlite3-dev"])]
     ),
     .target(
@@ -96,7 +96,7 @@ targets.insert(contentsOf: [
     ),
     .target(
         name: "Glider",
-        dependencies: ["CSQLite"],
+        dependencies: ["CSQLiteGlider"],
         path: "Glider/Sources",
         plugins: ["SwiftLintXcode"]
     ),
@@ -105,7 +105,7 @@ targets.insert(contentsOf: [
 targets.insert(contentsOf: [
     .target(
         name: "Glider",
-        dependencies: ["CSQLite"],
+        dependencies: ["CSQLiteGlider"],
         path: "Glider/Sources"
     ),
 ], at: 1)

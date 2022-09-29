@@ -1,4 +1,4 @@
-module CSQLite [system] {
+module CSQLiteGlider [system] {
     header "shim.h"
     link "sqlite3"
     export *

@@ -16,7 +16,7 @@
 import Foundation
 
 #if os(Linux)
-import CSQLite
+import CSQLiteGlider
 #else
 import SQLite3
 #endif
