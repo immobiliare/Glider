@@ -83,17 +83,17 @@ var targets: [Target] = [
 #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
 targets.insert(contentsOf: [
     // Specify where to download the compiled swiftlint tool from
-    .binaryTarget(
-        name: "SwiftLintBinary",
-        url: "https://github.com/juozasvalancius/SwiftLint/releases/download/spm-accommodation/SwiftLintBinary-macos.artifactbundle.zip",
-        checksum: "cdc36c26225fba80efc3ac2e67c2e3c3f54937145869ea5dbcaa234e57fc3724"
-    ),
-    // Define the SPM plugin
-    .plugin(
-        name: "SwiftLintXcode",
-        capability: .buildTool(),
-        dependencies: ["SwiftLintBinary"]
-    ),
+//    .binaryTarget(
+//        name: "SwiftLintBinary",
+//        url: "https://github.com/juozasvalancius/SwiftLint/releases/download/spm-accommodation/SwiftLintBinary-macos.artifactbundle.zip",
+//        checksum: "cdc36c26225fba80efc3ac2e67c2e3c3f54937145869ea5dbcaa234e57fc3724"
+//    ),
+//    // Define the SPM plugin
+//    .plugin(
+//        name: "SwiftLintXcode",
+//        capability: .buildTool(),
+//        dependencies: ["SwiftLintBinary"]
+//    ),
     .target(
         name: "Glider",
         dependencies: ["CSQLiteGlider"],
