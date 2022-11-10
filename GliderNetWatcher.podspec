@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "GliderNetWatcher"
-  s.version      = "1.0.2"
+  s.version      = "1.0.3"
   s.summary      = "Networking monitor/sniffer for Glider Logging Service"
   s.homepage     = "https://github.com/malcommac/Glider.git"
   s.license      = { :type => "MIT", :file => "LICENSE" }
@@ -16,6 +16,6 @@ Pod::Spec.new do |s|
 
   s.module_name = "GliderNetWatcher"
   s.source_files = 'GliderNetWatcher/Sources/**/*'
-  s.dependency 'GliderLogger', '1.0.1'
+  s.dependency 'GliderLogger', '1.0.3'
 
 end
