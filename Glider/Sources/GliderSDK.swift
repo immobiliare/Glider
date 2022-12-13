@@ -23,10 +23,10 @@ public class GliderSDK {
     public static let shared = GliderSDK()
     
     /// SDK Current Version.
-    public static let version = "1.0.4"
+    public static let version = "1.1.0"
 
     /// Identifier of the package
-    public static let identifier = "com.glider-logger"
+    public static let identifier = "com.immobiliare.glider-logger"
     
     /// Locale used when formatting strings for log.
     /// By default is set to `current`.
