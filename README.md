@@ -104,7 +104,6 @@ The following manual will guide you through using Glider for your project.
 
 - [Transports](./Documentation/Transports.md#transports)
   - [Introduction](./Documentation/Transports.md#introduction)
-  - [Apple Swift-Log Integration](./Documentation/Transports.md#apple-swift-log-integration)
   - [Base Transports](./Documentation/Transports.md#base-transports)
     - [AsyncTransport](./Documentation/Transports.md#asynctransport)
     - [BufferedTransport](./Documentation/Transports.md#bufferedtransport)
@@ -122,25 +121,15 @@ The following manual will guide you through using Glider for your project.
   - [WebSocketTransport](./Documentation/Transports.md#websockettransport)
     - [WebSocketTransportClient](./Documentation/Transports.md#websockettransportclient)
     - [WebSocketTransportServer](./Documentation/Transports.md#websockettransportserver)
-- [Other Transports](./Documentation/Transports.md#other-transports)
-  - [GliderSentry](./Documentation/Transports.md#glidersentry)
-  - [GliderELKTransport](./Documentation/Transports.md#gliderelktransport)
-    - [ELK Features](./Documentation/Transports.md#elk-features)
 
-## Network Sniffer
+# Third Party Transports
 
-`NetWatcher` package offers the ability to capture your app's network traffic (including requests/responses) and redirect them to a specific transport.  
-It's fully integrated with Glider and simple to use.
+Glider is a lightweight yet extensible library. The following packages are available outside the main core of the library:
 
-- [Network Sniffer](./Documentation/NetWatcher.md#network-sniffer)
-  - [Introduction](./Documentation/NetWatcher.md#introduction)
-  - [Installation](./Documentation/NetWatcher.md#installation)
-  - [Capture Taffic](./Documentation/NetWatcher.md#capture-taffic)
-    - [NetWatcherDelegate](./Documentation/NetWatcher.md#netwatcherdelegate)
-  - [Transports](./Documentation/NetWatcher.md#transports)
-    - [NetSparseFilesTransport](./Documentation/NetWatcher.md#netsparsefilestransport)
-    - [NetArchiveTransport](./Documentation/NetWatcher.md#netarchivetransport)
-
+- [Glider-ELK](https://github.com/immobiliare/Glider-ELK): library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB)
+- [Glider-Sentry](https://github.com/immobiliare/Glider-Sentry): provides support to post log on [sentry.io](https://sentry.io/welcome/) instances using the native swift sdk.
+- [Glider-NetWatcher](https://github.com/immobiliare/Glider-NetWatcher) offers the ability to capture your app's network traffic (including requests/responses) and redirect them to a specific transport.
+- [Glider-AppleSwiftLog](https://github.com/immobiliare/Glider-AppleSwiftLog) can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).
 # Test Suite
 
 Glider offers an extensive suite of unit tests for Glider Core Logger and third-party packages under the `/Tests` folder.
@@ -160,7 +149,7 @@ Please open an issue and discuss one of them with us!
 
 Glider can be installed on any platform which supports:
 
-- iOS 14+, macOS Catalina+, watchOS 7+, tvOS 13+
+- iOS 10+, macOS Catalina+, watchOS 7+, tvOS 13+
 - Xcode 13.2+
 - Swift 5.5+
 

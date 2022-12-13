@@ -22,10 +22,6 @@
   - [WebSocketTransport](#websockettransport)
     - [WebSocketTransportClient](#websockettransportclient)
     - [WebSocketTransportServer](#websockettransportserver)
-- [Third Party Transports](#third-party-transports)
-  - [GliderSentry](#glidersentry)
-  - [GliderELKTransport](#gliderelktransport)
-    - [ELK Features](#elk-features)
 
 ## Introduction
 
@@ -70,6 +66,9 @@ LoggingSystem.bootstrap {
     return handler
 }
 ```
+
+> Glider for Apple Swift-Log is available as separate plugin in [Glider-AppleSwiftLog](https://github.com/immobiliare/Glider-AppleSwiftLog) repository.
+
 ## Base Transports
 
 Glider offers several base transport layers you can use to simplify the creation of your own transport.
@@ -401,55 +400,3 @@ Just create a `WebSocketTransportServer` transport:
 ```
 
 and use `delegate` with `WebSocketTransportServerDelegate` to listen for useful events coming from the server (connection and/or disconnection by clients or any other error).
-
-# Third Party Transports
-
-Glider also offer other transports used to connect and send events to specific destinations.  
-These transports are not part of the core package, so you need to install them along with the main library using relative podspecs or SPM packages.
-
-## GliderSentry
-
-The `GliderSentryTransport` is used to forward the messages coming from `Glider` logging system to the [Sentry](https://github.com/getsentry/sentry-cocoa) iOS official SDK.  
-When you install this package, `sentry-cocoa` is a dependency.
-
-```swift
-let sentryTransport = GliderSentryTransport {
-    // If you have not initialized the Sentry SDK yet you can pass a valid
-    // `sdkConfiguration` here and the lib will do it for you.
-    $0.sdkConfiguration = { ... }
-    $0.environment = "MyApp-Production" // set the sentry environment
-}
-
-let logger = Log {
-    $0.level = .info
-    $0.transports = [sentryTransport]
-}
-```
-
-## GliderELKTransport
-
-The `GliderELKTransport` library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB) environments.  
-
-The log entries are properly formatted, cached, and then uploaded via HTTP/HTTPS to elastic/logstash, which allows for further processing in its pipeline. The logs can then be stored in elastic/elasticsearch and visualized in elastic/kibana.  
-
-> **Note**
-> The original inspiration is from [swift-log-elk](https://github.com/Apodini/swift-log-elk) project.
-
-### ELK Features
-- Uploads the log data automatically to Logstash (e.g. the ELK stack)
-- Caches the created log entries and sends them via HTTP either periodically or when exceeding a certain configurable memory threshold to Logstash
-- Converts the logging metadata to a JSON representation, which allows querying after those values (e.g. filter after a specific parameter in Kibana)
-- Logs itself via a background activity logger (including protection against a possible infinite recursion)
-
-```swift
-let elkTransport = try GliderELKTransport(hostname: "127.0.0.1", port: 5000, delegate: self) {
-    $0.uploadInterval = TimeAmount.seconds(10)
-}
-        
-let logger = Log {
-    $0.subsystem = "com.myapp"
-    $0.category = "network"
-    $0.level = .info
-    $0.transports = [elkTransport]
-}
-```
