@@ -114,7 +114,7 @@ dependencies.append(.package(url: "https://github.com/getsentry/sentry-cocoa.git
 let package = Package(
     name: "Glider",
     platforms: [
-        .iOS(.v13), .macOS(.v11), .watchOS(.v7), .tvOS(.v14)
+        .iOS(.v10), .macOS(.v11), .watchOS(.v7), .tvOS(.v14)
     ],
     products: products,
     dependencies: dependencies,

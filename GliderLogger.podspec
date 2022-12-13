@@ -1,12 +1,12 @@
 Pod::Spec.new do |s|
   s.name         = "GliderLogger"
-  s.version      = "1.0.4"
+  s.version      = "1.1.0"
   s.summary      = "Lightweight yet powerful logging library. It's the Winston.js for Swift!"
   s.homepage     = "https://github.com/malcommac/Glider.git"
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.author             = { "Daniele Margutti" => "hello@danielemargutti.com" }
   s.social_media_url   = "https://twitter.com/danielemargutti"
-  s.ios.deployment_target = '13.0'
+  s.ios.deployment_target = '10.0'
   s.source           = {
     :git => 'https://github.com/malcommac/Glider.git',
     :tag => s.version.to_s
