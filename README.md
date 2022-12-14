@@ -153,6 +153,10 @@ Glider can be installed on any platform which supports:
 - iOS 10, macOS 10.14, macCatalyst, tvOS 13
 - Xcode 13.2
 
+> NOTE:
+> The followinG transports require newer OSs versions (iOS 13+, tvOS 13+ and macOS 10.15+):
+> RemoteTransportServer, RemoteTransportServerClient
+
 # Installation
 
 ## Swift Package Manager
