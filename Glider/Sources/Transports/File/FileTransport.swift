@@ -121,7 +121,11 @@ open class FileTransport: Transport {
     
     /// Close pointer to file handler.
     open func close() {
-        try? fileHandle?.close()
+        if #available(iOS 13.0, macOS 10.15, tvOS 13.0, *) {
+            try? fileHandle?.close()
+        } else {
+            fileHandle?.closeFile()
+        }
         fileHandle = nil
     }
     

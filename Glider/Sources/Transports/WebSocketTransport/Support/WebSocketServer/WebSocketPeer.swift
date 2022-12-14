@@ -18,7 +18,7 @@ import Foundation
 import Network
 
 /// Represent a single peer connected to the WSServer instance.
-@available(iOS, introduced: 13)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public class WebSocketPeer {
     
     // MARK: - Public properties

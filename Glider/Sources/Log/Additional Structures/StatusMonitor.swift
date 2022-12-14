@@ -48,8 +48,10 @@ extension StatusMonitor {
 
 // MARK: - Network
 
+
 extension StatusMonitor {
 
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
     internal class Network {
         
         // MARK: - Public Properties

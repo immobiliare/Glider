@@ -21,6 +21,7 @@ import XCTest
 @testable import Glider
 import CloudKit
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegate, WebSocketClientDelegate {
     
     // MARK: - Private Properties

@@ -19,6 +19,7 @@ import XCTest
 @testable import Glider
 import SwiftUI
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class SizeRotationTransportTests: XCTestCase, SizeRotationFileTransportDelegate {
     
     private var prunedFiles = 0

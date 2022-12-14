@@ -6,7 +6,7 @@
 </p>
 
 [![Swift](https://img.shields.io/badge/Swift-5.3_5.4_5.5_5.6-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.3_5.4_5.5_5.6-Orange?style=flat-square)
-[![Platform](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-4E4E4E.svg?colorA=28a745)](#installation)
+[![Platform](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20Linux-4E4E4E.svg?colorA=28a745)](#installation)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/GliderLogger.svg?style=flat-square)](https://img.shields.io/cocoapods/v/GliderLogger.svg)
 
@@ -126,10 +126,10 @@ The following manual will guide you through using Glider for your project.
 
 Glider is a lightweight yet extensible library. The following packages are available outside the main core of the library:
 
-- [Glider-ELK](https://github.com/immobiliare/Glider-ELK): library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB)
+- [Glider-AppleSwiftLog](https://github.com/immobiliare/Glider-AppleSwiftLog) can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).
+- [Glider-ELK](https://github.com/immobiliare/Glider-ELK): library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB) stacks.
 - [Glider-Sentry](https://github.com/immobiliare/Glider-Sentry): provides support to post log on [sentry.io](https://sentry.io/welcome/) instances using the native swift sdk.
 - [Glider-NetWatcher](https://github.com/immobiliare/Glider-NetWatcher) offers the ability to capture your app's network traffic (including requests/responses) and redirect them to a specific transport.
-- [Glider-AppleSwiftLog](https://github.com/immobiliare/Glider-AppleSwiftLog) can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).
 # Test Suite
 
 Glider offers an extensive suite of unit tests for Glider Core Logger and third-party packages under the `/Tests` folder.
@@ -149,9 +149,9 @@ Please open an issue and discuss one of them with us!
 
 Glider can be installed on any platform which supports:
 
-- iOS 10+, macOS Catalina+, watchOS 7+, tvOS 13+
-- Xcode 13.2+
-- Swift 5.5+
+- Swift 5.0
+- iOS 10, macOS 10.14, macCatalyst, tvOS 13
+- Xcode 13.2
 
 # Installation
 
@@ -181,12 +181,7 @@ use_frameworks!
 
 pod 'GliderLogger'
 ```
-> **Note**
-> Not all packages are available via CocoaPods:
-> - [GliderSwiftLog](https://github.com/immobiliare/Glider/tree/main/GliderSwiftLog/Sources): Apple Swift-Log backend
-> - [GliderELK](https://github.com/immobiliare/Glider/tree/main/GliderELK/Sources): ELK stack client
-> 
-> are available only via SPM.
+
 ## Powered Apps
 
 Glider was created by the amazing mobile team at [ImmobiliareLabs](http://labs.immobiliare.it), the Tech dept at Immobiliare.it.

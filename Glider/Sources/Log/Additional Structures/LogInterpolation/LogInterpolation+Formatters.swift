@@ -105,7 +105,12 @@ extension Double {
             formatter.includesUnit = true
             formatter.isAdaptive = true
             formatter.countStyle = style
-            return formatter.string(from: .init(value: value.doubleValue, unit: .bytes)).removeGroupingSeparatorAndUseDotDecimal()
+            if #available(iOS 13.0, macOS 10.15, tvOS 13, *) {
+                return formatter.string(from: .init(value: value.doubleValue, unit: .bytes)).removeGroupingSeparatorAndUseDotDecimal()
+            } else {
+                // Fallback on earlier versions
+                return formatter.string(fromByteCount: value.int64Value).removeGroupingSeparatorAndUseDotDecimal()
+            }
             
         case .currency(let symbol, let usesGroupingSeparator):
             let currencyFormatter = NumberFormatter()

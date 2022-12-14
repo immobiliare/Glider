@@ -18,6 +18,7 @@ import Foundation
 import XCTest
 @testable import Glider
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     
     var countWrittenPayloads: Int = 0

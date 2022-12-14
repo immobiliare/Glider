@@ -18,6 +18,7 @@ import Foundation
 import Network
 
 /// `WebSocketTransportClientDelegate` allows to receive notifications from a `WebSocketTransportClient`.
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public protocol WebSocketTransportClientDelegate: AnyObject {
     
     // MARK: - Connection Related

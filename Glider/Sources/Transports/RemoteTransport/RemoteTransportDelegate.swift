@@ -19,6 +19,7 @@ import Network
 
 /// You can implement the following method in order to receive important information
 /// about the status and the events of the `RemoteTransport` instance during its lifecycle.
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public protocol RemoteTransportDelegate: AnyObject {
  
     // MARK: - General

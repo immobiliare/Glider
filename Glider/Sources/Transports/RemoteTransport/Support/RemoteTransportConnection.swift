@@ -17,6 +17,7 @@ import Foundation
 #if canImport(Network)
 import Network
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransport {
     
     /// Identify a connection server which will receive messages from the transport.
@@ -216,6 +217,7 @@ extension RemoteTransport {
 
 /// This is the internal protocol used to exchange messages between the `RemoteTransport`
 /// and their `Connection` instances.
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 internal protocol RemoteTransportConnectionDelegate: AnyObject {
     
     /// Triggered when a connection did change its state.

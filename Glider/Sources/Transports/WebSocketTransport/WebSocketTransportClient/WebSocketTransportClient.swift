@@ -19,7 +19,7 @@ import Network
 
 /// The `WebSocketTransportClient` is used to transport messages to a websocket compliant server.
 /// Each message is transmitted to the server directly on record.
-@available(iOS, introduced: 13)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
     public typealias Payload = (event: Event, message: SerializableData?)
     
@@ -186,6 +186,7 @@ public class WebSocketTransportClient: Transport, WebSocketClientDelegate {
 
 // MARK: - Configuration
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension WebSocketTransportClient {
     
     public struct Configuration {

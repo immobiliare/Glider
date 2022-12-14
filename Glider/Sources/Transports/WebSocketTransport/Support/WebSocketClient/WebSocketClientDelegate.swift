@@ -18,7 +18,7 @@ import Foundation
 import Network
 
 /// Defines a delegate for a websocket connection.
-@available(iOS, introduced: 13)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public protocol WebSocketClientDelegate: AnyObject {
     
     /// Tells the delegate that the WebSocket did connect successfully.

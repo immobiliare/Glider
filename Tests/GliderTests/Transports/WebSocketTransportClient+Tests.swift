@@ -13,7 +13,7 @@
 //  Licensed under MIT License.
 //
 
-#if os(iOS) || os(watchOS) || os(tvOS)
+#if os(iOS) || os(tvOS)
 import Foundation
 import Network
 import CoreGraphics
@@ -24,6 +24,7 @@ import XCTest
 @testable import Glider
 import CloudKit
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSocketTransportClientDelegate {
     
     private var server: WebSocketServer?

@@ -20,6 +20,7 @@ import Network
 /// This is the delegate protocol which allows you to read important data about
 /// the lifecycle of `RemoteTransportServer`, a typical destination for
 /// `RemoteTransport` protocol which you will implement in your client.
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public protocol RemoteTransportServerDelegate: AnyObject {
     
     /// Triggered when server did start publishing its service over the network.

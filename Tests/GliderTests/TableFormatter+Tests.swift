@@ -46,8 +46,7 @@ extension String {
     }
 }
 
-
-
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class TableFormattersTest: XCTestCase {
 
     /// The following test check if the `TableFormatter` return valid values

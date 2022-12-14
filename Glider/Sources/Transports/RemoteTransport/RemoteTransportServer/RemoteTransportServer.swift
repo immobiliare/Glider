@@ -19,9 +19,7 @@ import Foundation
 import Network
 #if os(iOS) || os(tvOS)
 import UIKit
-#elseif os(watchOS)
-import WatchKit
-#else
+#elseif os(macOS)
 import AppKit
 #endif
 
@@ -29,6 +27,7 @@ import AppKit
 /// from the `RemoteTransport` transport. We are using it in testing phase while
 /// a more complete implementation is used by the GliderViewer app to provide
 /// a server where SDKs can connect and send messages.
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public class RemoteTransportServer {
     
     // MARK: - Public Properties
@@ -92,8 +91,6 @@ public class RemoteTransportServer {
     public static func currentMachineName() -> String {
         #if os(iOS) || os(tvOS)
         return UIDevice.current.name
-        #elseif os(watchOS)
-        return WKInterfaceDevice.current()
         #else
         return Host.current().localizedName ?? "Unknown"
         #endif
@@ -232,6 +229,7 @@ public class RemoteTransportServer {
 
 // MARK: - RemoteTransportConnectionDelegate
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransportServer: RemoteTransportConnectionDelegate {
     
     public func connection(_ connection: RemoteTransport.Connection, didChangeState newState: NWConnection.State) {
@@ -271,6 +269,7 @@ extension RemoteTransportServer: RemoteTransportConnectionDelegate {
 
 // MARK: - ConnectionId
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransportServer {
     
     fileprivate struct ConnectionId: Hashable {

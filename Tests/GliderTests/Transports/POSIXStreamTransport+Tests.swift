@@ -17,6 +17,7 @@ import Foundation
 import XCTest
 @testable import Glider
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate {
     
     var stdListener: POSIXStreamListener?
@@ -178,8 +179,13 @@ public class POSIXStreamListener {
         let fileName = streamType.fileName
         freopen(fileName, "a", file)
         
-        try inputPipe?.fileHandleForWriting.close()
-        try inputPipe?.fileHandleForReading.close()
+        if #available(iOS 13.0, tvOS 13.0, *) {
+            try inputPipe?.fileHandleForWriting.close()
+            try inputPipe?.fileHandleForReading.close()
+        } else {
+            inputPipe?.fileHandleForWriting.closeFile()
+            inputPipe?.fileHandleForReading.closeFile()
+        }
         
         inputPipe!.fileHandleForReading.readabilityHandler = nil
         inputPipe = nil

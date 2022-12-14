@@ -19,7 +19,7 @@ import Network
 
 // MARK: - WebSocketClient
 
-@available(iOS, introduced: 13)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 open class WebSocketClient {
     
     // MARK: - Public properties
@@ -447,6 +447,7 @@ open class WebSocketClient {
 
 private var _intentionalDisconnection: Bool = false
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 internal extension NWConnection {
 
     var intentionalDisconnection: Bool {

@@ -19,6 +19,7 @@ import XCTest
 @testable import Glider
 import CloudKit
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
     
     var numberOfEvents = 100
@@ -74,6 +75,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
     
 }
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 class ThrottledTransportTestsFlush: XCTestCase, ThrottledTransportDelegate {
 
     var numberOfEvents = 100

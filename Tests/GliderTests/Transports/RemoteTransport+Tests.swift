@@ -20,6 +20,7 @@ import Network
 import XCTest
 @testable import Glider
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
     
     // MARK: - Private Properties
@@ -125,6 +126,7 @@ class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
 
 // MARK: - RemoteTransportReconnectClientTests
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class RemoteTransportReconnectClientTests: RemoteTransportTests {
     
     private var connectionClosed = false
@@ -198,6 +200,7 @@ final class RemoteTransportReconnectClientTests: RemoteTransportTests {
 
 // MARK: - RemoteTransportReconnectServerTests
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class RemoteTransportReconnectServerTests: RemoteTransportTests {
     
     private var connectionClosed = false

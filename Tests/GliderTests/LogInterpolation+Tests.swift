@@ -18,6 +18,7 @@ import Foundation
 import XCTest
 @testable import Glider
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class LogInterpolationTests: XCTestCase {
     
     private let user = LogInterpolationUser(name: "Mark", surname: "Howens", email: "mark.howens@gmail.com", creditCardCVV: 4566)

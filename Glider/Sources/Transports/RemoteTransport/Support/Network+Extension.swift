@@ -19,6 +19,7 @@ import Network
 
 // MARK: - NWBrowser.Result
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension NWBrowser.Result {
     
     internal var name: String? {
@@ -72,6 +73,7 @@ fileprivate extension Data {
 
 // MARK: - NWListener.State
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension NWListener.State {
     
     public var description: String {

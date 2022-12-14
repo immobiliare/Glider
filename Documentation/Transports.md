@@ -141,9 +141,9 @@ let logger = Log {
 ## OSLogTransport
 
 > **Note**
-> Available on macOS, iOS, watchOS and tvOS. Use POSIXTransport on Linux.
+> Available on macOS, iOS and tvOS. Use POSIXTransport on Linux.
 
-The `OSLogTransport` is an implemention of the `Transport` protocol that records log entries using the new unified logging system available s of iOS 10.0, macOS 10.12, tvOS 10.0, and watchOS 3.0.
+The `OSLogTransport` is an implemention of the `Transport` protocol that records log entries using the new unified logging system available s of iOS 10.0, macOS 10.12, tvOS 10.0.
 
 More [informations here](https://developer.apple.com/documentation/os/logging).
 

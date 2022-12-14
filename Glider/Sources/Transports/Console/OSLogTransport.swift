@@ -13,14 +13,14 @@
 //  Licensed under MIT License.
 //
 
-#if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
+#if os(iOS) || os(tvOS) || os(macOS)
 import Foundation
 import Darwin.C.stdio
 import os.log
 
 /// The `OSLogTransport` is an implemention of the `Transport` protocol that
 /// records log entries using the new unified logging system available
-/// as of iOS 10.0, macOS 10.12, tvOS 10.0, and watchOS 3.0.
+/// as of iOS 10.0, macOS 10.12, tvOS 10.0.
 ///
 /// Read more [here](https://developer.apple.com/documentation/os/logging).
 open class OSLogTransport: Transport {
@@ -49,7 +49,7 @@ open class OSLogTransport: Transport {
     ///
     /// - Parameter configuration: configuration.
     public init?(configuration: Configuration) throws {
-        guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, watchOS 3.0, *) else {
+        guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, *) else {
             throw GliderError(message: "OSLog is not supported in this platform")
         }
         
@@ -71,7 +71,7 @@ open class OSLogTransport: Transport {
     // MARK: - Conformance
     
     public func record(event: Event) -> Bool {        
-        guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, watchOS 3.0, *) else {
+        guard #available(iOS 10.0, macOS 10.12, tvOS 10.0, *) else {
             // things should never get this far; failable initializers should prevent this condition
             print("os.log module not supported on this platform")
             return false

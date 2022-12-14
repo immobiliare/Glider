@@ -1,4 +1,4 @@
-// swift-tools-version: 5.5
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Glider",
     platforms: [
-        .iOS(.v10), .macOS(.v11), .watchOS(.v7), .tvOS(.v14)
+        .iOS(.v10), .macOS(.v10_14), .tvOS(.v12)
     ],
     products: [
         .library(name: "Glider", targets: ["Glider"])

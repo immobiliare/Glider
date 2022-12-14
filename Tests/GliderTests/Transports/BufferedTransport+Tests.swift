@@ -18,9 +18,10 @@ import Foundation
 import XCTest
 @testable import Glider
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class BufferedTransportTests: XCTestCase {
     
-    func tests_bufferedTransport() async throws {        
+    func tests_bufferedTransport() async throws {
         let format = FieldsFormatter(fields: [
             .message({
                 $0.truncate = .head(length: 10)

@@ -18,7 +18,7 @@ import Foundation
 import Network
 
 /// `WebSocketTransportServerDelegate` allows to receive notifications from a `WebSocketTransportServer`.
-@available(iOS, introduced: 13)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public protocol WebSocketTransportServerDelegate: AnyObject {
     
     // MARK: - Bonjour Advertising Related

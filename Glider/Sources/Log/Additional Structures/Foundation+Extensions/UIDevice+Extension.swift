@@ -15,7 +15,20 @@
 
 import Foundation
 
-#if os(iOS) || os(tvOS) || os(watchOS)
+#if os(iOS)
+
+extension UIDevice {
+    
+    var isCharging: Bool {
+        isBatteryMonitoringEnabled = true
+        return batteryState != .unplugged
+    }
+    
+}
+
+#endif
+
+#if os(iOS) || os(tvOS)
 import UIKit
 
 extension UIDevice {
@@ -26,11 +39,6 @@ extension UIDevice {
         #else
         false
         #endif
-    }
-    
-    var isCharging: Bool {
-        isBatteryMonitoringEnabled = true
-        return batteryState != .unplugged
     }
     
     var distribution: Distribution {
@@ -114,6 +122,10 @@ extension UIUserInterfaceIdiom: CustomStringConvertible {
     }
     
 }
+
+#endif
+
+#if os(iOS)
 
 // MARK: - UIDeviceOrientation
 

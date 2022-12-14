@@ -35,6 +35,7 @@ import Network
 /// </array>
 /// ```
 /// 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public class RemoteTransport: Transport {
     
     // MARK: - Public Properties
@@ -419,6 +420,7 @@ public class RemoteTransport: Transport {
 
 // MARK: - RemoteTransport Connection Manager
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransport: RemoteTransportConnectionDelegate {
     
     public func connection(_ connection: Connection, didChangeState newState: NWConnection.State) {

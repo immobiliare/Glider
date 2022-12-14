@@ -15,7 +15,7 @@
 
 import Foundation
 
-#if os(iOS) || os(tvOS) || os(watchOS)
+#if os(iOS) || os(tvOS)
 import UIKit
 #endif
 
@@ -322,7 +322,7 @@ final class FormattersTest: XCTestCase {
         XCTAssertEqual(globalTagsValue, "valueTag")
     }
     
-    #if os(iOS) || os(tvOS) || os(watchOS)
+    #if os(iOS) || os(tvOS)
     /// This test the `JSONFormatter` encoding an `UIImage` and checking the result along with the metadata associated.
     func test_jsonFormatterWithBase64ImageEncoded() throws {
         let fileURL = URL.temporaryFileURL()
@@ -592,7 +592,7 @@ fileprivate struct UserTest: SerializableObject, Codable {
     public var role: String?
 }
 
-#if os(iOS) || os(tvOS) || os(watchOS)
+#if os(iOS) || os(tvOS)
 
 fileprivate extension UIImage {
     

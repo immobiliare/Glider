@@ -15,6 +15,7 @@
 
 import Foundation
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransport {
     
     /// Represent the configuration settings used to create a new `RemoteTransport` instance.

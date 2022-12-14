@@ -15,6 +15,7 @@
 
 import Foundation
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransportServer {
     
     /// Identify a client connected to the server.
@@ -134,6 +135,7 @@ extension RemoteTransportServer {
     
 }
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransportServer {
     
     public struct ClientId: Hashable {

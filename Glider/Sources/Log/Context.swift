@@ -14,7 +14,7 @@
 //
 
 import Foundation
-#if os(iOS) || os(tvOS) || os(watchOS)
+#if os(iOS) || os(tvOS)
 import UIKit
 #endif
 
@@ -152,15 +152,17 @@ internal class ContextsData {
     }
     
     private func updateOSDynamicAttributes() {
-        #if os(macOS)
-        os[.theme] = (NSAppearance.current?.name == .aqua ? "light": "dark")
-        #else
-        os[.theme] = (UITraitCollection.current.userInterfaceStyle == .dark ? "dark" : "light")
-        #endif
+        if #available(iOS 13.0, *) {
+#if os(macOS)
+            os[.theme] = (NSAppearance.current?.name == .aqua ? "light": "dark")
+#elseif os(iOS)
+            os[.theme] = (UITraitCollection.current.userInterfaceStyle == .dark ? "dark" : "light")
+#endif
+        }
     }
     
     private func setupDeviceStaticAttributes() {
-        #if os(iOS) || os(tvOS) || os(watchOS)
+        #if os(iOS) || os(tvOS)
         device[.hostname] = UIDevice.current.name
         device[.family] = UIDevice.current.userInterfaceIdiom.description
         device[.model] = UIDevice.current.model
@@ -177,14 +179,16 @@ internal class ContextsData {
     }
     
     private func updateDeviceDynamicAttributes() {
-        #if os(iOS) || os(tvOS) || os(watchOS)
+        #if os(iOS)
         device[.orientation] = UIDevice.current.orientation.description
         device[.charging] = UIDevice.current.isCharging.description
         device[.battery_level] = (UIDevice.current.isBatteryMonitoringEnabled ? UIDevice.current.batteryLevel.description : "0")
         #endif
         
         // Other
-        device[.online] = StatusMonitor.Network.current.isNetworkAvailable().description
+        if #available(iOS 13.0, macOS 10.15, tvOS 13.0, *) {
+            device[.online] = StatusMonitor.Network.current.isNetworkAvailable().description
+        }
         device[.timezone] = TimeZone.current.identifier
 
         // Disk

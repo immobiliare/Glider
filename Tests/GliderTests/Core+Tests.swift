@@ -16,6 +16,7 @@
 import XCTest
 @testable import Glider
 
+@available(iOS 13.0.0, tvOS 13.0, *)
 final class CoreTests: XCTestCase {
     
     /// The following test validate the use of `Message` construct to produce
@@ -463,7 +464,7 @@ final class CoreTests: XCTestCase {
         
     }
     
-#if os(iOS) || os(tvOS) || os(watchOS)
+#if os(iOS) || os(tvOS)
     /// The following tests check if automatic encoding of `UIImage` works properly.
     func test_eventObjectSerializationWithUIImage() async throws {
         let imageData = try! Data(contentsOf: URL(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Wikisource-logo.png/360px-Wikisource-logo.png")!)

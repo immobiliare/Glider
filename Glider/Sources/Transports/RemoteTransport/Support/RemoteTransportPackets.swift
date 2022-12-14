@@ -17,12 +17,11 @@ import Foundation
 
 #if os(iOS) || os(tvOS)
 import UIKit
-#elseif os(watchOS)
-import WatchKit
 #elseif os(macOS)
 import AppKit
 #endif
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransport {
     
     /// Packet presets code.
@@ -45,6 +44,7 @@ extension RemoteTransport {
 
 // MARK: - RemoteTransportPacket
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public protocol RemoteTransportPacket {
     var code: RemoteTransport.PacketCode { get }
     
@@ -61,6 +61,7 @@ public protocol RemoteTransportPacket {
     
 }
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransport {
     
     /// The following packet encapsulate the logic of a `Glider.Event`.
@@ -174,16 +175,6 @@ extension RemoteTransport {
                     systemName: device.systemName,
                     systemVersion: device.systemVersion
                 )
-                #elseif os(watchOS)
-                let device = WKInterfaceDevice.current()
-                self.deviceId = device.identifierForVendor
-                self.deviceInfo = DeviceInfo(
-                    name: device.name,
-                    model: device.model,
-                    localizedModel: device.localizedModel,
-                    systemName: device.systemName,
-                    systemVersion: device.systemVersion
-                )
                 #else
                 self.deviceId = nil
                 self.deviceInfo = DeviceInfo(
@@ -230,6 +221,7 @@ extension RemoteTransport {
     
 }
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension RemoteTransport {
     
     // MARK: - RemoteEvent

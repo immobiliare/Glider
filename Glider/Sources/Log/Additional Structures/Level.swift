@@ -14,7 +14,7 @@
 //
 
 import Foundation
-#if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
+#if os(iOS) || os(tvOS) || os(macOS)
 import os.log
 #endif
 
@@ -115,7 +115,7 @@ extension Level {
         return self.rawValue < minLevel.rawValue
     }
     
-    #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
+    #if os(iOS) || os(tvOS) || os(macOS)
     /// Return the os_log compatible representation of the severity level.
     ///
     /// NOTE:

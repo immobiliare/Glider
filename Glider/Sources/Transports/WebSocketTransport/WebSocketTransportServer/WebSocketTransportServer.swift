@@ -19,7 +19,7 @@ import Network
 
 /// The `WebSocketTransport` is used to dispatch received messages to any connected websocket client.
 /// Each message is transmitted to the server directly on record.
-@available(iOS, introduced: 13)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 public class WebSocketTransportServer: Transport, WebSocketServerDelegate, BonjourPublisherDelegate {
     
     // MARK: - Public Properties
@@ -221,6 +221,7 @@ public class WebSocketTransportServer: Transport, WebSocketServerDelegate, Bonjo
 
 // MARK: - WebSocketTransportServer.Configuration
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, macCatalyst 13.0, *)
 extension WebSocketTransportServer {
     
     public struct Configuration {
