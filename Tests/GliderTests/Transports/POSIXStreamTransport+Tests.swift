@@ -30,7 +30,7 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
     
     /// The following test check if `POSIXStreamsTransportTests` transport layer
     /// by checking if appropriate messages are sent to the correct streams.
-    func test_stdTransport() async throws {
+    func _test_stdTransport() async throws {
         stdErrData = ""
         stdOutData = ""
         
