@@ -111,7 +111,7 @@ final class LogInterpolationTests: XCTestCase {
         })
         
         // Date
-        let date = createDateWithString("09-12-2018 14:11")!
+        let date = createDateWithString("09-12-2018 12:11")!
         log.alert?.write(msg: "Date is \(date, format: .iso8601, privacy: .public)")
         log.alert?.write(msg: "Date is \(date, format: .custom("dd.MM.yy"), privacy: .public)")
         log.alert?.write(msg: "Date is \(date, format: .custom("dd.MM.yy"), privacy: .partiallyHide)")
@@ -184,6 +184,7 @@ final class LogInterpolationTests: XCTestCase {
     private func createDateWithString(_ value: String) -> Date? {
         let format = DateFormatter()
         format.locale = Locale(identifier: "en_US")
+        format.timeZone = TimeZone(secondsFromGMT: 0)
         format.dateFormat = "MM-dd-yyyy HH:mm"
         return format.date(from: value)
     }
