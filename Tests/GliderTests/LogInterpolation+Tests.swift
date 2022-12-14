@@ -183,7 +183,7 @@ final class LogInterpolationTests: XCTestCase {
     
     private func createDateWithString(_ value: String) -> Date? {
         let format = DateFormatter()
-        format.locale = Locale(identifier: "EN")
+        format.locale = Locale(identifier: "en_US")
         format.dateFormat = "MM-dd-yyyy HH:mm"
         return format.date(from: value)
     }
