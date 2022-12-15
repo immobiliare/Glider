@@ -72,8 +72,13 @@ public struct User: Codable {
         try container.encodeIfPresent(self.ipAddress, forKey: .ipAddress)
         
         if let encodableDict: [String: Data?] = data?.mapValues({ $0.asData() }) {
-            let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableDict, requiringSecureCoding: false)
-            try container.encode(rawData, forKey: .data)
+            if #available(iOS 11.0, *) {
+                let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableDict, requiringSecureCoding: false)
+                try container.encode(rawData, forKey: .data)
+            } else {
+                let rawData = NSKeyedArchiver.archivedData(withRootObject: encodableDict)
+                try container.encode(rawData, forKey: .data)
+            }
         }
     }
     

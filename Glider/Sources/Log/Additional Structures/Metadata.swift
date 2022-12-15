@@ -103,8 +103,13 @@ public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let encodableExtraDict: [String: Data?] = values.mapValues({ $0?.asData() })
 
-        let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableExtraDict, requiringSecureCoding: false)
-        try container.encode(rawData, forKey: .values)
+        if #available(iOS 11.0, *) {
+            let rawData = try NSKeyedArchiver.archivedData(withRootObject: encodableExtraDict, requiringSecureCoding: false)
+            try container.encode(rawData, forKey: .values)
+        } else {
+            let rawData = NSKeyedArchiver.archivedData(withRootObject: encodableExtraDict)
+            try container.encode(rawData, forKey: .values)
+        }
     }
     
     public init(from decoder: Decoder) throws {
