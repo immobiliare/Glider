@@ -74,7 +74,7 @@ final class LogInterpolationTests: XCTestCase {
             "Float is                45.56",
             "Float is 45.6",
             "There are 45.556km",
-            "There are 45 bytes",
+            "There are 45 byte",
             "There are 1 KB",
             "There are 2.1 MB",
             "There are 13345.5534955068",

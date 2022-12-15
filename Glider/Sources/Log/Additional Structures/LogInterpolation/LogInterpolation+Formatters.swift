@@ -133,7 +133,7 @@ extension Double {
 extension String {
     
     fileprivate func removeGroupingSeparatorAndUseDotDecimal() -> String {
-        return self.replacingOccurrences(of: ",", with: ".")
+        self.replacingOccurrences(of: ",", with: ".")
     }
     
 }
