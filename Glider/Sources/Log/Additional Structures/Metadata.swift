@@ -67,7 +67,12 @@ public struct Metadata: Codable, ExpressibleByDictionaryLiteral {
     ///
     /// - Returns: `String`
     public func asString() -> String? {
-        let json = try? JSONSerialization.data(withJSONObject: self, options: .sortedKeys)
+        var json: Data?
+        if #available(iOS 11.0, *) {
+            json = try? JSONSerialization.data(withJSONObject: self, options: .sortedKeys)
+        } else {
+            json = try? JSONSerialization.data(withJSONObject: self)
+        }
         return json?.asString()
     }
     

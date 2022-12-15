@@ -28,13 +28,13 @@ That's the right job for logging: logged data provide valuable information that 
 We loved making this open-source package and would see engineers like you using this software.  
 Those are five reasons you will love Glider:
 
-- 🧩 14+ built-in, fully customizable transports to store your data ([ELK](https://github.com/malcommac/Glider/tree/main/GliderELK/Sources), [HTTP](https://github.com/malcommac/Glider/blob/main/Glider/Sources/Transports/HTTPTransport/HTTPTransport.swift), [Logstash](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/LogstashTransport), [SQLite](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/SQLiteTransport), [WebSocket](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/WebSocketTransport), [Console](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/Console), [File/Rotating Files](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File), [POSIX](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Transports/File/POSIXTransports), [swift-log](https://github.com/malcommac/Glider/tree/main/GliderSwiftLog/Sources), [sentry.io](https://github.com/malcommac/Glider/tree/main/GliderSentry/Sources)...)
-- ✏️ 7+ customizable formatters for log messages ([JSON](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/JSONFormatter), [Fields based](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/FieldsFormatter)), [MsgPack](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/MsgPackFormatter), [Syslog](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/SysLogFormatter))...)
+- 🧩 14+ built-in, fully customizable transports to store your data ([ELK](https://github.com/immobiliare/Glider-ELK), [HTTP](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/HTTPTransport), [Logstash](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/LogstashTransport), [SQLite](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/SQLiteTransport), [WebSocket](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/WebSocketTransport), [Console](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/Console), [File/Rotating Files](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/File), [POSIX](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Transports/File/POSIXTransports), [swift-log](https://github.com/immobiliare/Glider-AppleSwiftLog), [sentry.io](https://github.com/immobiliare/Glider-Sentry)...)
+- ✏️ 7+ customizable formatters for log messages ([JSON](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Formatters/JSONFormatter), [Fields based](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Formatters/FieldsFormatter)), [MsgPack](https://github.com/immobiliare/Glider/tree/main/Glider/Sources/Formatters/MsgPackFormatter), [Syslog](https://github.com/malcommac/Glider/tree/main/Glider/Sources/Formatters/SysLogFormatter))...)
 - 🚀 A simple API set with an extensible architecture to suit your need
-- 📚 A fully documented code (check out our DoCC site!)
+- 📚 A fully documented code via Apple's DocC ([link](https://swiftpackageindex.com/immobiliare/Glider))
 - ⚙️ An extensive unit test suite
   
-# One Line Implementation
+# One line implementation
 
 Creating a logger is simple.  
 Each logger is an instance of the `Log` class; typically, you need to specify one or more transports (where the data is stored).
@@ -79,8 +79,8 @@ A separate transport is able to capture automatically every network request and 
 
 <p align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./Documentation/assets/transports-dark.png" width="840">
-  <img alt="logo-library" src="./Documentation/assets/transports-light.png" width="840">
+  <source media="(prefers-color-scheme: dark)" srcset="./Documentation/assets/transports-list-dark.png" width="840">
+  <img alt="logo-library" src="./Documentation/assets/transports-list-light.png" width="840">
 </picture>
 </p>
 

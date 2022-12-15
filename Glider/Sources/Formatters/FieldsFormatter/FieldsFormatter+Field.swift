@@ -763,7 +763,12 @@ extension FieldsFormatter {
                     return nil
                 }
                 
-                let json = try? JSONSerialization.data(withJSONObject: serializableDictionary, options: .sortedKeys)
+                var json: Data?
+                if #available(iOS 11.0, *) {
+                    json = try? JSONSerialization.data(withJSONObject: serializableDictionary, options: .sortedKeys)
+                } else {
+                    json = try? JSONSerialization.data(withJSONObject: serializableDictionary)
+                }
                 return json?.asString()
             case let arrayValue as [Any?]:
                 guard arrayValue.isEmpty == false else {
