@@ -65,6 +65,14 @@ logger.info?.write { // Logs an event with a set of attached details
 
 ## Transports
 
+This the list of transport services officially supported.  
+Third party transports are available into the following separate repositories:
+
+- [Glider-AppleSwiftLog](https://github.com/immobiliare/Glider-AppleSwiftLog) can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).
+- [Glider-ELK](https://github.com/immobiliare/Glider-ELK): library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB) stacks.
+- [Glider-Sentry](https://github.com/immobiliare/Glider-Sentry): provides support to post log on [sentry.io](https://sentry.io/welcome/) instances using the native swift sdk.
+- [Glider-NetWatcher](https://github.com/immobiliare/Glider-NetWatcher) offers the ability to capture your app's network traffic (including requests/responses) and redirect them to a specific transport.
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./Documentation/assets/transports-dark.png" width="840">
@@ -131,14 +139,6 @@ The following manual will guide you through using Glider for your project.
     - [WebSocketTransportClient](./Documentation/Transports.md#websockettransportclient)
     - [WebSocketTransportServer](./Documentation/Transports.md#websockettransportserver)
 
-# Third Party Transports
-
-Glider is a lightweight yet extensible library. The following packages are available outside the main core of the library:
-
-- [Glider-AppleSwiftLog](https://github.com/immobiliare/Glider-AppleSwiftLog) can also work as a backend for [apple/swift-log](https://github.com/apple/swift-log/).
-- [Glider-ELK](https://github.com/immobiliare/Glider-ELK): library provides a logging transport for glider and [ELK](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-EMEA-S-Exact&gambit=Stack-ELK&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQjwjIKYBhC6ARIsAGEds-I1kAzd4o5RdmCR0U4yXPL4QFQXBCn1bRn-MjwZV0fkSXuFIIJ6VcwaAo1AEALw_wcB) stacks.
-- [Glider-Sentry](https://github.com/immobiliare/Glider-Sentry): provides support to post log on [sentry.io](https://sentry.io/welcome/) instances using the native swift sdk.
-- [Glider-NetWatcher](https://github.com/immobiliare/Glider-NetWatcher) offers the ability to capture your app's network traffic (including requests/responses) and redirect them to a specific transport.
 # Test Suite
 
 Glider offers an extensive suite of unit tests for Glider Core Logger and third-party packages under the `/Tests` folder.
