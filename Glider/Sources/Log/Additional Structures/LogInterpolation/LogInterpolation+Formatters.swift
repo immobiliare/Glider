@@ -28,11 +28,9 @@ extension String {
             return self
         }
 
-        #if DEBUG
         if GliderSDK.shared.disablePrivacyRedaction {
             return String(describing: self)
         }
-        #endif
         
         switch privacy {
         case .public:
