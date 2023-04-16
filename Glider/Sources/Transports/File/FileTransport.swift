@@ -104,21 +104,36 @@ open class FileTransport: Transport {
     // MARK: - Public Functions
     
     open func record(event: Event) -> Bool {
-        guard let message = configuration.formatters.format(event: event)?.asData(),
+        guard let fileHandle,
+              let message = configuration.formatters.format(event: event)?.asData(),
               message.isEmpty == false else {
             return false
         }
         
-        fileHandle?.seekToEndOfFile()
-        
-        fileHandle?.write(message)
-        if let newLinesData = newLinesData {
-            fileHandle?.write(newLinesData)
-        }
+        if #available(iOS 13.4, *) {
+            do {
+                try fileHandle.seekToEnd()
+                try fileHandle.write(contentsOf: message as NSData)
+                if let newLinesData = newLinesData {
+                    try fileHandle.write(contentsOf: newLinesData as NSData)
+                }
+                
+                return true
+            } catch {
+                return false
+            }
+        } else {
+            // It will still unsafe in case of no left space on disk.
+            fileHandle.seekToEndOfFile()
+            fileHandle.write(message)
+            if let newLinesData = newLinesData {
+                fileHandle.write(newLinesData)
+            }
+            return true
 
-        return true
+        }
     }
-    
+        
     /// Close pointer to file handler.
     open func close() {
         if #available(iOS 13.0, macOS 10.15, tvOS 13.0, *) {
