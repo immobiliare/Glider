@@ -95,5 +95,13 @@ public struct Message: ExpressibleByStringInterpolation, ExpressibleByStringLite
     public func asData() -> Data? {
         content.asData()
     }
-
+    
+    public static func +=(lhs: inout Message, rhs: String) {
+        lhs.content.append(rhs)
+    }
+    
+    public static func +=(lhs: inout Message, rhs: Message) {
+        lhs.content.append(rhs.content)
+    }
+    
 }
