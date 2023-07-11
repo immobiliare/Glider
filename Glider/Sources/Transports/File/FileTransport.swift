@@ -110,7 +110,7 @@ open class FileTransport: Transport {
             return false
         }
         
-        if #available(iOS 13.4, *) {
+        if #available(iOS 13.4, macOS 10.15.4, *) {
             do {
                 try fileHandle.seekToEnd()
                 try fileHandle.write(contentsOf: message as NSData)
