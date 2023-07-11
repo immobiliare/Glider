@@ -131,7 +131,7 @@ extension OSLogTransport {
         /// - Parameters:
         ///   - formatters: formatters to use. Ignore to use the default `XCodeFormatter`.
         ///   - builder: builder configuration function.
-        public init(formatters: [EventMessageFormatter] = [XCodeFormatter.init()],
+        public init(formatters: [EventMessageFormatter] = [OSLogFormatter.init()],
                     _ builder: ((inout Configuration) -> Void)?) {
             self.formatters = formatters
             self.queue = DispatchQueue(label: String(describing: type(of: self)), attributes: [])
