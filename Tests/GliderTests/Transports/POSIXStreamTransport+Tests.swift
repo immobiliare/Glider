@@ -32,7 +32,7 @@ final class POSIXStreamsTransportTests: XCTestCase, POSIXStreamListenerDelegate 
     /// by checking if appropriate messages are sent to the correct streams.
     /// 
     /// NOTE: disabled because it does not run correctly on GitHub Action.
-    func _test_stdTransport() async throws {
+    func _test_stdTransport() throws {
         stdErrData = ""
         stdOutData = ""
         

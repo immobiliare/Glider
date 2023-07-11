@@ -26,7 +26,7 @@ final class SQLiteTransportTests: XCTestCase, SQLiteTransportDelegate {
     var maxEntries: Int = 0
     var exp: XCTestExpectation!
 
-    func test_sqliteTransport() async throws {
+    func test_sqliteTransport() throws {
         exp = expectation(description: "SQLiteTransportTests")
                         
         self.maxEntries = 100

@@ -172,7 +172,7 @@ extension UIImage {
             kCGImageSourceCreateThumbnailWithTransform: true,
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceThumbnailMaxPixelSize: max(newSize.width, newSize.height)
-        ] as CFDictionary
+        ] as [CFString : Any] as CFDictionary
         guard   let source = CGImageSourceCreateWithData(imageCFData, nil),
                 let imageReference = CGImageSourceCreateThumbnailAtIndex(source, 0, options) else { return resultImage }
         resultImage = UIImage(cgImage: imageReference)

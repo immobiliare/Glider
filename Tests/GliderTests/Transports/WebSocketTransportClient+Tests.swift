@@ -33,7 +33,7 @@ class WebSocketTransportClientTests: XCTestCase, WebSocketServerDelegate, WebSoc
     private var eventsToGenerate = 30
     private var serverPort: UInt16 = 1011
 
-    func tests_webSocketTransport() async throws {
+    func tests_webSocketTransport() throws {
         // Create WebSocket server
         print("Starting WebSocket Server on port \(serverPort)")
         server?.stop()

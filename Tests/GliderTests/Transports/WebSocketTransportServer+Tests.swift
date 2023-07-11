@@ -44,7 +44,7 @@ class WebSocketTransportServerTests: XCTestCase, WebSocketTransportServerDelegat
     private var isFulfilledA = false
     private var isFulfilledB = false
 
-    func tests_webSocketTransport() async throws {
+    func tests_webSocketTransport() throws {
         // Prepare formatter
         let format = FieldsFormatter(fields: [
             .message({

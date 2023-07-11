@@ -40,7 +40,7 @@ class RemoteTransportTests: XCTestCase, RemoteTransportServerDelegate {
     // MARK: - Tests
     
     /// The following test validate the auto connection and data receive.
-    func test_remoteTransport() async throws {
+    func test_remoteTransport() throws {
         exp = expectation(description: "Waiting for receive messages")
         
         // Create a remote transport
@@ -133,11 +133,7 @@ final class RemoteTransportReconnectClientTests: RemoteTransportTests {
     private var remoteTransport: RemoteTransport?
     private var fulfilled = false
     
-    override func test_remoteTransport() async throws {
-        
-    }
-
-    func test_remoteTransportAutoClientReconnect() async throws {
+    func test_remoteTransportAutoClientReconnect() throws {
         exp = expectation(description: "Waiting for reconnection test")
         
         // Create a remote transport
@@ -206,12 +202,8 @@ final class RemoteTransportReconnectServerTests: RemoteTransportTests {
     private var connectionClosed = false
     private var remoteTransport: RemoteTransport?
     private var fulfilled = false
-    
-    override func test_remoteTransport() async throws {
-        
-    }
 
-    func test_remoteTransportAutoServerReconnect() async throws {
+    func test_remoteTransportAutoServerReconnect() throws {
         exp = expectation(description: "Waiting for reconnection test")
         
         // Create a remote transport

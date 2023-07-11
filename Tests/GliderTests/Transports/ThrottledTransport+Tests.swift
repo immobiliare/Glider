@@ -35,7 +35,7 @@ class ThrottledTransportTests: XCTestCase, ThrottledTransportDelegate {
     }
     
     /// The following test check if the buffer size flush is respected.
-    func tests_throttledTransportBufferFlush() async throws {
+    func tests_throttledTransportBufferFlush() throws {
         let exp = expectation(description: "tests_throttledTransportBufferFlush")
         let format = FieldsFormatter(fields: [
             .message({
@@ -91,7 +91,7 @@ class ThrottledTransportTestsFlush: XCTestCase, ThrottledTransportDelegate {
     }
     
     /// Tests if transport flush interval set is respected.
-    func tests_throttledTransportBufferTimeInterval() async throws {
+    func tests_throttledTransportBufferTimeInterval() throws {
         let exp = expectation(description: "end of sent")
         
         let format = FieldsFormatter(fields: [
@@ -154,7 +154,7 @@ class ThrottledTransportTestsFlush: XCTestCase, ThrottledTransportDelegate {
         }
     }
 
-    func test_throttledManualFlush() async throws {
+    func test_throttledManualFlush() throws {
         let exp = expectation(description: "end of sent")
         
         let format = FieldsFormatter(fields: [
