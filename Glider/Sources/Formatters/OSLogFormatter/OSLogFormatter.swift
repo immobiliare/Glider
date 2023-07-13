@@ -24,18 +24,9 @@ open class OSLogFormatter: FieldsFormatter {
         super.init(fields: Self.defaultFields())
     }
     
-    /// Return the default fields of the default `TerminalFormatter` configuration.
-    ///
-    /// - Parameters:
-    ///   - colorize: colorize mode.
-    ///   - colorizeFields: colorized fields.
-    /// - Returns: `[FieldsFormatter.Field]`
+    /// Return the default fields of the default `OSLogFormatter` configuration.
     open class func defaultFields() -> [FieldsFormatter.Field] {
-        [
-            .timestamp(style: .iso8601),
-            .literal(" "),
-            .message()
-        ].compactMap({ $0 })
+        [.message()].compactMap({ $0 })
     }
     
     @available(*, unavailable)
