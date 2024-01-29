@@ -112,7 +112,7 @@ extension Level {
             return true
         }
 
-        return self.rawValue < minLevel.rawValue
+        return self.rawValue <= minLevel.rawValue
     }
     
     #if os(iOS) || os(tvOS) || os(macOS)
