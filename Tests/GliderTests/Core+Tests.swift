@@ -57,6 +57,7 @@ final class CoreTests: XCTestCase {
     /// so you can avoid to write all the messages on it even if logger accepts them.
     func test_minimumTransportAcceptLevel() throws {
         var minAcceptedLevel: Glider.Level? = .error
+        var passedCountWhenSet = 0
         var passedCountWhenNil = 0
         
         let transport = TestTransport { event, _ in
@@ -64,6 +65,7 @@ final class CoreTests: XCTestCase {
             
             if let minAcceptedLevel = minAcceptedLevel {
                 XCTAssertTrue(event.level <= minAcceptedLevel)
+                passedCountWhenSet += 1
             } else {
                 passedCountWhenNil += 1
             }
@@ -84,6 +86,8 @@ final class CoreTests: XCTestCase {
         log.info?.write(msg: "[SET] Should pass the log service but not the minimum accepted level for transport")
         log.error?.write(msg: "[SET] Should pass both")
         log.critical?.write(msg: "[SET] Should pass both")
+        
+        XCTAssertEqual(passedCountWhenSet, 2)
         
         // ignore
         transport.minimumAcceptedLevel = nil
